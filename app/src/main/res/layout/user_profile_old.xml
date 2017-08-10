@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical" android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:layout_marginLeft="30dp"
+    android:layout_marginRight="30dp">
+
+    <com.wfm.soundcollaborations.views.PlayerLargeView
+        android:id="@+id/sound_player"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"/>
+
+    <Space
+        android:layout_width="0dp"
+        android:layout_height="20dp" />
+
+    <View
+        android:layout_width="fill_parent"
+        android:layout_height="1dip"
+        android:background="#bbb" />
+
+    <Button
+        android:id="@+id/btn_sound_management"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:drawableLeft="@android:drawable/ic_popup_reminder"
+        android:drawableTint="#555"
+        android:background="#00000000"
+        android:gravity="left|center_vertical"
+        android:drawablePadding="20dp"
+        android:text="Meine Geräusche"/>
+
+    <View
+        android:layout_width="fill_parent"
+        android:layout_height="1dip"
+        android:background="#555" />
+
+    <Button
+        android:id="@+id/btn_track_management"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:drawableLeft="@android:drawable/ic_btn_speak_now"
+        android:drawableTint="#555"
+        android:background="#00000000"
+        android:gravity="left|center_vertical"
+        android:drawablePadding="20dp"
+        android:text="Meine Tracks"/>
+
+    <View
+        android:layout_width="fill_parent"
+        android:layout_height="1dip"
+        android:background="#555" />
+
+    <Button
+        android:id="@+id/btn_friendlist"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:drawableLeft="@android:drawable/ic_menu_myplaces"
+        android:drawableTint="#555"
+        android:background="#00000000"
+        android:gravity="left|center_vertical"
+        android:drawablePadding="20dp"
+        android:text="Meine Partner" />
+
+    <View
+        android:layout_width="fill_parent"
+        android:layout_height="1dip"
+        android:background="#555" />
+
+    <Button
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:drawableLeft="@android:drawable/ic_menu_edit"
+        android:drawableTint="#555"
+        android:background="#00000000"
+        android:gravity="left|center_vertical"
+        android:drawablePadding="20dp"
+        android:text="Einstellungen"/>
+
+    <View
+        android:layout_width="fill_parent"
+        android:layout_height="1dip"
+        android:background="#555" />
+</LinearLayout>

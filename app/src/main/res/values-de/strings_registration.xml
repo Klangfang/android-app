@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="msg_tv_register">Registrieren</string>
+    <string name="msg_tv_sending">Senden...</string>
+    <string name="msg_tv_username">Benutzername:</string>
+    <string name="msg_et_username_hint">Dein Benutzername</string>
+    <string name="msg_btn_register_account">Registriere Account</string>
+    <string name="msg_toast_reg_failed">Dieser Benutzername existiert bereits</string>
+</resources>

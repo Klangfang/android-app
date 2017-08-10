@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <declare-styleable name="CircularTimeline">
+        <attr name="min" format="integer" />
+        <attr name="max" format="integer" />
+        <attr name="progress" format="integer" />
+        <attr name="color" format="color" />
+        <attr name="thickness" format="dimension" />
+    </declare-styleable>
+
+    <declare-styleable name="PlayerSmall">
+        <attr name="title" format="string" />
+        <attr name="info" format="string" />
+        <attr name="file" format="reference" />
+    </declare-styleable>
+
+    <declare-styleable name="TimeLimit">
+        <attr name="circle_color" format="color"/>
+        <attr name="start_radius" format="integer"/>
+        <attr name="start" format="reference" />
+    </declare-styleable>
+
+    <declare-styleable name="Song">
+        <attr name="action_type" format="integer" />
+        <attr name="extendable" format="boolean" />
+        <attr name="display_contribution_bar" format="boolean" />
+    </declare-styleable>
+
+    <declare-styleable name="SoundVisualization">
+        <attr name="light_color" format="color"/>
+        <attr name="dark_color" format="color"/>
+    </declare-styleable>
+</resources>

@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="colorPrimary">#3F51B5</color>
+    <color name="colorPrimaryDark">#303F9F</color>
+    <color name="colorAccent">#FF4081</color>
+    <color name="blue">#3F51B5</color>
+    <color name="navigation">#212121</color>
+    <color name="yellow_light">#F9D737</color>
+    <color name="yellow_dark">#463C14</color>
+    <!--<color name="yellow_dark">#c7a505</color>-->
+    <color name="content_bg">#464646</color>
+    <color name="grey_light">#BDBDBD</color>
+    <color name="grey_dark">#787878</color>
+    <color name="green_light">#37dc78</color>
+    <color name="green_dark">#00462d</color>
+    <color name="red">#d15357</color>
+
+    <array name="record_limit_colors">
+        <item>#ccb9219b</item>
+        <item>#cc257397</item>
+        <item>#ccdeb531</item>
+        <item>#cc45de31</item>
+    </array>
+</resources>

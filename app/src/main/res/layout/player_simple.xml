@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="horizontal">
+
+    <RelativeLayout
+        android:layout_width="wrap_content"
+        android:layout_height="match_parent">
+
+        <com.wfm.soundcollaborations.views.SoundVisualizationView
+            android:id="@+id/visualization"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            app:light_color="@color/yellow_light"
+            app:dark_color="@color/yellow_dark"/>
+
+        <ImageButton
+            android:id="@+id/ib_player_state"
+            android:layout_width="80dp"
+            android:layout_height="80dp"
+            android:background="@drawable/ic_play_arrow_black_24dp"
+            android:backgroundTint="#ffffff"
+            android:layout_centerInParent="true"
+            android:elevation="100dp"
+            />
+    </RelativeLayout>
+</LinearLayout>

@@ -1,0 +1,24 @@
+<resources>
+    <string name="app_name">Sound Collaborations</string>
+    <string name="drawer_open">Öffnen</string>
+    <string name="drawer_close">Schließen</string>
+
+    <string-array name="drawer_items">
+        <item>Record</item>
+        <item>Sound News Feed</item>
+        <item>Radio</item>
+        <item>Profil</item>
+    </string-array>
+
+    <string-array name="hashtags">
+        <item>Natur</item>
+        <item>Stadt</item>
+        <item>Menschen</item>
+        <item>Tiere</item>
+        <item>unterwegs</item>
+        <item>zuhause</item>
+        <item>Technik</item>
+        <item>Verkehrsmittel</item>
+        <item>Wetter</item>
+    </string-array>
+</resources>
