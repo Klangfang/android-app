@@ -9,6 +9,7 @@ import android.support.annotation.NonNull;
 import android.support.design.widget.BottomNavigationView;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.FragmentTransaction;
+import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
 
@@ -97,11 +98,11 @@ public class MainActivity extends BaseActivity implements FragmentObserver{
         profile.performClick();
 
         // Database
-        try {
+       /* try {
             initDatabaseHelper();
         } catch (SQLException e) {
             e.printStackTrace();
-        }
+        }*/
     }
 
     private void initDatabaseHelper() throws SQLException {
@@ -125,7 +126,6 @@ public class MainActivity extends BaseActivity implements FragmentObserver{
 
         FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
         transaction.replace(R.id.content_layout, explorationFragment);
-        transaction.addToBackStack(null);
         transaction.commit();
     }
 
@@ -134,7 +134,6 @@ public class MainActivity extends BaseActivity implements FragmentObserver{
 
         FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
         transaction.replace(R.id.content_layout, compositionFragment);
-        transaction.addToBackStack(null);
         transaction.commit();
     }
 
@@ -143,7 +142,6 @@ public class MainActivity extends BaseActivity implements FragmentObserver{
 
         FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
         transaction.replace(R.id.content_layout, userProfileFragment);
-        transaction.addToBackStack(null);
         transaction.commit();
     }
 
@@ -166,12 +164,5 @@ public class MainActivity extends BaseActivity implements FragmentObserver{
             }
             default: super.onRequestPermissionsResult(requestCode, permissions, grantResults);
         }
-    }
-
-    // TODO Remove later
-    @Override
-    public void onBackPressed()
-    {
-
     }
 }
