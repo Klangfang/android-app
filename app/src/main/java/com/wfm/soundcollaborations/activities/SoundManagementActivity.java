@@ -24,31 +24,9 @@ public class SoundManagementActivity extends MainActivity {
     public void onCreate(Bundle savedInstanceState){
         super.onCreate(savedInstanceState);
 
-        getLayoutInflater().inflate(R.layout.sound_management, (ViewGroup) findViewById(R.id.content_layout));
+        getLayoutInflater().inflate(R.layout.fragment_mysounds, (ViewGroup) findViewById(R.id.fl_content));
 
         lvSounds = (ListView) findViewById(R.id.lv_sounds);
-        refresh();
     }
 
-    public void deleteSound(long soundID){
-        try {
-            soundDao.deleteById(soundID);
-        } catch (SQLException e) {
-            e.printStackTrace();
-            return;
-        }
-        refresh();
-    }
-
-    private void refresh(){
-        List<SoundEntity> sounds = new ArrayList<>();
-        try {
-            sounds = soundDao.queryForAll();
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-
-        soundListAdapter = new SoundListAdapter(this, R.layout.sound_row, sounds);
-        lvSounds.setAdapter(soundListAdapter);
-    }
 }

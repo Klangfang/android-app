@@ -63,7 +63,7 @@ public class ContactsActivity extends MainActivity implements  LoaderManager.Loa
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        getLayoutInflater().inflate(R.layout.contacts, (ViewGroup) findViewById(R.id.content_layout));
+        getLayoutInflater().inflate(R.layout.contacts, (ViewGroup) findViewById(R.id.fl_content));
         getSupportLoaderManager().initLoader(0, null, this);
 
         lvContacs = (ListView) findViewById(R.id.lv_contacs);

@@ -21,4 +21,17 @@
         <item>Verkehrsmittel</item>
         <item>Wetter</item>
     </string-array>
+
+    <string name="my_sounds">My Sounds</string>
+    <string name="finished_collages">Finished Collages</string>
+
+    <!-- Bottom Navigation Menu -->
+    <string name="bnm_explore">Explore</string>
+    <string name="bnm_compose">Compose</string>
+    <string name="bnm_record">Record</string>
+
+    <!-- MESSAGES GO HERE -->
+    <string name="MESSAGE_PRESS_AND_HOLD_TO_RECORD">Please press and hold to record a voice clip</string>
+
+    <string name="sound_file_prefix" translatable="false">Sound</string>
 </resources>

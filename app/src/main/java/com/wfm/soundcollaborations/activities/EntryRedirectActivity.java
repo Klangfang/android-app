@@ -22,17 +22,10 @@ public class EntryRedirectActivity extends Activity{
 
         // Preferences
         preferences = PreferenceManager.getDefaultSharedPreferences(this);
-        String accountName = preferences.getString(MainActivity.KEY_ACCOUNT_NAME, null);
 
         Intent intent;
-
-        if (accountName == null) {
-            Log.v(TAG, "Start registration");
-            intent = new Intent(this, RegistrationActivity.class);
-        } else {
-            Log.v(TAG, "Start main menu");
-            intent = new Intent(this, MainActivity.class);
-        }
+        //intent = new Intent(this, RegistrationActivity.class);
+        intent = new Intent(this, MainActivity.class);
         // clear this activity from the back stack
         startActivity(intent);
         finish();

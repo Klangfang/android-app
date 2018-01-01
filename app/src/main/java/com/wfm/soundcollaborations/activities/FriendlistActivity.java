@@ -40,7 +40,7 @@ public class FriendlistActivity extends MainActivity {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        getLayoutInflater().inflate(R.layout.friendlist, (ViewGroup) findViewById(R.id.content_layout));
+        getLayoutInflater().inflate(R.layout.friendlist, (ViewGroup) findViewById(R.id.fl_content));
 
         tlFeed = (TabLayout) findViewById(R.id.tl_friendlist);
         vpFeed = (ViewPager) findViewById(R.id.vp_friendlist);
@@ -76,7 +76,6 @@ public class FriendlistActivity extends MainActivity {
             lvFriends = (ListView) v.findViewById(R.id.lv_items);
             friendlistAdapter = new FriendlistAdapter(getActivity(), R.layout.friendlist_friend_row);
             lvFriends.setAdapter(friendlistAdapter);
-            refresh();
 
             v.findViewById(R.id.btn_add_friend).setOnClickListener(new View.OnClickListener() {
                 @Override
@@ -113,31 +112,9 @@ public class FriendlistActivity extends MainActivity {
                             friendNames[random.nextInt(friendNames.length)],
                             data.getStringExtra("contactName"));
 
-                    try {
-                        activity.friendDao.create(friend);
-                        Toast.makeText(getContext(), data.getStringExtra("contactName") + " hinzugefügt.",
-                                Toast.LENGTH_LONG).show();
-                    } catch (SQLException e) {
-                        e.printStackTrace();
-                        Log.e(TAG, "A Friend with the same ID was already added");
-                    }
 
-                    refresh();
                 }
             }
-        }
-
-        private void refresh(){
-            List<FriendEntity> friends = new ArrayList<>();
-
-            try {
-                friends = activity.friendDao.queryForAll();
-            } catch (SQLException e) {
-                e.printStackTrace();
-            }
-
-            friendlistAdapter.clear();
-            friendlistAdapter.addAll(friends);
         }
     }
 
