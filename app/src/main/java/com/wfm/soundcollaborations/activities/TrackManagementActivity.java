@@ -24,16 +24,11 @@ public class TrackManagementActivity extends MainActivity {
     public void onCreate(Bundle savedInstanceState){
         super.onCreate(savedInstanceState);
 
-        getLayoutInflater().inflate(R.layout.track_management, (ViewGroup) findViewById(R.id.content_layout));
+        getLayoutInflater().inflate(R.layout.track_management, (ViewGroup) findViewById(R.id.fl_content));
 
         lvTracks = (ListView) findViewById(R.id.lv_tracks);
 
         List<GroupSongEntity> groupSongEntities = new ArrayList<>();
-        try {
-            groupSongEntities = groupSongDao.queryForAll();
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
 
         List<String> names = new ArrayList<>();
 

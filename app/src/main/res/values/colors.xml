@@ -14,6 +14,9 @@
     <color name="green_light">#37dc78</color>
     <color name="green_dark">#00462d</color>
     <color name="red">#d15357</color>
+    <color name="toolbar_title">#fff</color>
+    <color name="toolbar_profile_title">#000</color>
+    <color name="toolbar_profile_background">#F9D737</color>
 
     <array name="record_limit_colors">
         <item>#ccb9219b</item>

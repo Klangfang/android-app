@@ -12,6 +12,7 @@ import android.view.View;
 import com.wfm.soundcollaborations.R;
 import com.wfm.soundcollaborations.helper.Utility;
 
+import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -105,6 +106,30 @@ public class SoundVisualizationView extends View{
 
             startX += s;
         }
+    }
+
+    public void addBytesArray(byte[] bytes)
+    {
+        ArrayList<Integer> data = new ArrayList<>();
+        byte tmp[] = new byte[4];
+        int tmpInteger;
+        for(int i=0; i<bytes.length; i=i+4)
+        {
+            tmp[0] = bytes[i];
+            tmp[1] = bytes[i+1];
+            tmp[2] = bytes[i+2];
+            tmp[3] = bytes[i+3];
+            tmpInteger = new BigInteger(tmp).intValue();
+            data.add(tmpInteger);
+        }
+        this.amplitudes.addAll(data);
+        invalidate();
+    }
+
+    public void addAmplitude(int amplitude)
+    {
+        this.amplitudes.add(amplitude);
+        invalidate();
     }
 
     public void setAmplitudes(List<Integer> amplitudes){

@@ -36,7 +36,7 @@ public class FriendChoiceActivity extends MainActivity {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        getLayoutInflater().inflate(R.layout.friend_choice, (ViewGroup) findViewById(R.id.content_layout));
+        getLayoutInflater().inflate(R.layout.friend_choice, (ViewGroup) findViewById(R.id.fl_content));
 
         etSearch = (EditText) findViewById(R.id.et_search);
         lvFriends = (ListView) findViewById(R.id.lv_items);
@@ -44,7 +44,6 @@ public class FriendChoiceActivity extends MainActivity {
         friendChoiceAdapter = new FriendChoiceAdapter(this, R.layout.friend_choice_row);
         lvFriends.setAdapter(friendChoiceAdapter);
         lvFriends.setTextFilterEnabled(true);
-        refresh();
 
 
         lvFriends.setOnItemClickListener(new AdapterView.OnItemClickListener() {
@@ -85,37 +84,6 @@ public class FriendChoiceActivity extends MainActivity {
         });
     }
 
-    private void refresh(){
-        List<FriendEntity> friends = new ArrayList<>();
 
-        try {
-            friends = friendDao.queryForAll();
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-
-        friendChoiceAdapter.setItems(friends);
-    }
-
-    private void refresh(String searchText){
-        List<FriendEntity> friends = new ArrayList<>();
-
-        try {
-            QueryBuilder<FriendEntity, Long> queryBuilder = friendDao.queryBuilder();
-            queryBuilder
-                    .where()
-                    .like("name", "%" + searchText + "%")
-                    .or()
-                    .like("contactName", "%" + searchText + "%");
-
-            PreparedQuery<FriendEntity> preparedQuery = queryBuilder.prepare();
-
-            friends = friendDao.query(preparedQuery);
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-
-        friendChoiceAdapter.setItems(friends);
-    }
 
 }

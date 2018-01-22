@@ -31,19 +31,5 @@ public class RegistrationActivity extends Activity {
         etUsername = (EditText) findViewById(R.id.et_username);
         btnRegister = (Button) findViewById(R.id.btn_register_account);
 
-        btnRegister.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                SharedPreferences.Editor editor = preferences.edit();
-                editor.putString(MainActivity.KEY_ACCOUNT_NAME, etUsername.getText().toString());
-                editor.commit();
-
-                Intent intent = new Intent(RegistrationActivity.this, MainActivity.class);
-                startActivity(intent);
-
-                //Destroy the activity
-                finish();
-            }
-        });
     }
 }

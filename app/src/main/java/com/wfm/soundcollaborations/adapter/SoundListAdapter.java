@@ -10,10 +10,9 @@ import android.widget.ArrayAdapter;
 import android.widget.ImageButton;
 
 import com.wfm.soundcollaborations.R;
-import com.wfm.soundcollaborations.activities.SoundEditorActivity;
+import com.wfm.soundcollaborations.activities.SaveSoundActivity;
 import com.wfm.soundcollaborations.database.SoundEntity;
-import com.wfm.soundcollaborations.fragments.UserProfileFragment;
-import com.wfm.soundcollaborations.views.PlayerLargeView;
+import com.wfm.soundcollaborations.fragments.MySoundsFragment;
 import com.wfm.soundcollaborations.views.PlayerSmallView;
 
 import java.util.List;
@@ -23,7 +22,7 @@ import java.util.List;
  */
 public class SoundListAdapter extends ArrayAdapter<SoundEntity> {
 
-    UserProfileFragment.SoundFragment fragment;
+    MySoundsFragment fragment;
 
     public SoundListAdapter(Context context, int resource) {
         super(context, resource);
@@ -33,7 +32,7 @@ public class SoundListAdapter extends ArrayAdapter<SoundEntity> {
         super(context, resource, items);
     }
 
-    public SoundListAdapter(UserProfileFragment.SoundFragment fragment, int resource, List<SoundEntity> items) {
+    public SoundListAdapter(MySoundsFragment fragment, int resource, List<SoundEntity> items) {
         super(fragment.getContext(), resource, items);
         this.fragment = fragment;
     }
@@ -61,7 +60,7 @@ public class SoundListAdapter extends ArrayAdapter<SoundEntity> {
             btnEdit.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    Intent intent = new Intent(getContext(), SoundEditorActivity.class);
+                    Intent intent = new Intent(getContext(), SaveSoundActivity.class);
                     intent.putExtra("soundID", sound.getId());
                     getContext().startActivity(intent);
                 }
