@@ -170,6 +170,7 @@ public class CompositionBuilder
      */
     private void downloadSounds()
     {
+        prepareTracks();// Initialisierung von AudioPlayer!
         this.downloader = SoundDownloader.getSoundDownloader(this.compositionView.getContext(),
                 new FileDownloadListener() {
                     @Override
