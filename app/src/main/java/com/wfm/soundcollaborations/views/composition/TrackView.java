@@ -12,6 +12,7 @@ import android.widget.RelativeLayout;
 import android.widget.Toast;
 
 import com.wfm.soundcollaborations.R;
+import com.wfm.soundcollaborations.activities.EditorActivity;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;

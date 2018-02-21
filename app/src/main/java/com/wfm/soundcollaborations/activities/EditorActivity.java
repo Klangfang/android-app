@@ -5,6 +5,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
+import android.widget.Button;
 import android.widget.RelativeLayout;
 import android.widget.Toast;
 
@@ -36,9 +37,19 @@ public class EditorActivity extends AppCompatActivity {
     private RelativeLayout.LayoutParams layoutParams;
     private int width = 0;
 
-    private boolean isPlaying = false;
+    //private boolean isPlaying = false;
     private boolean recording;
-    private boolean pauseRecording;
+    private boolean strobo;
+
+    private SoundView soundView;
+    private AudioRecorder audioRecorder = new AudioRecorder();
+    private Timer recordTimer = new Timer();
+
+    @BindView(R.id.btn_record)
+    Button recordBtn;
+
+    @BindView(R.id.btn_play)
+    PlayPauseView playBtn;
 
     @Override
     protected void onCreate(Bundle savedInstanceState)
@@ -82,98 +93,121 @@ public class EditorActivity extends AppCompatActivity {
     }
 
     @OnClick(R.id.btn_record)
-    public void record(View view)
+    public void record(final View view)
     {
-        // Pausieren, wenn die Aufnahme am laufen ist.
-        if(recording && !pauseRecording){
-            pauseRecording = true;
+        // Pause / stop recording and make an update
+        if (recording) {
+            updateRecordButton();
             return;
         }
 
-        // Wiederaufnahme, wenn die Aufnahme pausiert wurde.
-        if (pauseRecording) {
-            pauseRecording = false;
-        }
-
-        // Der Aufnahmestart findet nur einmal statt, wenn noch nicht aufgenommen wird.
-        if (!recording) {
-
-            recording = true;
-
-            final SoundView soundView;
-            final AudioRecorder audioRecorder = new AudioRecorder();
-            final Timer recordTimer = new Timer();
-            handler = new Handler();
-            try {
-                audioRecorder.create();
-                soundView = builder.record(this);
-                audioRecorder.start();
-                recordTimer.scheduleAtFixedRate(new TimerTask() {
-                    @Override
-                    public void run() {
-                        handler.post(new Runnable() {
-                            @Override
-                            public void run() {
-                                // do your work right here
-                                if (!pauseRecording) { // Die Aufnahme laueft, wenn man nicht pausieren moechte.
-                                    layoutParams = (RelativeLayout.LayoutParams) soundView.getLayoutParams();
-                                    width = width + 3;
-                                    layoutParams.width = width;
-                                    soundView.setLayoutParams(layoutParams);
-                                    int max = audioRecorder.getMaxAmplitude();
-                                    soundView.addWave(max);
-                                    Log.d(TAG, "Max Amplitude Recieved -> " + max);
-                                    soundView.invalidate();
-                                    builder.getCompositionView().increaseScrollPosition(3);
-                                    builder.getCompositionView().increaseViewWatchPercentage(soundView.getTrack(), 0.17f);
-                                    try {
-                                        builder.isThereAnyOverlapping(layoutParams.leftMargin + layoutParams.width, soundView.getTrack());
-                                    } catch (Exception ex) {
-                                        Log.d(TAG, "Timer Out Of Range!");
-                                        recordTimer.cancel();
-                                        audioRecorder.stop();
-                                    }
-
-                                }
+        handler = new Handler();
+        try {
+            audioRecorder.create();
+            soundView = builder.record(this);
+            audioRecorder.start();
+            recordTimer.scheduleAtFixedRate(new TimerTask() {
+                @Override
+                public void run() {
+                    handler.post(new Runnable() {
+                        @Override
+                        public void run() {
+                            // do your work right here
+                            if (!updateRecordAvailability()) {
+                                return;
                             }
-                        });
-                    }
-                }, 0, 50);
+                            if (recording) { // Die Aufnahme laueft, wenn man nicht pausieren moechte.
+                                layoutParams = (RelativeLayout.LayoutParams) soundView.getLayoutParams();
+                                width = width + 3;
+                                layoutParams.width = width;
+                                soundView.setLayoutParams(layoutParams);
+                                int max = audioRecorder.getMaxAmplitude();
+                                soundView.addWave(max);
+                                Log.d(TAG, "Max Amplitude Recieved -> " + max);
+                                soundView.invalidate();
+                                builder.getCompositionView().increaseScrollPosition(3);
+                                builder.getCompositionView().increaseViewWatchPercentage(soundView.getTrack(), 0.17f);
+                            }
+                        }
+                    });
+                }
+            }, 0, 50);
 
-            } catch (NoActiveTrackException ex) {
-                Toast.makeText(this, "Please select Track!", Toast.LENGTH_LONG).show();
-            } catch (SoundWillOverlapException ex2) {
-                Toast.makeText(this, "Recording will overlap with other sounds!", Toast.LENGTH_LONG).show();
-            } catch (SoundWillBeOutOfCompositionException ex) {
-                Toast.makeText(this, "Recording will be out of composition!", Toast.LENGTH_LONG).show();
-            } catch (Exception ex) {
-                Log.e(TAG, ex.getMessage());
-            }
+        } catch (NoActiveTrackException ex) {
+            Toast.makeText(this, "Please select Track!", Toast.LENGTH_LONG).show();
+        } catch (SoundWillOverlapException ex2) {
+            Toast.makeText(this, "Recording will overlap with other sounds!", Toast.LENGTH_LONG).show();
+            recording = false;
+        } catch (SoundWillBeOutOfCompositionException ex) {
+            Toast.makeText(this, "Recording will be out of composition!", Toast.LENGTH_LONG).show();
+        } catch (Exception ex) {
+            Log.e(TAG, ex.getMessage());
         }
-
-        //view.setEnabled(false); Zustaendig fuer die deaktivierung des Aufnahmekopfs
-
     }
 
     @OnClick(R.id.btn_play)
     public void play(View view)
     {
-        if(! isPlaying)
-        {
-            builder.play();
-            isPlaying = true;
-            ((PlayPauseView) view).toggle();
-        }
-        else
-        {
-            builder.pause();
-            isPlaying = false;
-            ((PlayPauseView) view).toggle();
-        }
-
+        builder.play();
+        updateStatusOnPlay();
+        ((PlayPauseView) view).toggle();
     }
 
+    private boolean updateRecordersOnOverlapping() {
 
+        // cancel recorders on overlapping and return true;
+        if ((builder != null && layoutParams != null && soundView != null) &&
+                builder.isThereAnyOverlapping(layoutParams.leftMargin + layoutParams.width, soundView.getTrack())) {
+            initRecorders();
 
+            Toast.makeText(this, "Can't record while overlapping with other sounds!", Toast.LENGTH_LONG).show();
+
+            return true;
+        }
+
+        return false;
+    }
+
+    private void updateStatusOnPlay() {
+
+        recordBtn.setEnabled(!builder.getPlayStatus());
+    }
+
+    private boolean updateRecordAvailability() {
+
+        boolean playStatus = builder.getPlayStatus();
+        boolean overlapping = updateRecordersOnOverlapping();
+
+        // Recording ability is when the player is either recording or playing and there is no overlapping
+        recording = (!playStatus && !overlapping);
+        strobo = !strobo;
+        recordBtn.setBackgroundColor(strobo ? getResources().getColor(R.color.red) : getResources().getColor(R.color.colorPrimary));
+
+        // Play button is activated when it is not recording
+        playBtn.setEnabled(!recording);
+
+        return recording;
+    }
+
+    private void updateRecordButton() {
+
+        updateRecordAvailability();
+
+        // Record button is activated when it is not recording and the player is not playing and there is no overlapping
+        //recordBtn.setEnabled(false);
+        initRecorders();
+        recording = !recording; // switch recording status
+
+        // Play button is activated when it is not recording
+        playBtn.setEnabled(!recording);
+    }
+
+    private void initRecorders() {
+        recordTimer.cancel();
+        audioRecorder.stop();
+        audioRecorder = new AudioRecorder();
+        recordTimer = new Timer();
+        width = 0;
+    }
 
 }

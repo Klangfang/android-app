@@ -2,22 +2,17 @@ package com.wfm.soundcollaborations.model.composition;
 
 
 import android.content.Context;
-import android.graphics.Color;
 import android.os.AsyncTask;
-import android.support.v4.os.AsyncTaskCompat;
-import android.support.v7.app.ActionBar;
-import android.support.v7.widget.LinearLayoutCompat;
 import android.util.Log;
 import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 
 import com.liulishuo.filedownloader.BaseDownloadTask;
 import com.liulishuo.filedownloader.FileDownloadListener;
+import com.wfm.soundcollaborations.activities.EditorActivity;
 import com.wfm.soundcollaborations.exceptions.NoActiveTrackException;
 import com.wfm.soundcollaborations.exceptions.SoundWillBeOutOfCompositionException;
 import com.wfm.soundcollaborations.exceptions.SoundWillOverlapException;
-import com.wfm.soundcollaborations.model.audio.AudioPlayer;
-import com.wfm.soundcollaborations.model.audio.AudioRecorder;
 import com.wfm.soundcollaborations.network.SoundDownloader;
 import com.wfm.soundcollaborations.tasks.VisualizeSoundTask;
 import com.wfm.soundcollaborations.utils.FileUtils;
@@ -29,10 +24,7 @@ import com.wfm.soundcollaborations.views.composition.listeners.TrackViewOnClickL
 import com.wfm.soundcollaborations.views.composition.listeners.TrackWatchViewOnClickListener;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
-import java.util.TreeMap;
 
 /**
  * Created by mohammed on 10/29/17.
@@ -57,7 +49,7 @@ public class CompositionBuilder
     private ArrayList<Track> mTracks;
 
     private TracksTimer mTracksTimer;
-    private boolean isPlaying = false;
+    private boolean playing = false;
 
     public CompositionBuilder(CompositionView compositionView, int tracks)
     {
@@ -148,12 +140,13 @@ public class CompositionBuilder
         }
         // default one is the first
         this.compositionView.activateTrack(0);
+
         // subscribe to scroll event
         this.compositionView.setOnScrollChanged(new CompositionView.OnScrollChanged() {
             @Override
             public void onNewScrollPosition(int position)
             {
-                if(! isPlaying)
+                if(!playing)
                 {
                     int milliseconds = (int)(position * 16.6666);
                     seek(milliseconds);
@@ -251,15 +244,16 @@ public class CompositionBuilder
         return recordingSoundView;
     }
 
-    public void isThereAnyOverlapping(int pos, int activeTrack) throws SoundWillOverlapException
+    public boolean isThereAnyOverlapping(int pos, int activeTrack) //throws SoundWillOverlapException
     {
         int margin, width;
         boolean overlap;
-        for(int i=0; i<soundsViews.size(); i++)
+        //for(int i=0; i<soundsViews.size(); i++)
+        for (Sound sound : msounds)
         {
             overlap = false;
-            margin = getSoundViewMargin(msounds.get(i).getStartPosition());
-            width = getSoundViewWidth(msounds.get(i).getLength());
+            margin = getSoundViewMargin(sound.getStartPosition());
+            width = getSoundViewWidth(sound.getLength());
 
             // check one second forward
             // check if indicator above above track
@@ -268,21 +262,45 @@ public class CompositionBuilder
                 overlap = true;
             }
 
-            if(overlap && this.msounds.get(i).getTrack() == activeTrack)
-                throw new SoundWillOverlapException();
+            if(overlap && sound.getTrack() == activeTrack) {
+                //throw new SoundWillOverlapException();
+                return true;
+            }
         }
+        return false;
     }
 
-    public void play()
+    /*public void play()
     {
         mTracksTimer.play();
-        isPlaying = true;
+        playing = true;
     }
 
     public void pause()
     {
         mTracksTimer.pause();
-        isPlaying = false;
+        playing = false;
+    }*/
+
+    public void play() {
+
+        if (!playing) {
+            mTracksTimer.play();
+            updateStatus();
+        } else {
+            mTracksTimer.pause();
+            updateStatus();
+        }
+    }
+
+    private void updateStatus() {
+
+        playing = !playing;
+    }
+
+    public boolean getPlayStatus() {
+
+        return playing;
     }
 
     public void seek(int positionInMillis)

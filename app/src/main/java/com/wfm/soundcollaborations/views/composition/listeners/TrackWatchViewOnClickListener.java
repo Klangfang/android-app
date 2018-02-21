@@ -1,8 +1,12 @@
 package com.wfm.soundcollaborations.views.composition.listeners;
 
 import android.view.View;
+import android.widget.Button;
 
+import com.wfm.soundcollaborations.R;
 import com.wfm.soundcollaborations.views.composition.CompositionView;
+
+import butterknife.BindView;
 
 /**
  * Created by mohammed on 10/22/17.
