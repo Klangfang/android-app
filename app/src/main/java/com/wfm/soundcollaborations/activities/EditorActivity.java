@@ -89,18 +89,18 @@ public class EditorActivity extends AppCompatActivity {
         // when all sounds are loaded the Composition will be ready to play the sounds
         builder = new CompositionBuilder(compositionView, 4);
         builder.addSounds(JSONUtils.getSounds(jsonData));
-
     }
 
     @OnClick(R.id.btn_record)
     public void record(final View view)
     {
-        // Pause / stop recording and make an update
+        // Clicking record while recording
         if (recording) {
             updateRecordButton();
             return;
         }
 
+        // Clicking record while not recording
         handler = new Handler();
         try {
             audioRecorder.create();
@@ -113,9 +113,9 @@ public class EditorActivity extends AppCompatActivity {
                         @Override
                         public void run() {
                             // do your work right here
-                            if (!updateRecordAvailability()) {
-                                return;
-                            }
+
+                            updateRecordAvailability();
+
                             if (recording) { // Die Aufnahme laueft, wenn man nicht pausieren moechte.
                                 layoutParams = (RelativeLayout.LayoutParams) soundView.getLayoutParams();
                                 width = width + 3;
@@ -135,13 +135,17 @@ public class EditorActivity extends AppCompatActivity {
 
         } catch (NoActiveTrackException ex) {
             Toast.makeText(this, "Please select Track!", Toast.LENGTH_LONG).show();
+            initRecorders();
         } catch (SoundWillOverlapException ex2) {
             Toast.makeText(this, "Recording will overlap with other sounds!", Toast.LENGTH_LONG).show();
-            recording = false;
+            //recording = false;
+            initRecorders();
         } catch (SoundWillBeOutOfCompositionException ex) {
             Toast.makeText(this, "Recording will be out of composition!", Toast.LENGTH_LONG).show();
+            initRecorders();
         } catch (Exception ex) {
             Log.e(TAG, ex.getMessage());
+            initRecorders();
         }
     }
 
@@ -173,7 +177,7 @@ public class EditorActivity extends AppCompatActivity {
         recordBtn.setEnabled(!builder.getPlayStatus());
     }
 
-    private boolean updateRecordAvailability() {
+    private void updateRecordAvailability() {
 
         boolean playStatus = builder.getPlayStatus();
         boolean overlapping = updateRecordersOnOverlapping();
@@ -185,8 +189,6 @@ public class EditorActivity extends AppCompatActivity {
 
         // Play button is activated when it is not recording
         playBtn.setEnabled(!recording);
-
-        return recording;
     }
 
     private void updateRecordButton() {
@@ -200,6 +202,9 @@ public class EditorActivity extends AppCompatActivity {
 
         // Play button is activated when it is not recording
         playBtn.setEnabled(!recording);
+
+        recordBtn.setEnabled(!recording);
+
     }
 
     private void initRecorders() {
@@ -208,6 +213,7 @@ public class EditorActivity extends AppCompatActivity {
         audioRecorder = new AudioRecorder();
         recordTimer = new Timer();
         width = 0;
+        layoutParams = null;
     }
 
 }
