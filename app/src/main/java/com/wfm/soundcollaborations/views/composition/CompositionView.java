@@ -193,4 +193,12 @@ public class CompositionView extends LinearLayout
         mOnScrollChanged = scrollChanged;
     }
 
+    public void activate() {
+        setEnabled(true);
+    }
+
+    public void deactivate() {
+        setEnabled(false);
+    }
+
 }

@@ -7,15 +7,18 @@ import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.RelativeLayout;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.ohoussein.playpause.PlayPauseView;
 import com.wfm.soundcollaborations.R;
 import com.wfm.soundcollaborations.exceptions.NoActiveTrackException;
+import com.wfm.soundcollaborations.exceptions.RecordTimeOutExceededException;
 import com.wfm.soundcollaborations.exceptions.SoundWillBeOutOfCompositionException;
 import com.wfm.soundcollaborations.exceptions.SoundWillOverlapException;
 import com.wfm.soundcollaborations.model.audio.AudioRecorder;
 import com.wfm.soundcollaborations.model.composition.CompositionBuilder;
+import com.wfm.soundcollaborations.utils.AudioRecorderStatus;
 import com.wfm.soundcollaborations.utils.JSONUtils;
 import com.wfm.soundcollaborations.views.composition.CompositionView;
 import com.wfm.soundcollaborations.views.composition.SoundView;
@@ -94,13 +97,19 @@ public class EditorActivity extends AppCompatActivity {
     @OnClick(R.id.btn_record)
     public void record(final View view)
     {
+        // Beim Zeitlimit keine Aufnahme starten.
+        if (audioRecorder.getStatus().equals(AudioRecorderStatus.STOPED)) {
+            return;
+        }
         // Clicking record while recording
         if (recording) {
+            compositionView.activate();
             updateRecordButton();
             return;
         }
 
         // Clicking record while not recording
+        compositionView.deactivate();
         handler = new Handler();
         try {
             audioRecorder.create();
@@ -114,19 +123,24 @@ public class EditorActivity extends AppCompatActivity {
                         public void run() {
                             // do your work right here
 
-                            updateRecordAvailability();
+                            try {
+                                updateRecordAvailability();
+                                checkLimits();
+                                if (recording) { // Die Aufnahme laueft, wenn man nicht pausieren moechte.
+                                    layoutParams = (RelativeLayout.LayoutParams) soundView.getLayoutParams();
+                                    width = width + 3;
+                                    layoutParams.width = width;
+                                    soundView.setLayoutParams(layoutParams);
+                                    int max = audioRecorder.getMaxAmplitude();
+                                    soundView.addWave(max);
+                                    Log.d(TAG, "Max Amplitude Recieved -> " + max);
+                                    soundView.invalidate();
+                                    builder.getCompositionView().increaseScrollPosition(3);
+                                    builder.getCompositionView().increaseViewWatchPercentage(soundView.getTrack(), 0.17f);
+                                }
 
-                            if (recording) { // Die Aufnahme laueft, wenn man nicht pausieren moechte.
-                                layoutParams = (RelativeLayout.LayoutParams) soundView.getLayoutParams();
-                                width = width + 3;
-                                layoutParams.width = width;
-                                soundView.setLayoutParams(layoutParams);
-                                int max = audioRecorder.getMaxAmplitude();
-                                soundView.addWave(max);
-                                Log.d(TAG, "Max Amplitude Recieved -> " + max);
-                                soundView.invalidate();
-                                builder.getCompositionView().increaseScrollPosition(3);
-                                builder.getCompositionView().increaseViewWatchPercentage(soundView.getTrack(), 0.17f);
+                            } catch (SoundWillBeOutOfCompositionException e) {
+                            } catch (RecordTimeOutExceededException e) {
                             }
                         }
                     });
@@ -138,14 +152,27 @@ public class EditorActivity extends AppCompatActivity {
             initRecorders();
         } catch (SoundWillOverlapException ex2) {
             Toast.makeText(this, "Recording will overlap with other sounds!", Toast.LENGTH_LONG).show();
-            //recording = false;
             initRecorders();
         } catch (SoundWillBeOutOfCompositionException ex) {
-            Toast.makeText(this, "Recording will be out of composition!", Toast.LENGTH_LONG).show();
-            initRecorders();
+            //Toast.makeText(this, "Recording will be out of composition!", Toast.LENGTH_LONG).show();
+           // initRecorders();
         } catch (Exception ex) {
             Log.e(TAG, ex.getMessage());
             initRecorders();
+        }
+    }
+
+    private void checkLimits() throws SoundWillBeOutOfCompositionException, RecordTimeOutExceededException {
+        int pos = this.compositionView.getScrollPosition();
+        if((pos + builder.getSoundSecondWidth()) > builder.getTrackWidth()) {
+            Toast.makeText(this, "Recording will be out of composition!", Toast.LENGTH_LONG).show();
+            initRecorders();
+            throw new SoundWillBeOutOfCompositionException();
+        }
+        if (audioRecorder.getStatus().equals(AudioRecorderStatus.STOPED)) {
+            Toast.makeText(this, "30 second of recording is reached!", Toast.LENGTH_LONG).show();
+            initRecorders();
+            throw new RecordTimeOutExceededException();
         }
     }
 
@@ -203,17 +230,19 @@ public class EditorActivity extends AppCompatActivity {
         // Play button is activated when it is not recording
         playBtn.setEnabled(!recording);
 
-        recordBtn.setEnabled(!recording);
+       //TODO recordBtn.setEnabled(!recording);
 
     }
 
     private void initRecorders() {
+        compositionView.activate();
         recordTimer.cancel();
         audioRecorder.stop();
         audioRecorder = new AudioRecorder();
         recordTimer = new Timer();
         width = 0;
         layoutParams = null;
+        //recording = false;
     }
 
 }

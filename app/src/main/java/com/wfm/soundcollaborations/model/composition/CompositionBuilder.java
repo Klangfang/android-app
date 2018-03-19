@@ -312,4 +312,12 @@ public class CompositionBuilder
     {
         return this.compositionView;
     }
+
+    public static int getTrackWidth() {
+        return TRACK_WIDTH;
+    }
+
+    public static int getSoundSecondWidth() {
+        return SOUND_SECOND_WIDTH;
+    }
 }

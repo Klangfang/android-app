@@ -5,6 +5,7 @@ import android.os.Environment;
 import android.util.Log;
 
 import com.wfm.soundcollaborations.model.Constants;
+import com.wfm.soundcollaborations.utils.AudioRecorderStatus;
 import com.wfm.soundcollaborations.utils.DateUtils;
 import com.wfm.soundcollaborations.utils.FileUtils;
 
@@ -25,6 +26,7 @@ public class AudioRecorder implements MediaRecorder.OnInfoListener
     private final String SOUND_FILE_BASE_URI_DIR = Environment.getExternalStorageDirectory().getAbsolutePath() + "/";
     private final String SOUND_FILE_EXTENSION = ".3gp";
     private String filePath;
+    private AudioRecorderStatus status = AudioRecorderStatus.EMPTY;
 
     public void create()
     {
@@ -46,6 +48,7 @@ public class AudioRecorder implements MediaRecorder.OnInfoListener
             mMediaRecorder.setOutputFile(this.filePath);
             mMediaRecorder.setAudioEncoder(MediaRecorder.AudioEncoder.AMR_NB);
             mMediaRecorder.setMaxDuration(MAX_DURATION);
+            mMediaRecorder.setOnInfoListener(this);
 
             try
             {
@@ -57,6 +60,7 @@ public class AudioRecorder implements MediaRecorder.OnInfoListener
             }
 
             mMediaRecorder.start();
+            status = AudioRecorderStatus.RECORDING;
         }
     }
 
@@ -92,12 +96,17 @@ public class AudioRecorder implements MediaRecorder.OnInfoListener
         return this.filePath;
     }
 
+    public AudioRecorderStatus getStatus() {
+        return status;
+    }
+
     @Override
     public void onInfo(MediaRecorder mediaRecorder, int i, int i1) {
         if (i == MediaRecorder.MEDIA_RECORDER_INFO_MAX_DURATION_REACHED)
         {
             Log.e(TAG, "Max Duration Reached");
-            stop();
+            //stop(); //Fuehrt dazu, dass die Aufnahme verschwindet....
+            status = AudioRecorderStatus.STOPED;
         }
     }
 }
