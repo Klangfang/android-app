@@ -101,4 +101,8 @@ public class TrackWatchView extends View
         borderStrokePaint.setColor(Color.BLACK);
         invalidate();
     }
+
+    public float getPercentage() {
+        return percentage;
+    }
 }

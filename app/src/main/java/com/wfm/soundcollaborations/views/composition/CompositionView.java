@@ -176,8 +176,12 @@ public class CompositionView extends LinearLayout
         holderScrollView.scrollTo(value, 0);
     }
 
-    public void increaseViewWatchPercentage(int trackNumber, float percentage)
+    public void increaseViewWatchPercentage(int trackNumber, float percentage) throws Exception
     {
+        float actualPercentage = this.tracksWatchViews.get(trackNumber).getPercentage();
+        if (actualPercentage >= 100) {
+            throw new Exception();
+        }
         this.tracksWatchViews.get(trackNumber).increasePercentage(percentage);
     }
 

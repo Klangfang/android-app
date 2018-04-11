@@ -135,7 +135,7 @@ public class EditorActivity extends AppCompatActivity {
                             Log.d(TAG, "Max Amplitude Recieved -> " + max);
                             soundView.invalidate();
                             builder.getCompositionView().increaseScrollPosition(3);
-                           //TODO builder.getCompositionView().increaseViewWatchPercentage(soundView.getTrack(), 0.17f);
+                            builder.getCompositionView().increaseViewWatchPercentage(soundView.getTrack(), 0.17f);
                         }
 
                     } catch (SoundWillBeOutOfCompositionException e) {
