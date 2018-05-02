@@ -188,7 +188,7 @@ public class CompositionBuilder
                         msounds.get(index).setUri(FileUtils.getKlangfangCacheDirectory()+"/"+name);
                         mTracks.get(msounds.get(index).getTrack()).addSound(msounds.get(index));
                         numberOfDownloadedSounds++;
-                        if(numberOfDownloadedSounds == msounds.size())
+                        //if(numberOfDownloadedSounds == msounds.size())TODO readd?
                             prepareTracks();
                     }
 

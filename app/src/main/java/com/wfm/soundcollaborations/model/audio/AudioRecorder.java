@@ -4,6 +4,7 @@ import android.media.MediaRecorder;
 import android.os.Environment;
 import android.util.Log;
 
+import com.wfm.soundcollaborations.exceptions.RecordTimeOutExceededException;
 import com.wfm.soundcollaborations.model.Constants;
 import com.wfm.soundcollaborations.utils.AudioRecorderStatus;
 import com.wfm.soundcollaborations.utils.DateUtils;

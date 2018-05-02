@@ -63,25 +63,25 @@ public class EditorActivity extends AppCompatActivity {
                 + " 'uuid': '3423423-432434-43243241-33-22222',"
                 + " 'sounds': ["
                 + "   {'length': 28260, 'track': 1, 'start_position': 0, 'link': "
-                + "'https://www.firexweb.com/sounds/sound1.3gp'},"
+                + "'https://stereoninjamusic.weebly.com/uploads/4/5/7/5/45756923/we_wish_you_a_merry_xmas.ogg'},"
 
-                + "   {'length': 29760, 'track': 2, 'start_position': 0, 'link': "
-                + "'https://www.firexweb.com/sounds/sound3.3gp'},"
+                + "   {'length': 29760, 'track': 2, 'start_position': 20000, 'link': "
+                + "'https://stereoninjamusic.weebly.com/uploads/4/5/7/5/45756923/we_three_kings.ogg'},"
 
-                + "   {'length': 30580, 'track': 3, 'start_position': 0, 'link': "
-                + "'https://www.firexweb.com/sounds/sound5.3gp'},"
+                + "   {'length': 30580, 'track': 3, 'start_position': 30000, 'link': "
+                + "'https://stereoninjamusic.weebly.com/uploads/4/5/7/5/45756923/deck_the_halls.ogg'},"
 
                 + "   {'length': 29100, 'track': 4, 'start_position': 20000, 'link': "
-                + "'https://www.firexweb.com/sounds/sound8.3gp'},"
+                + "'https://stereoninjamusic.weebly.com/uploads/4/5/7/5/45756923/jingle_bells.ogg'},"
 
                 + "   {'length': 4920, 'track': 3, 'start_position': 40000, 'link': "
-                + "'https://www.firexweb.com/sounds/sound7.3gp'},"
+                + "'https://stereoninjamusic.weebly.com/uploads/4/5/7/5/45756923/the_heart_of_a_galaxy.ogg'},"
 
                 + "   {'length': 30580, 'track': 1, 'start_position': 50000, 'link': "
-                + "'https://www.firexweb.com/sounds/sound2.3gp'},"
+                + "'https://stereoninjamusic.weebly.com/uploads/4/5/7/5/45756923/solar_eclipse.ogg'},"
 
                 + "   {'length': 30680, 'track': 2, 'start_position': 80000, 'link': "
-                + "'https://www.firexweb.com/sounds/sound4.3gp'}"
+                + "'https://stereoninjamusic.weebly.com/uploads/4/5/7/5/45756923/the_midnight_ninja.ogg'}"
 
                 + " ]"
                 + "}";
@@ -233,7 +233,7 @@ public class EditorActivity extends AppCompatActivity {
             soundView = builder.record(this);
         } catch (NoActiveTrackException ex) {
             Toast.makeText(this, "Please select Track!", Toast.LENGTH_LONG).show();
-            initRecorders();
+            //initRecorders();
         } catch (SoundWillOverlapException ex2) {
             Toast.makeText(this, "Recording will overlap with other sounds!", Toast.LENGTH_LONG).show();
             initRecorders();
@@ -242,7 +242,7 @@ public class EditorActivity extends AppCompatActivity {
             // initRecorders();
         } catch (Exception ex) {
             Log.e(TAG, ex.getMessage());
-            initRecorders();
+            //initRecorders();
         }
         layoutParams = (RelativeLayout.LayoutParams) soundView.getLayoutParams();
     }

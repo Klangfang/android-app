@@ -15,6 +15,7 @@ import android.widget.HorizontalScrollView;
 import android.widget.LinearLayout;
 
 import com.wfm.soundcollaborations.R;
+import com.wfm.soundcollaborations.exceptions.SoundWillBeOutOfCompositionException;
 import com.wfm.soundcollaborations.views.composition.listeners.TrackViewOnClickListener;
 import com.wfm.soundcollaborations.views.composition.listeners.TrackWatchViewOnClickListener;
 
@@ -176,13 +177,17 @@ public class CompositionView extends LinearLayout
         holderScrollView.scrollTo(value, 0);
     }
 
-    public void increaseViewWatchPercentage(int trackNumber, float percentage) throws Exception
+    public void increaseViewWatchPercentage(int trackNumber, float percentage) throws SoundWillBeOutOfCompositionException
     {
-        float actualPercentage = this.tracksWatchViews.get(trackNumber).getPercentage();
-        if (actualPercentage >= 100) {
-            throw new Exception();
+        if (isTrackWatchPercentageFull(trackNumber)) {
+            throw new SoundWillBeOutOfCompositionException();
         }
         this.tracksWatchViews.get(trackNumber).increasePercentage(percentage);
+    }
+
+    public boolean isTrackWatchPercentageFull(int trackNumber) {
+        float actualPercentage = this.tracksWatchViews.get(trackNumber).getPercentage();
+        return actualPercentage >= 100;
     }
 
     @Override
