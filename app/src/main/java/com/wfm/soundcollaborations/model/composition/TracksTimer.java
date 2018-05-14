@@ -58,23 +58,7 @@ public class TracksTimer
 
                         for(int i=0; i<mTracks.size(); i++)
                         {
-                            if(mTracks.get(i).isPlaying())
-                            {
-                                if(! mTracks.get(i).isThereSound(positionInMillis))
-                                {
-                                    mTracks.get(i).pause();
-                                    Log.d(TAG, "Track "+i+" is Paused in "+positionInMillis);
-                                }
-                            }
-                            else
-                            {
-                                if(mTracks.get(i).isThereSound(positionInMillis))
-                                {
-                                    mTracks.get(i).play();
-                                    Log.d(TAG, "Track "+i+" is playing in "+positionInMillis);
-                                }
-
-                            }
+                            mTracks.get(i).play(i, positionInMillis);
                         }
 
                         // increase scroll position
@@ -97,8 +81,7 @@ public class TracksTimer
         this.mCompositionView.setEnabled(true);
         for(int i=0; i<mTracks.size(); i++)
         {
-            mTracks.get(i).pause();
-            Log.d(TAG, "Track "+i+" is Paused!");
+            mTracks.get(i).pause(i);
         }
     }
 

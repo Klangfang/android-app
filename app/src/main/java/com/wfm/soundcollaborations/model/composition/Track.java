@@ -40,14 +40,33 @@ public class Track
         player.addSounds(soundsUris);
     }
 
-    public void play()
+    public void play(int trackNumber, int positionInMillis)
     {
-        player.play();
+        if (!isPlaying() && isThereSound(positionInMillis)) {
+            player.play();
+            Log.d(TAG, "Track "+trackNumber+" is Playing in "+positionInMillis);
+            return;
+        }
+        if (isPlaying() && !isThereSound(positionInMillis)){
+            pause(trackNumber, positionInMillis);
+            return;
+        }
     }
 
-    public void pause()
+    public void pause(int trackNumber, int positionInMillis)
     {
         player.pause();
+        if (positionInMillis!=-1) {
+            Log.d(TAG, "Track " + trackNumber + " is Paused in " + positionInMillis);
+        } else {
+            Log.d(TAG, "Track " + trackNumber + " is Paused");
+        }
+
+    }
+
+    public void pause(int trackNumber)
+    {
+       pause(trackNumber, -1);
     }
 
     public boolean isPlaying()
