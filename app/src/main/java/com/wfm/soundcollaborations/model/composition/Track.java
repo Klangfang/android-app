@@ -7,6 +7,7 @@ import android.util.Log;
 import com.wfm.soundcollaborations.model.audio.AudioPlayer;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Timer;
 
@@ -111,5 +112,10 @@ public class Track
                 return true;
         }
         return false;
+    }
+
+    public void prepareSound(Sound sound) {
+        addSound(sound);
+        player.addSounds((String[]) Arrays.asList(sound.getUri()).toArray());
     }
 }

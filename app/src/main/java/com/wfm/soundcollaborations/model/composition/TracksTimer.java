@@ -96,11 +96,22 @@ public class TracksTimer
 
     public void reset()
     {
-        mTimer.cancel();
+        if (mTimer !=null) {
+            mTimer.cancel();
+        }
         positionInMillis = 0;
-        mCompositionView.setScrollPosition(0);
-        this.mCompositionView.setEnabled(true);
+
+        if (mCompositionView!= null) {
+            mCompositionView.setScrollPosition(0);
+            this.mCompositionView.setEnabled(true);
+        }
     }
 
+    public void updateTrack(int trackNumber, Sound sound) {
+        Track oldTrack = mTracks.get(trackNumber);
+        mTracks.remove(trackNumber);
 
+        oldTrack.prepareSound(sound);
+        mTracks.add(oldTrack);
+    }
 }

@@ -271,18 +271,6 @@ public class CompositionBuilder
         return false;
     }
 
-    /*public void play()
-    {
-        mTracksTimer.play();
-        playing = true;
-    }
-
-    public void pause()
-    {
-        mTracksTimer.pause();
-        playing = false;
-    }*/
-
     public void play() {
 
         if (!playing) {
@@ -320,5 +308,18 @@ public class CompositionBuilder
 
     public static int getSoundSecondWidth() {
         return SOUND_SECOND_WIDTH;
+    }
+
+    public void addRecordedSound(String soundPath, int length, int trackNumber, int startPosition) {
+        Sound sound = new Sound(soundPath, length, trackNumber, startPosition);
+        sound.setUri(soundPath);
+
+        Track track = mTracks.get(trackNumber);
+        mTracks.remove(trackNumber);
+
+        track.prepareSound(sound);
+        mTracks.add(track);
+
+        mTracksTimer.updateTrack(trackNumber, sound);
     }
 }

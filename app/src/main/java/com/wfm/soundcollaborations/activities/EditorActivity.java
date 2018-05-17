@@ -1,6 +1,8 @@
 package com.wfm.soundcollaborations.activities;
 
+import android.os.Build;
 import android.os.Handler;
+import android.support.annotation.RequiresApi;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
@@ -15,6 +17,7 @@ import com.wfm.soundcollaborations.exceptions.NoActiveTrackException;
 import com.wfm.soundcollaborations.exceptions.RecordTimeOutExceededException;
 import com.wfm.soundcollaborations.exceptions.SoundWillBeOutOfCompositionException;
 import com.wfm.soundcollaborations.exceptions.SoundWillOverlapException;
+import com.wfm.soundcollaborations.model.audio.AudioPlayer;
 import com.wfm.soundcollaborations.model.audio.AudioRecorder;
 import com.wfm.soundcollaborations.model.composition.CompositionBuilder;
 import com.wfm.soundcollaborations.utils.AudioRecorderStatus;
@@ -45,6 +48,8 @@ public class EditorActivity extends AppCompatActivity {
 
     private SoundView soundView;
     private AudioRecorder audioRecorder = new AudioRecorder();
+    private AudioPlayer player;
+
     private Timer recordTimer = new Timer();
 
     @BindView(R.id.btn_record)
@@ -52,6 +57,10 @@ public class EditorActivity extends AppCompatActivity {
 
     @BindView(R.id.btn_play)
     PlayPauseView playBtn;
+
+    private String recordedSoundPath;
+    private int startPosition;
+    private int soundLength;
 
     @Override
     protected void onCreate(Bundle savedInstanceState)
@@ -62,8 +71,8 @@ public class EditorActivity extends AppCompatActivity {
         String jsonData = "{"
                 + " 'uuid': '3423423-432434-43243241-33-22222',"
                 + " 'sounds': ["
-                + "   {'length': 28260, 'track': 1, 'start_position': 0, 'link': "
-                + "'https://stereoninjamusic.weebly.com/uploads/4/5/7/5/45756923/we_wish_you_a_merry_xmas.ogg'},"
+               // + "   {'length': 28260, 'track': 1, 'start_position': 0, 'link': "
+               // + "'https://stereoninjamusic.weebly.com/uploads/4/5/7/5/45756923/we_wish_you_a_merry_xmas.ogg'},"
 
                 + "   {'length': 29760, 'track': 2, 'start_position': 20000, 'link': "
                 + "'https://stereoninjamusic.weebly.com/uploads/4/5/7/5/45756923/we_three_kings.ogg'},"
@@ -113,7 +122,9 @@ public class EditorActivity extends AppCompatActivity {
         compositionView.deactivate();
         handler = new Handler();
         audioRecorder.create();
+        recordedSoundPath = audioRecorder.getRecordedFilePath();
         audioRecorder.start();
+        startPosition = compositionView.getScrollPosition();
         recordTimer.scheduleAtFixedRate(new TimerTask() {
             @Override
             public void run() {
@@ -128,6 +139,7 @@ public class EditorActivity extends AppCompatActivity {
                         if (recording) { // Die Aufnahme laueft, wenn man nicht pausieren moechte.
                             layoutParams = (RelativeLayout.LayoutParams) soundView.getLayoutParams();
                             width = width + 3;
+                            soundLength = width;
                             layoutParams.width = width;
                             soundView.setLayoutParams(layoutParams);
                             int max = audioRecorder.getMaxAmplitude();
@@ -164,9 +176,12 @@ public class EditorActivity extends AppCompatActivity {
         }
     }
 
+    @RequiresApi(api = Build.VERSION_CODES.JELLY_BEAN_MR1)
     @OnClick(R.id.btn_play)
     public void play(View view)
     {
+        //player = new AudioPlayer(compositionView.getContext());
+        builder.addRecordedSound(recordedSoundPath, soundLength*1000, soundView.getTrack(), startPosition);
         builder.play();
         updateStatusOnPlay();
         ((PlayPauseView) view).toggle();

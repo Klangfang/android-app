@@ -24,7 +24,7 @@ public class AudioRecorder implements MediaRecorder.OnInfoListener
     private static final int MAX_DURATION = Constants.MAX_RECORD_TIME  * 1000;
 
     private MediaRecorder mMediaRecorder;
-    private final String SOUND_FILE_BASE_URI_DIR = Environment.getExternalStorageDirectory().getAbsolutePath() + "/";
+    private final String SOUND_FILE_BASE_URI_DIR = FileUtils.getKlangfangCacheDirectory() + "/";
     private final String SOUND_FILE_EXTENSION = ".3gp";
     private String filePath;
     private AudioRecorderStatus status = AudioRecorderStatus.EMPTY;
