@@ -119,6 +119,13 @@ public class CompositionBuilder
         return width;
     }
 
+    private int getStartPositionInMs(int width) {
+        final double WIDTH_SOUND_SECOND = 16.6667;
+
+        int startPositionInMs = (int) (width * WIDTH_SOUND_SECOND);
+        return startPositionInMs;
+    }
+
     private void build()
     {
         for(int i=0; i<tracksViews.size(); i++)
@@ -310,8 +317,8 @@ public class CompositionBuilder
         return SOUND_SECOND_WIDTH;
     }
 
-    public void addRecordedSound(String soundPath, int length, int trackNumber, int startPosition) {
-        Sound sound = new Sound(soundPath, length, trackNumber, startPosition);
+    public void addRecordedSound(String soundPath, int length, int trackNumber, int startPositionInWidth) {
+        Sound sound = new Sound(soundPath, length, trackNumber, getStartPositionInMs(startPositionInWidth));
         sound.setUri(soundPath);
 
         Track track = mTracks.get(trackNumber);
@@ -320,6 +327,5 @@ public class CompositionBuilder
         track.prepareSound(sound);
         mTracks.add(track);
 
-        mTracksTimer.updateTrack(trackNumber, sound);
     }
 }

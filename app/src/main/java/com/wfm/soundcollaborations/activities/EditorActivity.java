@@ -7,6 +7,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.RelativeLayout;
 import android.widget.Toast;
@@ -58,9 +59,9 @@ public class EditorActivity extends AppCompatActivity {
     @BindView(R.id.btn_play)
     PlayPauseView playBtn;
 
-    private String recordedSoundPath;
-    private int startPosition;
-    private int soundLength;
+    private String recordedSoundPath=null;
+    private Integer startPositionInWidth=null;
+    private Integer soundLength=null;
 
     @Override
     protected void onCreate(Bundle savedInstanceState)
@@ -74,22 +75,22 @@ public class EditorActivity extends AppCompatActivity {
                // + "   {'length': 28260, 'track': 1, 'start_position': 0, 'link': "
                // + "'https://stereoninjamusic.weebly.com/uploads/4/5/7/5/45756923/we_wish_you_a_merry_xmas.ogg'},"
 
-                + "   {'length': 29760, 'track': 2, 'start_position': 20000, 'link': "
-                + "'https://stereoninjamusic.weebly.com/uploads/4/5/7/5/45756923/we_three_kings.ogg'},"
+               // + "   {'length': 29760, 'track': 2, 'start_position': 20000, 'link': "
+               // + "'https://stereoninjamusic.weebly.com/uploads/4/5/7/5/45756923/we_three_kings.ogg'},"
 
-                + "   {'length': 30580, 'track': 3, 'start_position': 30000, 'link': "
-                + "'https://stereoninjamusic.weebly.com/uploads/4/5/7/5/45756923/deck_the_halls.ogg'},"
+                //+ "   {'length': 30580, 'track': 3, 'start_position': 30000, 'link': "
+                //+ "'https://stereoninjamusic.weebly.com/uploads/4/5/7/5/45756923/deck_the_halls.ogg'},"
 
-                + "   {'length': 29100, 'track': 4, 'start_position': 20000, 'link': "
-                + "'https://stereoninjamusic.weebly.com/uploads/4/5/7/5/45756923/jingle_bells.ogg'},"
+                //+ "   {'length': 29100, 'track': 4, 'start_position': 20000, 'link': "
+               // + "'https://stereoninjamusic.weebly.com/uploads/4/5/7/5/45756923/jingle_bells.ogg'},"
 
-                + "   {'length': 4920, 'track': 3, 'start_position': 40000, 'link': "
-                + "'https://stereoninjamusic.weebly.com/uploads/4/5/7/5/45756923/the_heart_of_a_galaxy.ogg'},"
+                //+ "   {'length': 4920, 'track': 3, 'start_position': 40000, 'link': "
+                //+ "'https://stereoninjamusic.weebly.com/uploads/4/5/7/5/45756923/the_heart_of_a_galaxy.ogg'},"
 
-                + "   {'length': 30580, 'track': 1, 'start_position': 50000, 'link': "
+                + "   {'length': 30580, 'track': 1, 'start_position': 10000, 'link': "
                 + "'https://stereoninjamusic.weebly.com/uploads/4/5/7/5/45756923/solar_eclipse.ogg'},"
 
-                + "   {'length': 30680, 'track': 2, 'start_position': 80000, 'link': "
+                + "   {'length': 30680, 'track': 2, 'start_position': 20000, 'link': "
                 + "'https://stereoninjamusic.weebly.com/uploads/4/5/7/5/45756923/the_midnight_ninja.ogg'}"
 
                 + " ]"
@@ -115,6 +116,7 @@ public class EditorActivity extends AppCompatActivity {
         if (recording) {
             compositionView.activate();
             updateRecordButton();
+            prepareRecordedSounds();
             return;
         }
 
@@ -123,8 +125,7 @@ public class EditorActivity extends AppCompatActivity {
         handler = new Handler();
         audioRecorder.create();
         recordedSoundPath = audioRecorder.getRecordedFilePath();
-        audioRecorder.start();
-        startPosition = compositionView.getScrollPosition();
+        startRecord();
         recordTimer.scheduleAtFixedRate(new TimerTask() {
             @Override
             public void run() {
@@ -136,7 +137,7 @@ public class EditorActivity extends AppCompatActivity {
                     try {
                         updateRecordAvailability();
                         checkLimits();
-                        if (recording) { // Die Aufnahme laueft, wenn man nicht pausieren moechte.
+                        if (recording) { // Die Aufnahme laueft weiter, wenn man nicht pausieren moechte.
                             layoutParams = (RelativeLayout.LayoutParams) soundView.getLayoutParams();
                             width = width + 3;
                             soundLength = width;
@@ -180,8 +181,6 @@ public class EditorActivity extends AppCompatActivity {
     @OnClick(R.id.btn_play)
     public void play(View view)
     {
-        //player = new AudioPlayer(compositionView.getContext());
-        builder.addRecordedSound(recordedSoundPath, soundLength*1000, soundView.getTrack(), startPosition);
         builder.play();
         updateStatusOnPlay();
         ((PlayPauseView) view).toggle();
@@ -241,11 +240,19 @@ public class EditorActivity extends AppCompatActivity {
         compositionView.activate();
         recordTimer.cancel();
         audioRecorder.stop();
-        audioRecorder = new AudioRecorder();
+        //audioRecorder = new AudioRecorder();
         recordTimer = new Timer();
         width = 0;
+    }
+
+    private void startRecord() {
         try {
+            audioRecorder.start();
+
             soundView = builder.record(this);
+            RelativeLayout.LayoutParams soundParams = (RelativeLayout.LayoutParams) soundView.getLayoutParams();
+            startPositionInWidth = soundParams.leftMargin;
+
         } catch (NoActiveTrackException ex) {
             Toast.makeText(this, "Please select Track!", Toast.LENGTH_LONG).show();
             //initRecorders();
@@ -260,5 +267,11 @@ public class EditorActivity extends AppCompatActivity {
             //initRecorders();
         }
         layoutParams = (RelativeLayout.LayoutParams) soundView.getLayoutParams();
+    }
+
+    private void prepareRecordedSounds() {
+        if (recordedSoundPath != null && soundLength!=null && startPositionInWidth != null) {
+            builder.addRecordedSound(recordedSoundPath, soundLength*1000, soundView.getTrack(), startPositionInWidth);
+        }
     }
 }

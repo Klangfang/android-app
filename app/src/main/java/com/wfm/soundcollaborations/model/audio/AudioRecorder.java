@@ -31,12 +31,15 @@ public class AudioRecorder implements MediaRecorder.OnInfoListener
 
     public void create()
     {
-        if(this.filePath != null)
-            FileUtils.deleteFile(this.filePath);
+        if (status.equals(AudioRecorderStatus.EMPTY)) {
+            status = AudioRecorderStatus.RECORDING;
+            if (this.filePath != null)
+                FileUtils.deleteFile(this.filePath);
 
-        this.filePath = SOUND_FILE_BASE_URI_DIR + "SOUND_" +
-                DateUtils.getCurrentDate("yyyyMMdd_HHmmss")+ SOUND_FILE_EXTENSION;
-        this.mMediaRecorder = null;
+            this.filePath = SOUND_FILE_BASE_URI_DIR + "SOUND_" +
+                    DateUtils.getCurrentDate("yyyyMMdd_HHmmss") + SOUND_FILE_EXTENSION;
+            this.mMediaRecorder = null;
+        }
     }
 
     public void start()
