@@ -115,14 +115,16 @@ public class CompositionBuilder
     {
         int width = 0;
         width += (positionInMs / 1000) * SOUND_SECOND_WIDTH;
+        //TODO Aufschluesseln was das ist!
         width += (positionInMs % 1000) * SOUND_SECOND_WIDTH / 1000;
         return width;
     }
 
     private int getStartPositionInMs(int width) {
-        final double WIDTH_SOUND_SECOND = 16.6667;
+        // Factor um Breite in Millisekunden zu konvertieren: Hat sich automatisch ergeben
+        final double WIDTH_TO_MS_FACTOR = 16.6667;
 
-        int startPositionInMs = (int) (width * WIDTH_SOUND_SECOND);
+        int startPositionInMs = (int) (width * WIDTH_TO_MS_FACTOR);
         return startPositionInMs;
     }
 
