@@ -7,7 +7,7 @@
     android:paddingTop="10dp"
     android:baselineAligned="false"
     >
-    <com.wfm.soundcollaborations.views.composition.CompositionScrollView
+    <com.wfm.soundcollaborations.Editor.views.composition.CompositionScrollView
         android:id="@+id/hsv_holder"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
@@ -30,7 +30,7 @@
                 />
 
         </LinearLayout>
-    </com.wfm.soundcollaborations.views.composition.CompositionScrollView>
+    </com.wfm.soundcollaborations.Editor.views.composition.CompositionScrollView>
     <LinearLayout
         android:id="@+id/twvs"
         android:layout_width="50dp"

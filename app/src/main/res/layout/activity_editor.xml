@@ -7,13 +7,13 @@
     android:layout_height="match_parent"
     android:orientation="vertical"
     android:background="#000"
-    tools:context="com.wfm.soundcollaborations.activities.EditorActivity">
+    tools:context="com.wfm.soundcollaborations.Editor.activities.EditorActivity">
     <android.support.v7.widget.Toolbar
         android:layout_width="match_parent"
         android:layout_height="?android:attr/actionBarSize"
         android:background="#565656"
         />
-    <com.wfm.soundcollaborations.views.composition.CompositionView
+    <com.wfm.soundcollaborations.Editor.views.composition.CompositionView
         android:id="@+id/composition"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
