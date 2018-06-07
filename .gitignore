@@ -78,3 +78,5 @@ gradle-app.setting
 
 # Cache of project
 .gradletasknamecache
+
+sh.exe.stackdump
