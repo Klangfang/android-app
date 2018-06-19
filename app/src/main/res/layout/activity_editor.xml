@@ -6,34 +6,34 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    android:background="#000"
+    android:background="@color/black"
     tools:context="com.wfm.soundcollaborations.Editor.activities.EditorActivity">
+
     <android.support.v7.widget.Toolbar
         android:layout_width="match_parent"
         android:layout_height="?android:attr/actionBarSize"
-        android:background="#565656"
-        />
+        android:background="@color/dark_grey" />
     <com.wfm.soundcollaborations.Editor.views.composition.CompositionView
         android:id="@+id/composition"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:paddingTop="20dp"
         />
+
     <Button
         android:id="@+id/btn_record"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Record"
-        />
+        android:text="@string/record_button" />
+
     <com.ohoussein.playpause.PlayPauseView
         android:id="@+id/btn_play"
-        android:layout_width="50dp"
+        android:layout_width="match_parent"
         android:layout_height="50dp"
         android:clickable="true"
         android:focusable="true"
         android:foreground="?android:selectableItemBackground"
-        app:fill_color="#fff"
-        app:pause_bg="#000"
-        app:play_bg="#000"
-        />
+        app:fill_color="@color/white"
+        app:pause_bg="@color/black"
+        app:play_bg="@color/black" />
 </LinearLayout>

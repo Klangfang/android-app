@@ -54,7 +54,7 @@ public class CompositionView extends LinearLayout
     public CompositionView(Context context)
     {
         super(context);
-        View.inflate(getContext(), R.layout.view_composition, this);
+        View.inflate(getContext(), R.layout.tracks_and_trackwatch_viewgroup, this);
         ButterKnife.bind(this);
         initVariables();
     }
@@ -62,7 +62,7 @@ public class CompositionView extends LinearLayout
     public CompositionView(Context context, AttributeSet attrs)
     {
         super(context, attrs);
-        View.inflate(getContext(), R.layout.view_composition, this);
+        View.inflate(getContext(), R.layout.tracks_and_trackwatch_viewgroup, this);
         ButterKnife.bind(this);
         initVariables();
     }

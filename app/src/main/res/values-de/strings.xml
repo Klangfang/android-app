@@ -1,8 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <!-- General Strings -->
     <string name="app_name">Klangfang</string>
     <string name="my_sounds">Meine Klänge</string>
     <string name="finished_collages">Fertige Collagen</string>
+    <string name="record_button">Aufnehmen</string>
+
 
     <!-- Bottom Navigation Menu -->
     <string name="bnm_explore">Entdecken</string>
