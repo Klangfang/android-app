@@ -323,11 +323,17 @@ public class CompositionBuilder
         Sound sound = new Sound(soundPath, length, trackNumber, getStartPositionInMs(startPositionInWidth));
         sound.setUri(soundPath);
 
-        Track track = mTracks.get(trackNumber);
+        /*Track track = mTracks.get(trackNumber);
         mTracks.remove(trackNumber);
 
         track.prepareSound(sound);
-        mTracks.add(track);
+        mTracks.add(track);*/
 
+        mTracksTimer.updateTrack(trackNumber, sound);
+
+    }
+
+    public Track getTrack(int trackNumber) {
+        return mTracks.get(trackNumber);
     }
 }

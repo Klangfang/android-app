@@ -78,6 +78,7 @@ public class AudioRecorder implements MediaRecorder.OnInfoListener
                 mMediaRecorder.stop();
                 mMediaRecorder.release();
                 mMediaRecorder = null;
+                status = AudioRecorderStatus.EMPTY;
             }
         }
         catch (Exception ex)

@@ -108,8 +108,10 @@ public class TracksTimer
     }
 
     public void updateTrack(int trackNumber, Sound sound) {
+
+        //TODO prepareAllSounds into the audio player
         Track oldTrack = mTracks.get(trackNumber);
-        mTracks.remove(trackNumber);
+        mTracks.remove(oldTrack);
 
         oldTrack.prepareSound(sound);
         mTracks.add(oldTrack);

@@ -5,9 +5,11 @@ import android.os.Handler;
 import android.util.Log;
 
 import com.wfm.soundcollaborations.model.audio.AudioPlayer;
+import com.wfm.soundcollaborations.model.audio.AudioRecorder;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.Timer;
 
@@ -21,6 +23,7 @@ public class Track
 
     private List<Sound> sounds = new ArrayList<>();
     private AudioPlayer player;
+    private AudioRecorder audioRecorder = new AudioRecorder();
 
 
     public Track(){}
@@ -43,18 +46,25 @@ public class Track
 
     public void play(int trackNumber, int positionInMillis)
     {
-        if (!isPlaying() && isThereSound(positionInMillis)) {
-            player.play();
-            Log.d(TAG, "Track "+trackNumber+" is Playing in "+positionInMillis);
-            return;
-        }
-        if (isPlaying() && !isThereSound(positionInMillis)){
+        // den Player starten, wenn an der Stelle einen Sound vorhanden ist.
+        // Der Player selbst weiss nicht, wo die Sounds sich befinden.
+        if (isThereSound(positionInMillis)) {
+            playSound(trackNumber, positionInMillis);
+        } else {
             pause(trackNumber, positionInMillis);
-            return;
         }
     }
 
-    public void pause(int trackNumber, int positionInMillis)
+    // Play sound
+    private void playSound(int trackNumber, int positionInMillis)
+    {
+        if (!isPlaying()) {
+            player.play();
+            Log.d(TAG, "Track "+trackNumber+" is Playing in "+positionInMillis);
+        }
+    }
+
+    private void pause(int trackNumber, int positionInMillis)
     {
         player.pause();
         if (positionInMillis!=-1) {
@@ -70,7 +80,7 @@ public class Track
        pause(trackNumber, -1);
     }
 
-    public boolean isPlaying()
+    private boolean isPlaying()
     {
         return player.isPlaying();
     }
@@ -114,8 +124,30 @@ public class Track
         return false;
     }
 
-    public void prepareSound(Sound sound) {
+    // after adding a new sound to the list of sounds, we sort our list of sounds again and create a new player with this.
+    public void prepareSound(Sound sound)
+    {
         addSound(sound);
-        player.addSounds((String[]) Arrays.asList(sound.getUri()).toArray());
+
+        //Sorting sounds:
+        Collections.sort(sounds, (Sound s1, Sound s2) -> Integer.valueOf(s1.getStartPosition()).compareTo(Integer.valueOf(s2.getStartPosition())));
+
+        // add new sounds to the player
+        player.addSounds(getSoundUris());
+    }
+
+    private String[] getSoundUris() {
+        String[] soundsUris = new String[sounds.size()];
+
+        int i = 0;
+        for (Sound sound : sounds) {
+            soundsUris[i] = (sound.getUri());
+            i++;
+        }
+        return soundsUris;
+    }
+
+    public AudioRecorder getAudioRecorder() {
+        return audioRecorder;
     }
 }

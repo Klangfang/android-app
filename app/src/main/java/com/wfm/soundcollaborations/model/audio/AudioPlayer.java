@@ -71,6 +71,9 @@ public class AudioPlayer
 
     public void addSounds(String uris[])
     {
+        // create a new player to delete olds sounds
+        init();
+
         // Measures bandwidth during playback. Can be null if not required.
         DefaultBandwidthMeter bandwidthMeter = new DefaultBandwidthMeter();
         // Produces DataSource instances through which media data is loaded.

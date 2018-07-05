@@ -21,6 +21,7 @@ import com.wfm.soundcollaborations.exceptions.SoundWillOverlapException;
 import com.wfm.soundcollaborations.model.audio.AudioPlayer;
 import com.wfm.soundcollaborations.model.audio.AudioRecorder;
 import com.wfm.soundcollaborations.model.composition.CompositionBuilder;
+import com.wfm.soundcollaborations.model.composition.Track;
 import com.wfm.soundcollaborations.utils.AudioRecorderStatus;
 import com.wfm.soundcollaborations.utils.JSONUtils;
 import com.wfm.soundcollaborations.views.composition.CompositionView;
@@ -48,8 +49,7 @@ public class EditorActivity extends AppCompatActivity {
     private boolean strobo;
 
     private SoundView soundView;
-    private AudioRecorder audioRecorder = new AudioRecorder();
-    private AudioPlayer player;
+    //private AudioRecorder audioRecorder = new AudioRecorder();
 
     private Timer recordTimer = new Timer();
 
@@ -109,7 +109,7 @@ public class EditorActivity extends AppCompatActivity {
         initRecorders();
 
         // Beim Zeitlimit oder bei einer Ueberlappung keine Aufnahme starten.
-        if (audioRecorder.getStatus().equals(AudioRecorderStatus.STOPED) || updateRecordersOnOverlapping()) {
+        if (getAudioRecorder() != null && getAudioRecorder().getStatus().equals(AudioRecorderStatus.STOPED) || updateRecordersOnOverlapping()) {
             return;
         }
         // Clicking record while recording
@@ -121,11 +121,11 @@ public class EditorActivity extends AppCompatActivity {
         }
 
         // Clicking record while not recording
+        startRecord();
         compositionView.deactivate();
         handler = new Handler();
-        audioRecorder.create();
-        recordedSoundPath = audioRecorder.getRecordedFilePath();
-        startRecord();
+        getAudioRecorder().create();
+        recordedSoundPath = getAudioRecorder().getRecordedFilePath();
         recordTimer.scheduleAtFixedRate(new TimerTask() {
             @Override
             public void run() {
@@ -143,7 +143,7 @@ public class EditorActivity extends AppCompatActivity {
                             soundLength = width;
                             layoutParams.width = width;
                             soundView.setLayoutParams(layoutParams);
-                            int max = audioRecorder.getMaxAmplitude();
+                            int max = getAudioRecorder().getMaxAmplitude();
                             soundView.addWave(max);
                             Log.d(TAG, "Max Amplitude Recieved -> " + max);
                             soundView.invalidate();
@@ -170,7 +170,7 @@ public class EditorActivity extends AppCompatActivity {
             initRecorders();
             throw new SoundWillBeOutOfCompositionException();
         }
-        if (audioRecorder.getStatus().equals(AudioRecorderStatus.STOPED)) {
+        if (getAudioRecorder().getStatus().equals(AudioRecorderStatus.STOPED)) {
             Toast.makeText(this, "30 second of recording is reached!", Toast.LENGTH_LONG).show();
             initRecorders();
             throw new RecordTimeOutExceededException();
@@ -239,7 +239,7 @@ public class EditorActivity extends AppCompatActivity {
     private void initRecorders() {
         compositionView.activate();
         recordTimer.cancel();
-        audioRecorder.stop();
+        stopAudioRecorder();
         //audioRecorder = new AudioRecorder();
         recordTimer = new Timer();
         width = 0;
@@ -247,7 +247,7 @@ public class EditorActivity extends AppCompatActivity {
 
     private void startRecord() {
         try {
-            audioRecorder.start();
+            startAudioRecorder();
 
             soundView = builder.record(this);
             RelativeLayout.LayoutParams soundParams = (RelativeLayout.LayoutParams) soundView.getLayoutParams();
@@ -272,6 +272,27 @@ public class EditorActivity extends AppCompatActivity {
     private void prepareRecordedSounds() {
         if (recordedSoundPath != null && soundLength!=null && startPositionInWidth != null) {
             builder.addRecordedSound(recordedSoundPath, soundLength*1000, soundView.getTrack(), startPositionInWidth);
+        }
+    }
+
+    public AudioRecorder getAudioRecorder() {
+        if (builder == null || soundView==null) {
+            return null;
+        }
+        return builder.getTrack(soundView.getTrack()).getAudioRecorder();
+    }
+
+    public void stopAudioRecorder() {
+        AudioRecorder recorder = getAudioRecorder();
+        if (recorder != null) {
+            recorder.stop();
+        }
+    }
+
+    public void startAudioRecorder() {
+        AudioRecorder recorder = getAudioRecorder();
+        if (recorder != null) {
+            recorder.start();
         }
     }
 }
