@@ -85,7 +85,6 @@ public class RecordActivity extends AppCompatActivity
                 if(! isRecording)
                 {
                     resetPlayBtn();
-                    mAudioRecorder.create();
                     mAudioRecorder.start();
                     initRecordTimeTimer();
                     initVisualizeAmplitudesTimer();
@@ -94,7 +93,7 @@ public class RecordActivity extends AppCompatActivity
                 }
                 else
                 {
-                    mAudioRecorder.stop();
+                    mAudioRecorder.stop(0);
                     recordTimeTimer.cancel();
                     visualizeAmplitudesTimer.cancel();
                     resetValues();

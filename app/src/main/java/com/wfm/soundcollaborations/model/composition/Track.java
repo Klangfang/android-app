@@ -6,6 +6,7 @@ import android.util.Log;
 
 import com.wfm.soundcollaborations.model.audio.AudioPlayer;
 import com.wfm.soundcollaborations.model.audio.AudioRecorder;
+import com.wfm.soundcollaborations.utils.AudioRecorderStatus;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -23,13 +24,15 @@ public class Track
 
     private List<Sound> sounds = new ArrayList<>();
     private AudioPlayer player;
-    private AudioRecorder audioRecorder = new AudioRecorder();
+    private AudioRecorder recorder;
+    private int recorderTime;
 
 
-    public Track(){}
+    public Track(){ recorder = new AudioRecorder(); }
 
     public void addSound(Sound sound)
     {
+        recorderTime = recorderTime + sound.getLength();
         sounds.add(sound);
     }
 
@@ -46,38 +49,26 @@ public class Track
 
     public void play(int trackNumber, int positionInMillis)
     {
-        // den Player starten, wenn an der Stelle einen Sound vorhanden ist.
+        // Den Player starten, wenn an der Stelle einen Sound vorhanden ist.
         // Der Player selbst weiss nicht, wo die Sounds sich befinden.
         if (isThereSound(positionInMillis)) {
-            playSound(trackNumber, positionInMillis);
+            if (!isPlaying()) {
+                player.play();
+
+                Log.d(TAG, "Track "+trackNumber+" is Playing in "+positionInMillis);
+            }
         } else {
-            pause(trackNumber, positionInMillis);
-        }
-    }
+            player.pause();
 
-    // Play sound
-    private void playSound(int trackNumber, int positionInMillis)
-    {
-        if (!isPlaying()) {
-            player.play();
-            Log.d(TAG, "Track "+trackNumber+" is Playing in "+positionInMillis);
-        }
-    }
-
-    private void pause(int trackNumber, int positionInMillis)
-    {
-        player.pause();
-        if (positionInMillis!=-1) {
             Log.d(TAG, "Track " + trackNumber + " is Paused in " + positionInMillis);
-        } else {
-            Log.d(TAG, "Track " + trackNumber + " is Paused");
         }
-
     }
 
     public void pause(int trackNumber)
     {
-       pause(trackNumber, -1);
+        player.pause();
+
+        Log.d(TAG, "Track " + trackNumber + " is Paused");
     }
 
     private boolean isPlaying()
@@ -115,10 +106,12 @@ public class Track
     public boolean isThereSound(int positionInMillis)
     {
         int startPosition;
+        int endPosition;
         for(int i=0; i<sounds.size(); i++)
         {
             startPosition = sounds.get(i).getStartPosition();
-            if(positionInMillis >= startPosition && positionInMillis < (startPosition+sounds.get(i).getLength()))
+            endPosition = startPosition+sounds.get(i).getLength();
+            if(positionInMillis >= startPosition && positionInMillis < endPosition)
                 return true;
         }
         return false;
@@ -141,13 +134,36 @@ public class Track
 
         int i = 0;
         for (Sound sound : sounds) {
-            soundsUris[i] = (sound.getUri());
+            soundsUris[i] = sound.getUri();
             i++;
         }
         return soundsUris;
     }
 
-    public AudioRecorder getAudioRecorder() {
-        return audioRecorder;
+    // Startet den Recorder
+    public void startTrackRecorder() {
+        recorder.start();
     }
+
+    // Stopt den Recorder
+    public void stopTrackRecorder(int recorderTime) {
+        recorder.stop(recorderTime);
+    }
+
+    // Liefert den Recorder-Status zurueck
+    public AudioRecorderStatus getTrackRecorderStatus() {
+        return recorder.getStatus();
+    }
+
+    // Liefert den erzeugten Sound-Dateipfad zurueck
+    public String getRecordedFilePath() {
+        return recorder.getRecordedFilePath();
+    }
+
+    // Liefert die maximale Amplitude im Recorder zurueck
+    public int getMaxAmplitude() {
+        return recorder.getMaxAmplitude();
+    }
+
+
 }

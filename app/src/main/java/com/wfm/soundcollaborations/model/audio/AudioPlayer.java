@@ -71,8 +71,8 @@ public class AudioPlayer
 
     public void addSounds(String uris[])
     {
-        // create a new player to delete olds sounds
-        init();
+        // create a new player to delete old sounds
+        init();//TODO perhaps not needed
 
         // Measures bandwidth during playback. Can be null if not required.
         DefaultBandwidthMeter bandwidthMeter = new DefaultBandwidthMeter();

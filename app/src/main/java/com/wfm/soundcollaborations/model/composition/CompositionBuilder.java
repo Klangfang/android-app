@@ -13,6 +13,7 @@ import com.wfm.soundcollaborations.activities.EditorActivity;
 import com.wfm.soundcollaborations.exceptions.NoActiveTrackException;
 import com.wfm.soundcollaborations.exceptions.SoundWillBeOutOfCompositionException;
 import com.wfm.soundcollaborations.exceptions.SoundWillOverlapException;
+import com.wfm.soundcollaborations.model.audio.AudioRecorder;
 import com.wfm.soundcollaborations.network.SoundDownloader;
 import com.wfm.soundcollaborations.tasks.VisualizeSoundTask;
 import com.wfm.soundcollaborations.utils.FileUtils;
@@ -120,12 +121,12 @@ public class CompositionBuilder
         return width;
     }
 
-    private int getStartPositionInMs(int width) {
+    public int getPositionInMs(int width) {
         // Factor um Breite in Millisekunden zu konvertieren: Hat sich automatisch ergeben
         final double WIDTH_TO_MS_FACTOR = 16.6667;
 
-        int startPositionInMs = (int) (width * WIDTH_TO_MS_FACTOR);
-        return startPositionInMs;
+        int positionInMs = (int) (width * WIDTH_TO_MS_FACTOR);
+        return positionInMs;
     }
 
     private void build()
@@ -320,20 +321,23 @@ public class CompositionBuilder
     }
 
     public void addRecordedSound(String soundPath, int length, int trackNumber, int startPositionInWidth) {
-        Sound sound = new Sound(soundPath, length, trackNumber, getStartPositionInMs(startPositionInWidth));
+        // prepare new sound
+        Sound sound = new Sound(soundPath, getPositionInMs(length), trackNumber, getPositionInMs(startPositionInWidth));
         sound.setUri(soundPath);
 
-        /*Track track = mTracks.get(trackNumber);
+        // delete oldTrack
+        Track track = mTracks.get(trackNumber);
         mTracks.remove(trackNumber);
 
+        // prepare track and save it
         track.prepareSound(sound);
-        mTracks.add(track);*/
+        mTracks.add(trackNumber, track);
 
-        mTracksTimer.updateTrack(trackNumber, sound);
-
+        mTracksTimer.updateTrack(trackNumber, track);
     }
 
-    public Track getTrack(int trackNumber) {
-        return mTracks.get(trackNumber);
+
+    public Track getActiveTrack() {
+        return mTracks.get(compositionView.getActiveTrack());
     }
 }

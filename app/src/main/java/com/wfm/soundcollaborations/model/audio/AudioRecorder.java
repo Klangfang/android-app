@@ -21,16 +21,21 @@ public class AudioRecorder implements MediaRecorder.OnInfoListener
 {
     private final static String TAG = AudioRecorder.class.getSimpleName();
 
-    private static final int MAX_DURATION = Constants.MAX_RECORD_TIME  * 1000;
+    private static final int MAX_DURATION = /*Constants.MAX_RECORD_TIME*/ 5  * 1000;
 
     private MediaRecorder mMediaRecorder;
     private final String SOUND_FILE_BASE_URI_DIR = FileUtils.getKlangfangCacheDirectory() + "/";
     private final String SOUND_FILE_EXTENSION = ".3gp";
     private String filePath;
     private AudioRecorderStatus status = AudioRecorderStatus.EMPTY;
+    private int recordedTime;
 
-    public void create()
+    public AudioRecorder() {}
+
+
+    public void start()
     {
+        // create new sound file path
         if (status.equals(AudioRecorderStatus.EMPTY)) {
             status = AudioRecorderStatus.RECORDING;
             if (this.filePath != null)
@@ -40,10 +45,7 @@ public class AudioRecorder implements MediaRecorder.OnInfoListener
                     DateUtils.getCurrentDate("yyyyMMdd_HHmmss") + SOUND_FILE_EXTENSION;
             this.mMediaRecorder = null;
         }
-    }
 
-    public void start()
-    {
         if(mMediaRecorder == null)
         {
             mMediaRecorder = new MediaRecorder();
@@ -51,7 +53,7 @@ public class AudioRecorder implements MediaRecorder.OnInfoListener
             mMediaRecorder.setOutputFormat(MediaRecorder.OutputFormat.THREE_GPP);
             mMediaRecorder.setOutputFile(this.filePath);
             mMediaRecorder.setAudioEncoder(MediaRecorder.AudioEncoder.AMR_NB);
-            mMediaRecorder.setMaxDuration(MAX_DURATION);
+            mMediaRecorder.setMaxDuration(recordedTime >= MAX_DURATION ? 0 : MAX_DURATION - recordedTime);
             mMediaRecorder.setOnInfoListener(this);
 
             try
@@ -68,8 +70,15 @@ public class AudioRecorder implements MediaRecorder.OnInfoListener
         }
     }
 
-    public void stop()
+    // Stop and set max time is reached
+    public void stop() {
+        stop(MAX_DURATION);
+    }
+
+    public void stop(int recordedTime)
     {
+        this.recordedTime = recordedTime;
+
         try
         {
             if(mMediaRecorder != null)
@@ -78,6 +87,7 @@ public class AudioRecorder implements MediaRecorder.OnInfoListener
                 mMediaRecorder.stop();
                 mMediaRecorder.release();
                 mMediaRecorder = null;
+                this.filePath = null;
                 status = AudioRecorderStatus.EMPTY;
             }
         }
@@ -110,7 +120,7 @@ public class AudioRecorder implements MediaRecorder.OnInfoListener
         if (i == MediaRecorder.MEDIA_RECORDER_INFO_MAX_DURATION_REACHED)
         {
             Log.e(TAG, "Max Duration Reached");
-            //stop(); //Fuehrt dazu, dass die Aufnahme verschwindet....
+           // stop(MAX_DURATION); //TODO Fuehrt dazu, dass die Aufnahme verschwindet....
             status = AudioRecorderStatus.STOPED;
         }
     }

@@ -27,6 +27,8 @@ import com.wfm.soundcollaborations.utils.JSONUtils;
 import com.wfm.soundcollaborations.views.composition.CompositionView;
 import com.wfm.soundcollaborations.views.composition.SoundView;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Timer;
 import java.util.TimerTask;
 
@@ -49,7 +51,6 @@ public class EditorActivity extends AppCompatActivity {
     private boolean strobo;
 
     private SoundView soundView;
-    //private AudioRecorder audioRecorder = new AudioRecorder();
 
     private Timer recordTimer = new Timer();
 
@@ -108,70 +109,65 @@ public class EditorActivity extends AppCompatActivity {
     {
         initRecorders();
 
-        // Beim Zeitlimit oder bei einer Ueberlappung keine Aufnahme starten.
-        if (getAudioRecorder() != null && getAudioRecorder().getStatus().equals(AudioRecorderStatus.STOPED) || updateRecordersOnOverlapping()) {
-            return;
-        }
-        // Clicking record while recording
-        if (recording) {
-            compositionView.activate();
-            updateRecordButton();
-            prepareRecordedSounds();
-            return;
-        }
+        Track activeTrack = builder.getActiveTrack();
+        boolean isNewRecording = startRecord();
 
-        // Clicking record while not recording
-        startRecord();
-        compositionView.deactivate();
-        handler = new Handler();
-        getAudioRecorder().create();
-        recordedSoundPath = getAudioRecorder().getRecordedFilePath();
-        recordTimer.scheduleAtFixedRate(new TimerTask() {
-            @Override
-            public void run() {
-            handler.post(new Runnable() {
+        if (isNewRecording) {
+            compositionView.deactivate();
+            handler = new Handler();
+            recordedSoundPath = activeTrack.getRecordedFilePath();
+            recordTimer.scheduleAtFixedRate(new TimerTask() {
                 @Override
                 public void run() {
-                    // do your work right here
+                    handler.post(new Runnable() {
+                        @Override
+                        public void run() {
+                            // do your work right here
 
-                    try {
-                        updateRecordAvailability();
-                        checkLimits();
-                        if (recording) { // Die Aufnahme laueft weiter, wenn man nicht pausieren moechte.
-                            layoutParams = (RelativeLayout.LayoutParams) soundView.getLayoutParams();
-                            width = width + 3;
-                            soundLength = width;
-                            layoutParams.width = width;
-                            soundView.setLayoutParams(layoutParams);
-                            int max = getAudioRecorder().getMaxAmplitude();
-                            soundView.addWave(max);
-                            Log.d(TAG, "Max Amplitude Recieved -> " + max);
-                            soundView.invalidate();
-                            builder.getCompositionView().increaseScrollPosition(3);
-                            builder.getCompositionView().increaseViewWatchPercentage(soundView.getTrack(), 0.17f);
+                            try {
+                                updateRecordAvailability();
+                                checkLimits();
+                                if (recording) { // Die Aufnahme laueft weiter, wenn man nicht pausieren moechte.
+                                    layoutParams = (RelativeLayout.LayoutParams) soundView.getLayoutParams();
+                                    width = width + 3;
+                                    soundLength = width;
+                                    layoutParams.width = width;
+                                    soundView.setLayoutParams(layoutParams);
+                                    int max = activeTrack.getMaxAmplitude();
+                                    soundView.addWave(max);
+                                    Log.d(TAG, "Max Amplitude Recieved -> " + max);
+                                    soundView.invalidate();
+                                    builder.getCompositionView().increaseScrollPosition(3);
+                                    builder.getCompositionView().increaseViewWatchPercentage(soundView.getTrack(), 0.17f);
+                                }
+
+                            } catch (SoundWillBeOutOfCompositionException e) {
+
+                            } catch (RecordTimeOutExceededException e) {
+
+                            } catch (Exception e) {
+                                //Toast.makeText(this, "30 second of recording is reached!", Toast.LENGTH_LONG).show();
+                                initRecorders();
+                            }
                         }
-
-                    } catch (SoundWillBeOutOfCompositionException e) {
-                    } catch (RecordTimeOutExceededException e) {
-                    } catch (Exception e) {
-                        //Toast.makeText(this, "30 second of recording is reached!", Toast.LENGTH_LONG).show();
-                        initRecorders();
-                    }
-                }
-            });
+                    });
                 }
             }, 0, 50);
+        }
     }
 
     private void checkLimits() throws SoundWillBeOutOfCompositionException, RecordTimeOutExceededException {
         int pos = this.compositionView.getScrollPosition();
         if((pos + builder.getSoundSecondWidth()) > builder.getTrackWidth()) {
             Toast.makeText(this, "Recording will be out of composition!", Toast.LENGTH_LONG).show();
+            builder.getActiveTrack().stopTrackRecorder(builder.getPositionInMs(soundLength));
+            prepareRecordedSounds();
             initRecorders();
             throw new SoundWillBeOutOfCompositionException();
         }
-        if (getAudioRecorder().getStatus().equals(AudioRecorderStatus.STOPED)) {
+        if (builder.getActiveTrack().getTrackRecorderStatus().equals(AudioRecorderStatus.STOPED)) {
             Toast.makeText(this, "30 second of recording is reached!", Toast.LENGTH_LONG).show();
+            prepareRecordedSounds();
             initRecorders();
             throw new RecordTimeOutExceededException();
         }
@@ -239,17 +235,30 @@ public class EditorActivity extends AppCompatActivity {
     private void initRecorders() {
         compositionView.activate();
         recordTimer.cancel();
-        stopAudioRecorder();
-        //audioRecorder = new AudioRecorder();
         recordTimer = new Timer();
         width = 0;
     }
 
-    private void startRecord() {
-        try {
-            startAudioRecorder();
+    private boolean startRecord() {
+        // Beim Zeitlimit oder bei einer Ueberlappung keine Aufnahme starten.
+        if (builder.getActiveTrack().getTrackRecorderStatus().equals(AudioRecorderStatus.STOPED) || updateRecordersOnOverlapping()) {
+            return false;
+        }
 
+        // Clicking record while recording
+        if (recording) {
+            builder.getActiveTrack().stopTrackRecorder(builder.getPositionInMs(soundLength));
+            compositionView.activate();
+            updateRecordButton();
+            prepareRecordedSounds();
+            return false;
+        }
+
+        // Clicking record while not recording
+        try {
             soundView = builder.record(this);
+            // Start recorder
+            builder.getActiveTrack().startTrackRecorder();
             RelativeLayout.LayoutParams soundParams = (RelativeLayout.LayoutParams) soundView.getLayoutParams();
             startPositionInWidth = soundParams.leftMargin;
 
@@ -259,40 +268,24 @@ public class EditorActivity extends AppCompatActivity {
         } catch (SoundWillOverlapException ex2) {
             Toast.makeText(this, "Recording will overlap with other sounds!", Toast.LENGTH_LONG).show();
             initRecorders();
+            builder.getActiveTrack().stopTrackRecorder(0);
         } catch (SoundWillBeOutOfCompositionException ex) {
             //Toast.makeText(this, "Recording will be out of composition!", Toast.LENGTH_LONG).show();
             // initRecorders();
+            builder.getActiveTrack().stopTrackRecorder(0);
         } catch (Exception ex) {
             Log.e(TAG, ex.getMessage());
             //initRecorders();
         }
         layoutParams = (RelativeLayout.LayoutParams) soundView.getLayoutParams();
+
+        return true;
     }
 
     private void prepareRecordedSounds() {
         if (recordedSoundPath != null && soundLength!=null && startPositionInWidth != null) {
-            builder.addRecordedSound(recordedSoundPath, soundLength*1000, soundView.getTrack(), startPositionInWidth);
+            builder.addRecordedSound(recordedSoundPath, soundLength, soundView.getTrack(), startPositionInWidth);
         }
     }
 
-    public AudioRecorder getAudioRecorder() {
-        if (builder == null || soundView==null) {
-            return null;
-        }
-        return builder.getTrack(soundView.getTrack()).getAudioRecorder();
-    }
-
-    public void stopAudioRecorder() {
-        AudioRecorder recorder = getAudioRecorder();
-        if (recorder != null) {
-            recorder.stop();
-        }
-    }
-
-    public void startAudioRecorder() {
-        AudioRecorder recorder = getAudioRecorder();
-        if (recorder != null) {
-            recorder.start();
-        }
-    }
 }
