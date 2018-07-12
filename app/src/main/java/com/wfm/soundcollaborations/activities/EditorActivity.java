@@ -119,12 +119,9 @@ public class EditorActivity extends AppCompatActivity {
         restartTimer();
 
         Track activeTrack = builder.getActiveTrack();
-        boolean isNewRecording = startRecord();
+        boolean isNewRecording = startRecord(activeTrack);
 
         if (isNewRecording) {
-            compositionView.deactivate();
-            handler = new Handler();
-            recordedSoundPath = activeTrack.getRecordedFilePath();
             recordTimer.scheduleAtFixedRate(new TimerTask() {
                 @Override
                 public void run() {
@@ -165,7 +162,7 @@ public class EditorActivity extends AppCompatActivity {
         }
     }
 
-    private boolean startRecord() {
+    private boolean startRecord(Track activeTrack) {
         // Beim Zeitlimit oder bei einer Ueberlappung keine Aufnahme starten.
         if (isLimitReached() || isOverlapping()) {
             return false;
@@ -181,8 +178,6 @@ public class EditorActivity extends AppCompatActivity {
         // Clicking record while not recording
         try {
             soundView = builder.record(this);
-            // Start recorder
-            builder.getActiveTrack().startTrackRecorder();
             RelativeLayout.LayoutParams soundParams = (RelativeLayout.LayoutParams) soundView.getLayoutParams();
             startPositionInWidth = soundParams.leftMargin;
             layoutParams = (RelativeLayout.LayoutParams) soundView.getLayoutParams();
@@ -191,6 +186,17 @@ public class EditorActivity extends AppCompatActivity {
 
             // disable play button
             playBtn.setEnabled(false);
+
+            // deaktiviere Cursor
+            compositionView.deactivate();
+
+            handler = new Handler();
+
+
+            // Start recorder
+            builder.getActiveTrack().startTrackRecorder();
+
+            recordedSoundPath = activeTrack.getRecordedFilePath();
 
             return true;
 
