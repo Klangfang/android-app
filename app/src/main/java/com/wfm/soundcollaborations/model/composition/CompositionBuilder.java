@@ -16,6 +16,7 @@ import com.wfm.soundcollaborations.exceptions.SoundWillOverlapException;
 import com.wfm.soundcollaborations.model.audio.AudioRecorder;
 import com.wfm.soundcollaborations.network.SoundDownloader;
 import com.wfm.soundcollaborations.tasks.VisualizeSoundTask;
+import com.wfm.soundcollaborations.utils.AudioRecorderStatus;
 import com.wfm.soundcollaborations.utils.FileUtils;
 import com.wfm.soundcollaborations.views.composition.CompositionView;
 import com.wfm.soundcollaborations.views.composition.SoundView;
@@ -240,7 +241,7 @@ public class CompositionBuilder
         if((pos + SOUND_SECOND_WIDTH) > TRACK_WIDTH)
             throw new SoundWillBeOutOfCompositionException();
 
-        isThereAnyOverlapping(pos, activeTrack);
+        isThereAnyOverlapping(pos);
 
         SoundView recordingSoundView = new SoundView(context);
         recordingSoundView.setTrack(activeTrack);
@@ -255,26 +256,16 @@ public class CompositionBuilder
         return recordingSoundView;
     }
 
-    public boolean isThereAnyOverlapping(int pos, int activeTrack) //throws SoundWillOverlapException
-    {
+    public boolean isThereAnyOverlapping(int pos) {
         int margin, width;
-        boolean overlap;
-        //for(int i=0; i<soundsViews.size(); i++)
-        for (Sound sound : msounds)
-        {
-            overlap = false;
+        int trackNumber = compositionView.getActiveTrack();
+        for (Sound sound : msounds) {
             margin = getSoundViewMargin(sound.getStartPosition());
             width = getSoundViewWidth(sound.getLength());
 
             // check one second forward
             // check if indicator above above track
-            if( (pos <= margin && (pos + SOUND_SECOND_WIDTH) >= margin) || (pos <= (margin+width) && pos >= margin))
-            {
-                overlap = true;
-            }
-
-            if(overlap && sound.getTrack() == activeTrack) {
-                //throw new SoundWillOverlapException();
+            if(sound.getTrack() == trackNumber && ((pos <= margin && (pos + SOUND_SECOND_WIDTH) >= margin) || (pos <= (margin+width) && pos >= margin))) {
                 return true;
             }
         }
@@ -339,5 +330,14 @@ public class CompositionBuilder
 
     public Track getActiveTrack() {
         return mTracks.get(compositionView.getActiveTrack());
+    }
+
+    public void stopTrackRecorder(int soundLength) {
+        getActiveTrack().stopTrackRecorder(getPositionInMs(soundLength));
+    }
+
+    public boolean isRecorderStoped() {
+       boolean isStoped = getActiveTrack().getTrackRecorderStatus().equals(AudioRecorderStatus.STOPED);
+       return isStoped;
     }
 }

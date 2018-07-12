@@ -21,7 +21,7 @@ public class AudioRecorder implements MediaRecorder.OnInfoListener
 {
     private final static String TAG = AudioRecorder.class.getSimpleName();
 
-    private static final int MAX_DURATION = /*Constants.MAX_RECORD_TIME*/ 5  * 1000;
+    private static final int MAX_DURATION = Constants.MAX_RECORD_TIME * 1000;
 
     private MediaRecorder mMediaRecorder;
     private final String SOUND_FILE_BASE_URI_DIR = FileUtils.getKlangfangCacheDirectory() + "/";
@@ -88,7 +88,9 @@ public class AudioRecorder implements MediaRecorder.OnInfoListener
                 mMediaRecorder.release();
                 mMediaRecorder = null;
                 this.filePath = null;
-                status = AudioRecorderStatus.EMPTY;
+                if (status.equals(AudioRecorderStatus.RECORDING)) {
+                    status = AudioRecorderStatus.EMPTY;
+                }
             }
         }
         catch (Exception ex)

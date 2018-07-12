@@ -165,5 +165,9 @@ public class Track
         return recorder.getMaxAmplitude();
     }
 
+    public List<Sound> getSounds() {
+        return sounds;
+    }
+
 
 }
