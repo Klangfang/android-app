@@ -9,15 +9,11 @@ import android.widget.RelativeLayout;
 
 import com.liulishuo.filedownloader.BaseDownloadTask;
 import com.liulishuo.filedownloader.FileDownloadListener;
-import com.wfm.soundcollaborations.activities.EditorActivity;
 import com.wfm.soundcollaborations.exceptions.NoActiveTrackException;
 import com.wfm.soundcollaborations.exceptions.SoundWillBeOutOfCompositionException;
-import com.wfm.soundcollaborations.exceptions.SoundWillOverlapException;
-import com.wfm.soundcollaborations.model.audio.AudioRecorder;
 import com.wfm.soundcollaborations.network.SoundDownloader;
 import com.wfm.soundcollaborations.tasks.VisualizeSoundTask;
 import com.wfm.soundcollaborations.utils.AudioRecorderStatus;
-import com.wfm.soundcollaborations.utils.FileUtils;
 import com.wfm.soundcollaborations.views.composition.CompositionView;
 import com.wfm.soundcollaborations.views.composition.SoundView;
 import com.wfm.soundcollaborations.views.composition.TrackView;
@@ -194,9 +190,6 @@ public class CompositionBuilder
                         int index = (int) task.getTag();
                         VisualizeSoundTask soundTask = new VisualizeSoundTask(soundsViews.get(index), msounds.get(index));
                         soundTask.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
-                        String name = msounds.get(index).getLink().split("/")[msounds.get(index).getLink().split("/")
-                                .length - 1];
-                        msounds.get(index).setUri(FileUtils.getKlangfangCacheDirectory()+"/"+name);
                         mTracks.get(msounds.get(index).getTrack()).addSound(msounds.get(index));
                         numberOfDownloadedSounds++;
                         if(numberOfDownloadedSounds == msounds.size()) {
@@ -225,10 +218,10 @@ public class CompositionBuilder
         this.downloader.download();
     }
 
-    private void prepareTracks()
-    {
-        for(int i=0; i<mTracks.size(); i++)
+    private void prepareTracks() {
+        for(int i=0; i<mTracks.size(); i++) {
             mTracks.get(i).prepare(this.compositionView.getContext());
+        }
     }
 
     public SoundView record(Context context) throws Exception
@@ -313,15 +306,14 @@ public class CompositionBuilder
 
     public void addRecordedSound(String soundPath, int length, int trackNumber, int startPositionInWidth) {
         // prepare new sound
-        Sound sound = new Sound(soundPath, getPositionInMs(length), trackNumber, getPositionInMs(startPositionInWidth));
-        sound.setUri(soundPath);
+        Sound sound = new Sound(soundPath, getPositionInMs(length), trackNumber, getPositionInMs(startPositionInWidth), soundPath);
 
         // delete oldTrack
         Track track = mTracks.get(trackNumber);
         mTracks.remove(trackNumber);
 
         // prepare track and save it
-        track.prepareSound(sound);
+        track.prepareSound(sound, compositionView.getContext());
         mTracks.add(trackNumber, track);
 
         mTracksTimer.updateTrack(trackNumber, track);

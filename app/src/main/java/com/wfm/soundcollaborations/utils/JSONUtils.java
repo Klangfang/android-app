@@ -29,7 +29,9 @@ public class JSONUtils
                 int length = soundObj.getInt("length");
                 int track = soundObj.getInt("track") - 1;
                 int startPosition = soundObj.getInt("start_position");
-                Sound sound = new Sound(link, length, track, startPosition);
+                String name = link.split("/")[link.split("/").length - 1];
+                String uri = FileUtils.getKlangfangCacheDirectory()+"/" + name;
+                Sound sound = new Sound(link, length, track, startPosition, uri);
                 sounds.add(sound);
             }
 

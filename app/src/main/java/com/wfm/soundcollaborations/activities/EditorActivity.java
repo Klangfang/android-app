@@ -7,7 +7,6 @@ import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
-import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.RelativeLayout;
 import android.widget.Toast;
@@ -15,20 +14,14 @@ import android.widget.Toast;
 import com.ohoussein.playpause.PlayPauseView;
 import com.wfm.soundcollaborations.R;
 import com.wfm.soundcollaborations.exceptions.NoActiveTrackException;
-import com.wfm.soundcollaborations.exceptions.RecordTimeOutExceededException;
 import com.wfm.soundcollaborations.exceptions.SoundWillBeOutOfCompositionException;
 import com.wfm.soundcollaborations.exceptions.SoundWillOverlapException;
-import com.wfm.soundcollaborations.model.audio.AudioPlayer;
-import com.wfm.soundcollaborations.model.audio.AudioRecorder;
 import com.wfm.soundcollaborations.model.composition.CompositionBuilder;
 import com.wfm.soundcollaborations.model.composition.Track;
-import com.wfm.soundcollaborations.utils.AudioRecorderStatus;
 import com.wfm.soundcollaborations.utils.JSONUtils;
 import com.wfm.soundcollaborations.views.composition.CompositionView;
 import com.wfm.soundcollaborations.views.composition.SoundView;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Timer;
 import java.util.TimerTask;
 
