@@ -1,7 +1,9 @@
 <resources>
-    <string name="app_name">Sound Collaborations</string>
+    <!-- General Strings -->
+    <string name="app_name">Klangfang</string>
     <string name="drawer_open">Öffnen</string>
     <string name="drawer_close">Schließen</string>
+    <string name="record_button">Record</string>
 
     <string-array name="drawer_items">
         <item>Record</item>

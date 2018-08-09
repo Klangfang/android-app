@@ -15,7 +15,7 @@ import com.wfm.soundcollaborations.activities.RecordActivity;
 import com.wfm.soundcollaborations.activities.SaveSoundActivity;
 import com.wfm.soundcollaborations.adapter.SoundListAdapter;
 import com.wfm.soundcollaborations.animation.PulseAnimation;
-import com.wfm.soundcollaborations.model.audio.AudioRecorder;
+import com.wfm.soundcollaborations.Editor.model.audio.AudioRecorder;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
