@@ -1,29 +1,42 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <color name="colorPrimary">#3F51B5</color>
-    <color name="colorPrimaryDark">#303F9F</color>
-    <color name="colorAccent">#FF4081</color>
-    <color name="blue">#3F51B5</color>
-    <color name="navigation">#212121</color>
-    <color name="yellow_light">#ffd813</color>
-    <color name="yellow_dark">#463C14</color>
-    <!--<color name="yellow_dark">#c7a505</color>-->
-    <color name="content_bg">#464646</color>
-    <color name="grey_light">#BDBDBD</color>
-    <color name="grey_dark">#787878</color>
-    <color name="green_light">#37dc78</color>
-    <color name="green_dark">#00462d</color>
-    <color name="red">#d15357</color>
-    <color name="toolbar_title">#fff</color>
-    <color name="toolbar_profile_title">#000</color>
-    <color name="toolbar_profile_background">#F9D737</color>
 
-    <color name="primary_yellow">#ffd813</color>
-    <color name="dark_grey">#444444</color>
-    <color name="black">#1b1b1b</color>
-    <color name="light_grey">#bebebe</color>
-    <color name="warning">#f05256</color>
-    <color name="white">#fafafa</color>
+    <!-- Klangfang Base Colors -->
+    <color name="black">#1B1B1B</color>
+    <color name="grey_dark">#444444</color>
+    <color name="grey_middle">#E0E0E0</color>
+    <color name="grey_light">#BDBDBD</color>
+    <color name="white">#FAFAFA</color>
+    <color name="red">#F05555</color>
+    <color name="yellow_dark">#B09000</color>
+    <color name="yellow_light">#FFD800</color>
+    <color name="green_dark">#2D643C</color>
+    <color name="green_light">#37DC78</color>
+
+    <!-- Primary Colors -->
+    <color name="color_primary">@color/green_light</color>
+    <color name="color_accent">@color/yellow_light</color>
+
+    <!-- Semantic Colors -->
+    <color name="color_success">@color/green_light</color>
+    <color name="color_information">@color/grey_middle</color>
+    <color name="color_warning">@color/yellow_dark</color>
+    <color name="color_error">@color/red</color>
+
+    <!-- Neutral Colors TODO Define neutral colors, such as text and background -->
+    <color name="toolbar_title">@color/white</color>
+    <color name="toolbar_profile_background">@color/yellow_light</color>
+    <color name="navigation">@color/black</color>
+    <color name="content_bg">@color/grey_dark</color>
+    <color name="toolbar_profile_title">@color/black</color>
+
+    <!-- Sound-Visualization Colors -->
+    <color name="color_my_sound">@color/yellow_light</color>
+    <color name="color_my_sound_amplitude">@color/yellow_dark</color>
+    <color name="color_other_sound">@color/green_light</color>
+    <color name="color_other_sound_amplitude">@color/green_dark</color>
+
+
 
     <array name="record_limit_colors">
         <item>#ccb9219b</item>
