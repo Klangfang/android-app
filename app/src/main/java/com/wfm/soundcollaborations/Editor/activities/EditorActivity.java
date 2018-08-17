@@ -112,6 +112,19 @@ public class EditorActivity extends AppCompatActivity {
     @OnClick(R.id.btn_record)
     public void record(final View view)
     {
+        try {
+            soundView = builder.getRecordSoundView(this);
+        } catch (NoActiveTrackException ex) {
+            Toast.makeText(this, "Please select Track!", Toast.LENGTH_LONG).show();
+        } catch (SoundWillOverlapException ex2) {
+            Toast.makeText(this, "Recording will overlap with other sounds!", Toast.LENGTH_LONG).show();
+        } catch (SoundWillBeOutOfCompositionException ex) {
+        } catch (Exception ex) {
+            Log.e(TAG, ex.getMessage());
+        }
+
+        layoutParams = (RelativeLayout.LayoutParams) soundView.getLayoutParams();
+
         restartTimer();
 
         Track activeTrack = builder.getActiveTrack();
@@ -172,42 +185,27 @@ public class EditorActivity extends AppCompatActivity {
         }
 
         // Clicking record while not recording
-        try {
-            soundView = builder.record(this);
-            RelativeLayout.LayoutParams soundParams = (RelativeLayout.LayoutParams) soundView.getLayoutParams();
-            startPositionInWidth = soundParams.leftMargin;
-            layoutParams = (RelativeLayout.LayoutParams) soundView.getLayoutParams();
+        RelativeLayout.LayoutParams soundParams = (RelativeLayout.LayoutParams) soundView.getLayoutParams();
+        startPositionInWidth = soundParams.leftMargin;
+        layoutParams = (RelativeLayout.LayoutParams) soundView.getLayoutParams();
 
-            recording = true;
+        recording = true;
 
-            // disable play button
-            playBtn.setEnabled(false);
+        // disable play button
+        playBtn.setEnabled(false);
 
-            // deaktiviere Cursor
-            compositionView.deactivate();
+        // deaktiviere Cursor
+        compositionView.deactivate();
 
-            handler = new Handler();
+        handler = new Handler();
 
 
-            // Start recorder
-            builder.getActiveTrack().startTrackRecorder();
+        // Start recorder
+        builder.getActiveTrack().startTrackRecorder();
 
-            recordedSoundPath = activeTrack.getRecordedFilePath();
+        recordedSoundPath = activeTrack.getRecordedFilePath();
 
-            return true;
-
-        } catch (NoActiveTrackException ex) {
-            Toast.makeText(this, "Please select Track!", Toast.LENGTH_LONG).show();
-        } catch (SoundWillOverlapException ex2) {
-            Toast.makeText(this, "Recording will overlap with other sounds!", Toast.LENGTH_LONG).show();
-        } catch (SoundWillBeOutOfCompositionException ex) {
-        } catch (Exception ex) {
-            Log.e(TAG, ex.getMessage());
-        }
-
-        // Bei Fehlern
-        stopRecording();
-        return false;
+        return true;
     }
 
     private boolean isLimitReached() {
@@ -244,7 +242,9 @@ public class EditorActivity extends AppCompatActivity {
 
     private void checkRecordLimit() {
         if (isLimitReached() || isOverlapping()) {
-            stopRecording();
+            if (recording) {
+                stopRecording();
+            }
         }
 
         strobo = !strobo;
@@ -262,13 +262,16 @@ public class EditorActivity extends AppCompatActivity {
         // Aufgenommenen Sound zum Track hinzufuegen
 
         // Reactivate scrolling
-        compositionView.activate();
+        //compositionView.activate();
 
-        // set recoriding flag
+        // set recording flag
         recording = false;
 
         // enable play button again
         playBtn.setEnabled(true);
+
+        layoutParams = null;
+
     }
 
     private void restartTimer() {

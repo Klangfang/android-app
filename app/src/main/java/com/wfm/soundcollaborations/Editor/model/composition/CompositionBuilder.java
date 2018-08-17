@@ -224,7 +224,7 @@ public class CompositionBuilder
         }
     }
 
-    public SoundView record(Context context) throws Exception
+    public SoundView getRecordSoundView(Context context) throws Exception
     {
         int activeTrack = this.compositionView.getActiveTrack();
         if( activeTrack == -1)
