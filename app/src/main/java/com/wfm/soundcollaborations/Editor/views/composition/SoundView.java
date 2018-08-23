@@ -104,6 +104,9 @@ public class SoundView extends View
     public void reset()
     {
         this.waves.clear();
+        waves = null;
+        getLayoutParams().width = 0;
+        init();
         invalidate();
     }
 
@@ -126,6 +129,11 @@ public class SoundView extends View
     public void setYellowBackground()
     {
         rectPaint.setColor(Color.rgb(0xF9, 0xD7, 0x37));
+        invalidate();
+    }
+
+    public void setBlackBackground() {
+        rectPaint.setColor(Color.rgb(15, 15, 15));
         invalidate();
     }
 }

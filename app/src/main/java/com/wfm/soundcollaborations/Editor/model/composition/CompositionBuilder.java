@@ -2,7 +2,9 @@ package com.wfm.soundcollaborations.Editor.model.composition;
 
 
 import android.content.Context;
+import android.content.DialogInterface;
 import android.os.AsyncTask;
+import android.support.v7.app.AlertDialog;
 import android.util.Log;
 import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
@@ -40,11 +42,11 @@ public class CompositionBuilder
     private ArrayList<TrackView> tracksViews;
     private ArrayList<SoundView> soundsViews;
 
-    private ArrayList<Sound> msounds;
+    private ArrayList<Sound> downloadedSounds;
     private SoundDownloader downloader;
 
     private int numberOfDownloadedSounds = 0;
-    private ArrayList<Track> mTracks;
+    private ArrayList<Track> tracks;
 
     private TracksTimer mTracksTimer;
     private boolean playing = false;
@@ -54,8 +56,8 @@ public class CompositionBuilder
         this.compositionView = compositionView;
         tracksViews = new ArrayList<>();
         soundsViews = new ArrayList<>();
-        msounds = new ArrayList<>();
-        mTracks = new ArrayList<>();
+        downloadedSounds = new ArrayList<>();
+        this.tracks = new ArrayList<>();
         initTracksViews(tracks);
         initTracks(tracks);
     }
@@ -74,14 +76,14 @@ public class CompositionBuilder
         for(int i=0; i<tracks; i++)
         {
             Track track = new Track();
-            mTracks.add(track);
+            this.tracks.add(track);
         }
-        mTracksTimer = new TracksTimer(mTracks, this.compositionView);
+        mTracksTimer = new TracksTimer(this.tracks, this.compositionView);
     }
 
     public void addSounds(List<Sound> sounds)
     {
-        msounds.addAll(sounds);
+        downloadedSounds.addAll(sounds);
         for(int i=0; i<sounds.size(); i++)
         {
             // create sounds view
@@ -188,11 +190,11 @@ public class CompositionBuilder
                     {
                         task.reuse();
                         int index = (int) task.getTag();
-                        VisualizeSoundTask soundTask = new VisualizeSoundTask(soundsViews.get(index), msounds.get(index));
+                        VisualizeSoundTask soundTask = new VisualizeSoundTask(soundsViews.get(index), downloadedSounds.get(index));
                         soundTask.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
-                        mTracks.get(msounds.get(index).getTrack()).addSound(msounds.get(index));
+                        tracks.get(downloadedSounds.get(index).getTrack()).addSound(downloadedSounds.get(index));
                         numberOfDownloadedSounds++;
-                        if(numberOfDownloadedSounds == msounds.size()) {
+                        if(numberOfDownloadedSounds == downloadedSounds.size()) {
                             prepareTracks();
                         }
                     }
@@ -212,15 +214,15 @@ public class CompositionBuilder
 
                     }
                 });
-        for(int i=0; i<msounds.size(); i++)
-            this.downloader.addSoundUrl(msounds.get(i).getLink(), i);
+        for(int i = 0; i< downloadedSounds.size(); i++)
+            this.downloader.addSoundUrl(downloadedSounds.get(i).getLink(), i);
 
         this.downloader.download();
     }
 
     private void prepareTracks() {
-        for(int i=0; i<mTracks.size(); i++) {
-            mTracks.get(i).prepare(this.compositionView.getContext());
+        for(int i = 0; i< tracks.size(); i++) {
+            tracks.get(i).prepare(this.compositionView.getContext());
         }
     }
 
@@ -244,15 +246,45 @@ public class CompositionBuilder
         recordingSoundView.setLayoutParams(soundParams);
         recordingSoundView.setYellowBackground();
 
+        recordingSoundView.setOnLongClickListener(clickView -> {
+            recordingSoundView.animate();
+            Log.v("long clicked","pos: " + clickView.getX());
+            askForSoundDelete(recordingSoundView, clickView.getX(), context);
+            return true;
+        });
+
         tracksViews.get(activeTrack).addSoundView(recordingSoundView);
 
         return recordingSoundView;
     }
 
+    private void askForSoundDelete(SoundView soundView, float xPosition, Context context) {
+        DialogInterface.OnClickListener dialogClickListener = new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                switch (which){
+                    case DialogInterface.BUTTON_POSITIVE:
+                        //Yes button clicked
+                        int soundLength = deleteSound(soundView.getTrack(), xPosition);
+                        deleteSoundView(soundView, soundLength);
+                        break;
+
+                    case DialogInterface.BUTTON_NEGATIVE:
+                        //No button clicked
+                        break;
+                }
+            }
+        };
+
+        AlertDialog.Builder builder = new AlertDialog.Builder(context);
+        builder.setMessage("Möchten Sie diesen Sound löschen?").setPositiveButton("Ja", dialogClickListener)
+                .setNegativeButton("Nein", dialogClickListener).show();
+    }
+
     public boolean isThereAnyOverlapping(int pos) {
         int margin, width;
         int trackNumber = compositionView.getActiveTrack();
-        for (Sound sound : msounds) {
+        for (Sound sound : tracks.get(trackNumber).getSounds()) {
             margin = getSoundViewMargin(sound.getStartPosition());
             width = getSoundViewWidth(sound.getLength());
 
@@ -309,19 +341,19 @@ public class CompositionBuilder
         Sound sound = new Sound(soundPath, getPositionInMs(length), trackNumber, getPositionInMs(startPositionInWidth), soundPath);
 
         // delete oldTrack
-        Track track = mTracks.get(trackNumber);
-        mTracks.remove(trackNumber);
+        Track track = tracks.get(trackNumber);
+        tracks.remove(trackNumber);
 
         // prepare track and save it
         track.prepareSound(sound, compositionView.getContext());
-        mTracks.add(trackNumber, track);
+        tracks.add(trackNumber, track);
 
-        mTracksTimer.updateTrack(trackNumber, track);
+        mTracksTimer.updateTrack(trackNumber, track); //TODO noch brauchbar??!
     }
 
 
     public Track getActiveTrack() {
-        return mTracks.get(compositionView.getActiveTrack());
+        return tracks.get(compositionView.getActiveTrack());
     }
 
     public void stopTrackRecorder(int soundLength) {
@@ -331,5 +363,29 @@ public class CompositionBuilder
     public boolean isRecorderStoped() {
        boolean isStoped = getActiveTrack().getTrackRecorderStatus().equals(AudioRecorderStatus.STOPED);
        return isStoped;
+    }
+
+    public int deleteSound(int trackNumber, float xPosition) {
+        Track track = tracks.get(trackNumber);
+        tracks.remove(trackNumber);
+        List<Sound> copySounds = new ArrayList<>(track.getSounds());
+        Sound soundToDelete = null;
+        for (Sound sound : copySounds) {
+            int startPos = getSoundViewWidth(sound.getStartPosition());
+            int endPos = startPos + getSoundViewWidth(sound.getLength());
+            if (startPos <= xPosition && endPos >= xPosition) {
+                soundToDelete = sound;
+                break;
+            }
+        }
+        track.deleteSound(soundToDelete);
+        tracks.add(track);
+        return soundToDelete.getLength();
+    }
+
+    public void deleteSoundView(SoundView soundView, int soundLengthInMs) {
+        int soundLengthInWidth = getSoundViewWidth(soundLengthInMs);
+        compositionView.updateTrackView(soundView, soundLengthInWidth / 3 * 0.17f);        //TODO diese geheime Zahl genau checken!
+        tracksViews.get(soundView.getTrack()).deleteSoundView(soundView);
     }
 }

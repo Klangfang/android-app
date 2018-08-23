@@ -79,4 +79,6 @@ public class TrackView extends LinearLayout
     {
         soundsHolderLayout.addView(soundView);
     }
+
+    public void deleteSoundView(SoundView soundView) { soundsHolderLayout.removeView(soundView);}
 }

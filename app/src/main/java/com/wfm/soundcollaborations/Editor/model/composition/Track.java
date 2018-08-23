@@ -88,4 +88,11 @@ public class Track
         return recorder.getMaxAmplitude();
     }
 
+    public List<Sound> getSounds() {
+        return sounds;
+    }
+
+    public void deleteSound(Sound soundToDelete) {
+        sounds.remove(soundToDelete);
+    }
 }

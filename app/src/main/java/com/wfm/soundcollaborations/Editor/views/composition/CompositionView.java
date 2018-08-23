@@ -103,6 +103,16 @@ public class CompositionView extends LinearLayout
         holderScrollView.setOverScrollMode(View.OVER_SCROLL_NEVER);
     }
 
+    public void addSoundView(SoundView soundView) {
+       // int trackNumber = soundView.getTrack();
+       // TrackView trackView = tracksViews.remove(trackNumber);
+       // tracksViewsHolder.removeView(trackView);
+       // trackView.addSoundView(soundView);
+       // tracksViewsHolder.addView(trackView);
+       // tracksViews.add(trackNumber, trackView);
+    }
+
+
     public void addTrackView(TrackWatchView trackWatchView, TrackView trackView)
     {
         // add watch view
@@ -113,6 +123,15 @@ public class CompositionView extends LinearLayout
         tracksViews.add(trackView);
     }
 
+    public void updateTrackView(SoundView soundView, float percentage) {
+        int trackNumber = soundView.getTrack();
+        TrackView trackView = tracksViews.get(trackNumber);
+        tracksViewsHolder.removeView(trackView);
+        trackView.deleteSoundView(soundView);
+        tracksViewsHolder.addView(trackView);
+        //tracksViews.add(trackNumber, trackView);
+        decreaseViewWatchPercentage(trackNumber, percentage);
+    }
 
     public void activateTrack(int index)
     {
@@ -177,6 +196,11 @@ public class CompositionView extends LinearLayout
             throw new SoundWillBeOutOfCompositionException();
         }
         this.tracksWatchViews.get(trackNumber).increasePercentage(percentage);
+    }
+
+    public void decreaseViewWatchPercentage(int trackNumber, float percentage)
+    {
+        this.tracksWatchViews.get(trackNumber).decreasePercentage(percentage);
     }
 
     public boolean isTrackWatchPercentageFull(int trackNumber) {

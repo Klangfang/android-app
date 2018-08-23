@@ -1,8 +1,10 @@
 package com.wfm.soundcollaborations.Editor.activities;
 
+import android.content.DialogInterface;
 import android.os.Build;
 import android.os.Handler;
 import android.support.annotation.RequiresApi;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
@@ -244,6 +246,7 @@ public class EditorActivity extends AppCompatActivity {
         if (isLimitReached() || isOverlapping()) {
             if (recording) {
                 stopRecording();
+                prepareRecordedSounds();
             }
         }
 

@@ -88,6 +88,14 @@ public class TrackWatchView extends View
         invalidate();
     }
 
+    public void decreasePercentage(float percentage) {
+        this.percentage -=  percentage;
+        if (this.percentage < 0) {
+            this.percentage = 0;
+        }
+        invalidate();
+    }
+
     public void activate()
     {
         innerCirclePaint.setColor(Color.WHITE);
@@ -105,4 +113,5 @@ public class TrackWatchView extends View
     public float getPercentage() {
         return percentage;
     }
+
 }
