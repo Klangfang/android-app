@@ -1,6 +1,27 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
+    <!-- README
+
+    KLANGFANG BASE COLORS are the color-foundation of the app.
+
+    - When to use: Reference them inside Klangfang Job Colors.
+    - When NOT to use: Never use them inside code or layout files. Use Klangfang Job Colors for this purpose.
+    - How to name them: "variation_colorname" for example light_grey
+    - Specify as HEX values
+
+
+    KLANGFANG TASK COLORS are colors tied to a specific task, eg. primary buttons, headlines, etc.
+    They are divided into various categories, like primary colors, semantic colors and so on.
+
+    - When to use: Use them in layout files or inside code.
+    - When NOT to use: Always use them!
+    - How to name them: No colornames like "green". Use names that specify the task, like "success_color"
+    - Specify using Klangfang Base Colors
+
+    Please never hardcode colors!
+    -->
+
     <!-- Klangfang Base Colors -->
     <color name="black">#1B1B1B</color>
     <color name="grey_dark">#444444</color>
@@ -12,6 +33,9 @@
     <color name="yellow_light">#FFD800</color>
     <color name="green_dark">#2D643C</color>
     <color name="green_light">#37DC78</color>
+
+
+    <!-- KLANGFANG TASK COLORS -->
 
     <!-- Primary Colors -->
     <color name="color_primary">@color/green_light</color>
@@ -25,7 +49,6 @@
 
     <!-- Neutral Colors TODO Define neutral colors, such as text and background -->
     <color name="toolbar_title">@color/white</color>
-    <color name="toolbar_profile_background">@color/yellow_light</color>
     <color name="navigation">@color/black</color>
     <color name="content_bg">@color/grey_dark</color>
     <color name="toolbar_profile_title">@color/black</color>
@@ -36,12 +59,4 @@
     <color name="color_other_sound">@color/green_light</color>
     <color name="color_other_sound_amplitude">@color/green_dark</color>
 
-
-
-    <array name="record_limit_colors">
-        <item>#ccb9219b</item>
-        <item>#cc257397</item>
-        <item>#ccdeb531</item>
-        <item>#cc45de31</item>
-    </array>
 </resources>

@@ -55,7 +55,7 @@ public class ProfileFragment extends Fragment
         if(toolbar != null)
         {
             toolbar.setTitleTextColor(getResources().getColor(R.color.toolbar_profile_title));
-            toolbar.setBackgroundColor(getResources().getColor(R.color.toolbar_profile_background));
+            toolbar.setBackgroundColor(getResources().getColor(R.color.color_primary));
             setHasOptionsMenu(true);
         }
     }
