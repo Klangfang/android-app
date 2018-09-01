@@ -18,22 +18,43 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:paddingTop="20dp"
-        />
+        >
 
-    <Button
-        android:id="@+id/btn_record"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="@string/record_button" />
+    </com.wfm.soundcollaborations.Editor.views.composition.CompositionView>
 
-    <com.ohoussein.playpause.PlayPauseView
-        android:id="@+id/btn_play"
+    <android.support.constraint.ConstraintLayout
         android:layout_width="match_parent"
-        android:layout_height="50dp"
-        android:clickable="true"
-        android:focusable="true"
-        android:foreground="?android:selectableItemBackground"
-        app:fill_color="@color/white"
-        app:pause_bg="@color/black"
-        app:play_bg="@color/black" />
+        android:layout_height="0dp"
+        android:layout_weight="1">
+
+        <Button
+            android:id="@+id/btn_record"
+            android:layout_width="wrap_content"
+            android:layout_height="48dp"
+            android:layout_marginBottom="32dp"
+            android:layout_marginEnd="8dp"
+            android:layout_marginLeft="8dp"
+            android:layout_marginRight="8dp"
+            android:layout_marginStart="8dp"
+            android:text="@string/record_button"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent" />
+
+        <com.ohoussein.playpause.PlayPauseView
+            android:id="@+id/btn_play"
+            android:layout_width="wrap_content"
+            android:layout_height="48dp"
+            android:clickable="true"
+            android:focusable="true"
+            android:foreground="?android:selectableItemBackground"
+            app:fill_color="@color/white"
+            app:layout_constraintBottom_toBottomOf="@+id/btn_record"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toEndOf="@+id/btn_record"
+            app:layout_constraintTop_toTopOf="@+id/btn_record"
+            app:pause_bg="@color/black"
+            app:play_bg="@color/black" />
+    </android.support.constraint.ConstraintLayout>
+
 </LinearLayout>
