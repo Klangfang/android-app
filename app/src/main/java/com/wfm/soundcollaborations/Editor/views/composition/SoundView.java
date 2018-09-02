@@ -10,6 +10,8 @@ import android.graphics.drawable.ColorDrawable;
 import android.util.AttributeSet;
 import android.view.View;
 
+import com.wfm.soundcollaborations.R;
+
 import java.util.ArrayList;
 
 /**
@@ -125,7 +127,7 @@ public class SoundView extends View
 
     public void setYellowBackground()
     {
-        rectPaint.setColor(Color.rgb(0xF9, 0xD7, 0x37));
+        rectPaint.setColor(getResources().getColor(R.color.color_my_sound));
         invalidate();
     }
 }
