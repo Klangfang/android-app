@@ -1,5 +1,6 @@
 package com.wfm.soundcollaborations.Editor.activities;
 
+import android.content.Context;
 import android.content.DialogInterface;
 import android.os.Build;
 import android.os.Handler;
@@ -14,6 +15,7 @@ import android.widget.RelativeLayout;
 import android.widget.Toast;
 
 import com.ohoussein.playpause.PlayPauseView;
+import com.wfm.soundcollaborations.Editor.model.composition.Sound;
 import com.wfm.soundcollaborations.Editor.model.composition.Track;
 import com.wfm.soundcollaborations.R;
 import com.wfm.soundcollaborations.Editor.exceptions.NoActiveTrackException;
@@ -27,6 +29,8 @@ import com.wfm.soundcollaborations.Editor.utils.JSONUtils;
 import com.wfm.soundcollaborations.Editor.views.composition.CompositionView;
 import com.wfm.soundcollaborations.Editor.views.composition.SoundView;
 
+import java.util.List;
+import java.util.Map;
 import java.util.Timer;
 import java.util.TimerTask;
 
@@ -51,6 +55,9 @@ public class EditorActivity extends AppCompatActivity {
     private SoundView soundView;
 
     private Timer recordTimer = new Timer();
+
+    @BindView(R.id.btn_delete)
+    Button deletedBtn;
 
     @BindView(R.id.btn_record)
     Button recordBtn;
@@ -100,6 +107,54 @@ public class EditorActivity extends AppCompatActivity {
         // when all sounds are loaded the Composition will be ready to play the sounds
         builder = new CompositionBuilder(compositionView, 4);
         builder.addSounds(JSONUtils.getSounds(jsonData));
+
+        deletedBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                askForSoundDelete(view.getContext());
+            }
+        });
+    }
+
+    private void askForSoundDelete(Context context) {
+        DialogInterface.OnClickListener dialogClickListener = new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                switch (which){
+                    case DialogInterface.BUTTON_POSITIVE:
+                        //Yes button clicked
+                        Map<SoundView, Integer> soundLengths = builder.deleteSounds();
+                        builder.deleteSoundView(soundLengths);
+                        deletedBtn.setEnabled(false);
+                        break;
+
+                    case DialogInterface.BUTTON_NEGATIVE:
+                        //No button clicked
+                        break;
+                }
+            }
+        };
+
+        AlertDialog.Builder builder = new AlertDialog.Builder(context);
+        builder.setMessage("Möchten Sie diesen Sound löschen?").setPositiveButton("Ja", dialogClickListener)
+                .setNegativeButton("Nein", dialogClickListener).show();
+    }
+
+    private void selectSound(SoundView soundView, float xPosition, Context context) {
+        Sound selectedSound = null;
+        for (Sound sound : builder.getActiveTrack().getSounds()) {
+            int startPos = builder.getSoundViewWidth(sound.getStartPosition());
+            int endPos = startPos + builder.getSoundViewWidth(sound.getLength());
+            if (startPos <= xPosition && endPos >= xPosition) {
+                selectedSound = sound;
+                break;
+            }
+        }
+
+        if (selectedSound != null) {
+            builder.soundsToDelete.put(soundView, selectedSound);
+            deletedBtn.setEnabled(true);
+        }
     }
 
     @RequiresApi(api = Build.VERSION_CODES.JELLY_BEAN_MR1)
@@ -116,6 +171,13 @@ public class EditorActivity extends AppCompatActivity {
     {
         try {
             soundView = builder.getRecordSoundView(this);
+            soundView.setOnLongClickListener(clickView -> {
+                soundView.setActiveSoundColor();
+                Log.v("long clicked","pos: " + clickView.getX());
+                selectSound(soundView, clickView.getX(), soundView.getContext());
+                //TODO if not selectedsounds exists then deactivate delete button
+                return true;
+            });
         } catch (NoActiveTrackException ex) {
             Toast.makeText(this, "Please select Track!", Toast.LENGTH_LONG).show();
         } catch (SoundWillOverlapException ex2) {

@@ -6,6 +6,7 @@ import android.content.DialogInterface;
 import android.os.AsyncTask;
 import android.support.v7.app.AlertDialog;
 import android.util.Log;
+import android.widget.Button;
 import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 
@@ -22,9 +23,14 @@ import com.wfm.soundcollaborations.Editor.views.composition.TrackView;
 import com.wfm.soundcollaborations.Editor.views.composition.TrackWatchView;
 import com.wfm.soundcollaborations.Editor.views.composition.listeners.TrackViewOnClickListener;
 import com.wfm.soundcollaborations.Editor.views.composition.listeners.TrackWatchViewOnClickListener;
+import com.wfm.soundcollaborations.R;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+
+import butterknife.BindView;
 
 /**
  * Created by mohammed on 10/29/17.
@@ -50,6 +56,8 @@ public class CompositionBuilder
 
     private TracksTimer mTracksTimer;
     private boolean playing = false;
+
+    public Map<SoundView, Sound> soundsToDelete = new HashMap<>();
 
     public CompositionBuilder(CompositionView compositionView, int tracks)
     {
@@ -103,7 +111,7 @@ public class CompositionBuilder
         downloadSounds();
     }
 
-    private int getSoundViewWidth(int lengthInMs)
+    public int getSoundViewWidth(int lengthInMs)
     {
         int width = 0;
         width += (lengthInMs / 1000) * SOUND_SECOND_WIDTH;
@@ -246,39 +254,9 @@ public class CompositionBuilder
         recordingSoundView.setLayoutParams(soundParams);
         recordingSoundView.setYellowBackground();
 
-        recordingSoundView.setOnLongClickListener(clickView -> {
-            recordingSoundView.animate();
-            Log.v("long clicked","pos: " + clickView.getX());
-            askForSoundDelete(recordingSoundView, clickView.getX(), context);
-            return true;
-        });
-
         tracksViews.get(activeTrack).addSoundView(recordingSoundView);
 
         return recordingSoundView;
-    }
-
-    private void askForSoundDelete(SoundView soundView, float xPosition, Context context) {
-        DialogInterface.OnClickListener dialogClickListener = new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialog, int which) {
-                switch (which){
-                    case DialogInterface.BUTTON_POSITIVE:
-                        //Yes button clicked
-                        int soundLength = deleteSound(soundView.getTrack(), xPosition);
-                        deleteSoundView(soundView, soundLength);
-                        break;
-
-                    case DialogInterface.BUTTON_NEGATIVE:
-                        //No button clicked
-                        break;
-                }
-            }
-        };
-
-        AlertDialog.Builder builder = new AlertDialog.Builder(context);
-        builder.setMessage("Möchten Sie diesen Sound löschen?").setPositiveButton("Ja", dialogClickListener)
-                .setNegativeButton("Nein", dialogClickListener).show();
     }
 
     public boolean isThereAnyOverlapping(int pos) {
@@ -365,27 +343,22 @@ public class CompositionBuilder
        return isStoped;
     }
 
-    public int deleteSound(int trackNumber, float xPosition) {
-        Track track = tracks.get(trackNumber);
-        tracks.remove(trackNumber);
-        List<Sound> copySounds = new ArrayList<>(track.getSounds());
-        Sound soundToDelete = null;
-        for (Sound sound : copySounds) {
-            int startPos = getSoundViewWidth(sound.getStartPosition());
-            int endPos = startPos + getSoundViewWidth(sound.getLength());
-            if (startPos <= xPosition && endPos >= xPosition) {
-                soundToDelete = sound;
-                break;
-            }
-        }
-        track.deleteSound(soundToDelete);
-        tracks.add(track);
-        return soundToDelete.getLength();
+    public Map<SoundView, Integer> deleteSounds() {
+        Map<SoundView, Integer> soundLengths = new HashMap<>();
+        Track track = getActiveTrack();
+        soundsToDelete.forEach((soundView, sound) -> {
+            track.deleteSound(sound);
+            tracks.add(track);
+            soundLengths.put(soundView, sound.getLength());
+        });
+        return soundLengths;
     }
 
-    public void deleteSoundView(SoundView soundView, int soundLengthInMs) {
-        int soundLengthInWidth = getSoundViewWidth(soundLengthInMs);
-        compositionView.updateTrackView(soundView, soundLengthInWidth / 3 * 0.17f);        //TODO diese geheime Zahl genau checken!
-        tracksViews.get(soundView.getTrack()).deleteSoundView(soundView);
+    public void deleteSoundView(Map<SoundView, Integer> soundInfo) {
+        soundInfo.forEach((soundView, soundLengthInMs) -> {
+            int soundLengthInWidth = getSoundViewWidth(soundLengthInMs);
+            compositionView.updateTrackView(soundView, soundLengthInWidth / 3 * 0.17f);        //TODO diese geheime Zahl genau checken!
+            tracksViews.get(soundView.getTrack()).deleteSoundView(soundView);
+        });
     }
 }

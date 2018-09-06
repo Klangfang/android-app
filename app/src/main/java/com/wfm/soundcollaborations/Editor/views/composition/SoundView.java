@@ -134,8 +134,8 @@ public class SoundView extends View
         invalidate();
     }
 
-    public void setBlackBackground() {
-        rectPaint.setColor(Color.rgb(15, 15, 15));
+    public void setActiveSoundColor() {
+        setBackgroundColor(getResources().getColor(R.color.color_warning)); // where myColor is your variable to use for this layer.
         invalidate();
     }
 }
