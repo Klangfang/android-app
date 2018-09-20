@@ -108,30 +108,22 @@ public class EditorActivity extends AppCompatActivity {
         builder = new CompositionBuilder(compositionView, 4);
         builder.addSounds(JSONUtils.getSounds(jsonData));
 
-        deletedBtn.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                askForSoundDelete(view.getContext());
-            }
-        });
+        deletedBtn.setOnClickListener(view -> deleteConfirmation(view.getContext()));
     }
 
-    private void askForSoundDelete(Context context) {
-        DialogInterface.OnClickListener dialogClickListener = new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialog, int which) {
-                switch (which){
-                    case DialogInterface.BUTTON_POSITIVE:
-                        //Yes button clicked
-                        Map<SoundView, Integer> soundLengths = builder.deleteSounds();
-                        builder.deleteSoundView(soundLengths);
-                        deletedBtn.setEnabled(false);
-                        break;
+    private void deleteConfirmation(Context context) {
+        DialogInterface.OnClickListener dialogClickListener = (dialog, which) -> {
+            switch (which){
+                case DialogInterface.BUTTON_POSITIVE:
+                    //Yes button clicked
+                    Map<SoundView, Integer> soundLengths = builder.deleteSounds();
+                    builder.deleteSoundView(soundLengths);
+                    deletedBtn.setEnabled(false);
+                    break;
 
-                    case DialogInterface.BUTTON_NEGATIVE:
-                        //No button clicked
-                        break;
-                }
+                case DialogInterface.BUTTON_NEGATIVE:
+                    //No button clicked
+                    break;
             }
         };
 
@@ -140,21 +132,9 @@ public class EditorActivity extends AppCompatActivity {
                 .setNegativeButton("Nein", dialogClickListener).show();
     }
 
-    private void selectSound(SoundView soundView, float xPosition, Context context) {
-        Sound selectedSound = null;
-        for (Sound sound : builder.getActiveTrack().getSounds()) {
-            int startPos = builder.getSoundViewWidth(sound.getStartPosition());
-            int endPos = startPos + builder.getSoundViewWidth(sound.getLength());
-            if (startPos <= xPosition && endPos >= xPosition) {
-                selectedSound = sound;
-                break;
-            }
-        }
-
-        if (selectedSound != null) {
-            builder.soundsToDelete.put(soundView, selectedSound);
-            deletedBtn.setEnabled(true);
-        }
+    private void selectSound(float xPosition) {
+       Sound sound = builder.selectSound(xPosition);
+       deletedBtn.setEnabled(sound != null);
     }
 
     @RequiresApi(api = Build.VERSION_CODES.JELLY_BEAN_MR1)
@@ -169,13 +149,26 @@ public class EditorActivity extends AppCompatActivity {
     @OnClick(R.id.btn_record)
     public void record(final View view)
     {
+        // Beim Zeitlimit oder bei einer Ueberlappung keine Aufnahme starten.
+        if (isLimitReached() || isOverlapping()) {
+            return;
+        }
+
+        // Clicking record while recording
+        if (recording) {
+            stopRecording();
+            prepareRecordedSounds();
+            return;
+        }
+
         try {
             soundView = builder.getRecordSoundView(this);
             soundView.setOnLongClickListener(clickView -> {
-                soundView.setActiveSoundColor();
-                Log.v("long clicked","pos: " + clickView.getX());
-                selectSound(soundView, clickView.getX(), soundView.getContext());
-                //TODO if not selectedsounds exists then deactivate delete button
+                float xPosition = clickView.getX();
+                Log.v("long clicked","pos: " + xPosition);
+                selectSound(xPosition);
+                clickView.setBackgroundResource(R.color.red);
+                clickView.invalidate();
                 return true;
             });
         } catch (NoActiveTrackException ex) {
@@ -236,17 +229,6 @@ public class EditorActivity extends AppCompatActivity {
     }
 
     private boolean startRecord(Track activeTrack) {
-        // Beim Zeitlimit oder bei einer Ueberlappung keine Aufnahme starten.
-        if (isLimitReached() || isOverlapping()) {
-            return false;
-        }
-
-        // Clicking record while recording
-        if (recording) {
-            stopRecording();
-            prepareRecordedSounds();
-            return false;
-        }
 
         // Clicking record while not recording
         RelativeLayout.LayoutParams soundParams = (RelativeLayout.LayoutParams) soundView.getLayoutParams();
@@ -348,7 +330,7 @@ public class EditorActivity extends AppCompatActivity {
 
     private void prepareRecordedSounds() {
         if (recordedSoundPath != null && soundLength!=null && startPositionInWidth != null) {
-            builder.addRecordedSound(recordedSoundPath, soundLength, soundView.getTrack(), startPositionInWidth);
+            builder.addRecordedSound(recordedSoundPath, soundLength, soundView.getTrack(), startPositionInWidth, soundView);
         }
     }
 

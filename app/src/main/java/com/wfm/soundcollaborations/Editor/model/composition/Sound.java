@@ -4,6 +4,9 @@ import android.content.Context;
 import android.util.Log;
 
 import com.wfm.soundcollaborations.Editor.model.audio.AudioPlayer;
+import com.wfm.soundcollaborations.Editor.views.composition.SoundView;
+
+import java.util.Date;
 
 /**
  * Created by mohammed on 10/27/17.
@@ -19,9 +22,20 @@ public class Sound
     private int track;
     private int startPosition;
     private AudioPlayer player;
+    private SoundView soundView;
 
     public Sound(String link, int length, int track, int startPosition, String uri)
     {
+       initSound(link, length, track, startPosition, uri);
+    }
+
+    public Sound(String link, int length, int track, int startPosition, String uri, SoundView soundView)
+    {
+        initSound(link, length, track, startPosition, uri);
+        this.soundView = soundView;
+    }
+
+    private void initSound(String link, int length, int track, int startPosition, String uri) {
         this.link = link;
         this.length = length;
         this.track = track;
@@ -114,5 +128,9 @@ public class Sound
         if(this.uri.isEmpty())
             throw new NullPointerException("No Uri found for the sound file!");
         return this.uri;
+    }
+
+    public SoundView getSoundView() {
+        return soundView;
     }
 }

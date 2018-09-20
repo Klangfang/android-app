@@ -22,6 +22,8 @@ public class SoundView extends View
 {
     private static final String TAG = SoundView.class.getSimpleName();
 
+    private long soundId;
+
     private Paint linePaint;
     private ArrayList<Integer> waves;
     private int track = -1;
@@ -137,5 +139,9 @@ public class SoundView extends View
     public void setActiveSoundColor() {
         setBackgroundColor(getResources().getColor(R.color.color_warning)); // where myColor is your variable to use for this layer.
         invalidate();
+    }
+
+    public void setSoundId(long soundId) {
+        this.soundId = soundId;
     }
 }

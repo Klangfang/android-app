@@ -123,14 +123,17 @@ public class CompositionView extends LinearLayout
         tracksViews.add(trackView);
     }
 
-    public void updateTrackView(SoundView soundView, float percentage) {
+    public void deleteSoundView(SoundView soundView, float percentage) {
         int trackNumber = soundView.getTrack();
+        // Delete Sound View from Track View
         TrackView trackView = tracksViews.get(trackNumber);
         tracksViewsHolder.removeView(trackView);
         trackView.deleteSoundView(soundView);
         tracksViewsHolder.addView(trackView);
         //tracksViews.add(trackNumber, trackView);
-        decreaseViewWatchPercentage(trackNumber, percentage);
+
+        // Decrease Track Watch Percentage
+        decreaseTrackWatchPercentage(trackNumber, percentage);
     }
 
     public void activateTrack(int index)
@@ -198,7 +201,7 @@ public class CompositionView extends LinearLayout
         this.tracksWatchViews.get(trackNumber).increasePercentage(percentage);
     }
 
-    public void decreaseViewWatchPercentage(int trackNumber, float percentage)
+    public void decreaseTrackWatchPercentage(int trackNumber, float percentage)
     {
         this.tracksWatchViews.get(trackNumber).decreasePercentage(percentage);
     }

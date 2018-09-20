@@ -2,11 +2,8 @@ package com.wfm.soundcollaborations.Editor.model.composition;
 
 
 import android.content.Context;
-import android.content.DialogInterface;
 import android.os.AsyncTask;
-import android.support.v7.app.AlertDialog;
 import android.util.Log;
-import android.widget.Button;
 import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 
@@ -23,14 +20,11 @@ import com.wfm.soundcollaborations.Editor.views.composition.TrackView;
 import com.wfm.soundcollaborations.Editor.views.composition.TrackWatchView;
 import com.wfm.soundcollaborations.Editor.views.composition.listeners.TrackViewOnClickListener;
 import com.wfm.soundcollaborations.Editor.views.composition.listeners.TrackWatchViewOnClickListener;
-import com.wfm.soundcollaborations.R;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
-import butterknife.BindView;
 
 /**
  * Created by mohammed on 10/29/17.
@@ -45,8 +39,8 @@ public class CompositionBuilder
     private static final int TRACK_HEIGHT = 75;
 
     private CompositionView compositionView;
-    private ArrayList<TrackView> tracksViews;
-    private ArrayList<SoundView> soundsViews;
+    private ArrayList<TrackView> downloadedTrackViews;
+    private ArrayList<SoundView> downloadedSoundViews;
 
     private ArrayList<Sound> downloadedSounds;
     private SoundDownloader downloader;
@@ -57,13 +51,13 @@ public class CompositionBuilder
     private TracksTimer mTracksTimer;
     private boolean playing = false;
 
-    public Map<SoundView, Sound> soundsToDelete = new HashMap<>();
+    private List<Sound> soundsToDelete = new ArrayList<>();
 
     public CompositionBuilder(CompositionView compositionView, int tracks)
     {
         this.compositionView = compositionView;
-        tracksViews = new ArrayList<>();
-        soundsViews = new ArrayList<>();
+        downloadedTrackViews = new ArrayList<>();
+        downloadedSoundViews = new ArrayList<>();
         downloadedSounds = new ArrayList<>();
         this.tracks = new ArrayList<>();
         initTracksViews(tracks);
@@ -75,7 +69,7 @@ public class CompositionBuilder
         for(int i=0; i<tracks; i++)
         {
             TrackView trackView = new TrackView(this.compositionView.getContext());
-            tracksViews.add(trackView);
+            downloadedTrackViews.add(trackView);
         }
     }
 
@@ -96,15 +90,16 @@ public class CompositionBuilder
         {
             // create sounds view
             SoundView soundView = new SoundView(this.compositionView.getContext());
+            Sound sound = sounds.get(i);
             RelativeLayout.LayoutParams soundParams =
-                    new RelativeLayout.LayoutParams(getSoundViewWidth(sounds.get(i).getLength()), TRACK_HEIGHT);
-            soundParams.setMargins(getSoundViewMargin(sounds.get(i).getStartPosition()), 0, 0, 0);
+                    new RelativeLayout.LayoutParams(getSoundViewWidth(sound.getLength()), TRACK_HEIGHT);
+            soundParams.setMargins(getSoundViewMargin(sound.getStartPosition()), 0, 0, 0);
             soundView.setLayoutParams(soundParams);
-            soundView.setTrack(sounds.get(i).getTrack());
+            soundView.setTrack(sound.getTrack());
             // add soundView to the list
-            soundsViews.add(soundView);
+            downloadedSoundViews.add(soundView);
             // add sound view to the track
-            tracksViews.get(sounds.get(i).getTrack()).addSoundView(soundView);
+            downloadedTrackViews.get(sounds.get(i).getTrack()).addSoundView(soundView);
         }
         // we will add everything to the composition view
         build();
@@ -138,7 +133,7 @@ public class CompositionBuilder
 
     private void build()
     {
-        for(int i=0; i<tracksViews.size(); i++)
+        for(int i = 0; i< downloadedTrackViews.size(); i++)
         {
             // watches
             TrackWatchView trackWatchView = new TrackWatchView(this.compositionView.getContext());
@@ -147,7 +142,7 @@ public class CompositionBuilder
             watchParams.setMargins(10, 10, 0, 10);
             trackWatchView.setLayoutParams(watchParams);
             // tracks
-            TrackView trackView = tracksViews.get(i);
+            TrackView trackView = downloadedTrackViews.get(i);
             trackWatchView.setOnClickListener(new TrackViewOnClickListener(this.compositionView, i));
             LinearLayout.LayoutParams trackParams  = new LinearLayout.LayoutParams(TRACK_WIDTH, TRACK_HEIGHT);
             trackParams.setMargins(0, 10, 0, 10);
@@ -198,7 +193,7 @@ public class CompositionBuilder
                     {
                         task.reuse();
                         int index = (int) task.getTag();
-                        VisualizeSoundTask soundTask = new VisualizeSoundTask(soundsViews.get(index), downloadedSounds.get(index));
+                        VisualizeSoundTask soundTask = new VisualizeSoundTask(downloadedSoundViews.get(index), downloadedSounds.get(index));
                         soundTask.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
                         tracks.get(downloadedSounds.get(index).getTrack()).addSound(downloadedSounds.get(index));
                         numberOfDownloadedSounds++;
@@ -254,7 +249,7 @@ public class CompositionBuilder
         recordingSoundView.setLayoutParams(soundParams);
         recordingSoundView.setYellowBackground();
 
-        tracksViews.get(activeTrack).addSoundView(recordingSoundView);
+        downloadedTrackViews.get(activeTrack).addSoundView(recordingSoundView);
 
         return recordingSoundView;
     }
@@ -314,9 +309,9 @@ public class CompositionBuilder
         return SOUND_SECOND_WIDTH;
     }
 
-    public void addRecordedSound(String soundPath, int length, int trackNumber, int startPositionInWidth) {
+    public void addRecordedSound(String soundPath, int length, int trackNumber, int startPositionInWidth, SoundView soundView) {
         // prepare new sound
-        Sound sound = new Sound(soundPath, getPositionInMs(length), trackNumber, getPositionInMs(startPositionInWidth), soundPath);
+        Sound sound = new Sound(soundPath, getPositionInMs(length), trackNumber, getPositionInMs(startPositionInWidth), soundPath, soundView);
 
         // delete oldTrack
         Track track = tracks.get(trackNumber);
@@ -346,19 +341,40 @@ public class CompositionBuilder
     public Map<SoundView, Integer> deleteSounds() {
         Map<SoundView, Integer> soundLengths = new HashMap<>();
         Track track = getActiveTrack();
-        soundsToDelete.forEach((soundView, sound) -> {
+
+        for (Sound sound : soundsToDelete) {
+            SoundView soundView = sound.getSoundView();
+            Integer trackNumber = soundView.getTrack();
+            tracks.remove(trackNumber);
             track.deleteSound(sound);
-            tracks.add(track);
+            tracks.add(trackNumber, track);
             soundLengths.put(soundView, sound.getLength());
-        });
+        }
+
         return soundLengths;
     }
 
     public void deleteSoundView(Map<SoundView, Integer> soundInfo) {
         soundInfo.forEach((soundView, soundLengthInMs) -> {
             int soundLengthInWidth = getSoundViewWidth(soundLengthInMs);
-            compositionView.updateTrackView(soundView, soundLengthInWidth / 3 * 0.17f);        //TODO diese geheime Zahl genau checken!
-            tracksViews.get(soundView.getTrack()).deleteSoundView(soundView);
+            compositionView.deleteSoundView(soundView, soundLengthInWidth / 3 * 0.17f);        //TODO diese geheime Zahl genau checken!
         });
+    }
+
+    public Sound selectSound(float xPosition) {
+        Sound selectedSound = null;
+        for (Sound sound : getActiveTrack().getSounds()) {
+            int startPos = getSoundViewWidth(sound.getStartPosition());
+            int endPos = startPos + getSoundViewWidth(sound.getLength());
+            if (startPos <= xPosition && endPos >= xPosition) {
+                selectedSound = sound;
+                break;
+            }
+        }
+
+        if (selectedSound != null) {
+            soundsToDelete.add(selectedSound);
+        }
+        return selectedSound;
     }
 }
