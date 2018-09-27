@@ -108,7 +108,7 @@ public class EditorActivity extends AppCompatActivity {
         builder = new CompositionBuilder(compositionView, 4);
         builder.addSounds(JSONUtils.getSounds(jsonData));
 
-        deletedBtn.setOnClickListener(view -> deleteConfirmation(view.getContext()));
+        deletedBtn.setOnClickListener(delBtnview -> deleteConfirmation(delBtnview.getContext()));
     }
 
     private void deleteConfirmation(Context context) {
@@ -116,8 +116,7 @@ public class EditorActivity extends AppCompatActivity {
             switch (which){
                 case DialogInterface.BUTTON_POSITIVE:
                     //Yes button clicked
-                    Map<SoundView, Integer> soundLengths = builder.deleteSounds();
-                    builder.deleteSoundView(soundLengths);
+                    builder.deleteSounds();
                     deletedBtn.setEnabled(false);
                     break;
 
@@ -132,9 +131,9 @@ public class EditorActivity extends AppCompatActivity {
                 .setNegativeButton("Nein", dialogClickListener).show();
     }
 
-    private void selectSound(float xPosition) {
-       Sound sound = builder.selectSound(xPosition);
-       deletedBtn.setEnabled(sound != null);
+    private void selectSound(SoundView soundView) {
+       builder.selectSound(soundView);
+       deletedBtn.setEnabled(true);
     }
 
     @RequiresApi(api = Build.VERSION_CODES.JELLY_BEAN_MR1)
@@ -163,11 +162,18 @@ public class EditorActivity extends AppCompatActivity {
 
         try {
             soundView = builder.getRecordSoundView(this);
+
+            // Create sound view listener
             soundView.setOnLongClickListener(clickView -> {
                 float xPosition = clickView.getX();
                 Log.v("long clicked","pos: " + xPosition);
-                selectSound(xPosition);
-                clickView.setBackgroundResource(R.color.red);
+                if (builder.isSelectedSound((SoundView) clickView)) {
+                    clickView.setBackgroundResource(R.color.yellow_light);
+                    deselectSound((SoundView) clickView);
+                } else {
+                    clickView.setBackgroundResource(R.color.red);
+                    selectSound((SoundView) clickView);
+                }
                 clickView.invalidate();
                 return true;
             });
@@ -226,6 +232,11 @@ public class EditorActivity extends AppCompatActivity {
                 }
             }, 0, 50);
         }
+    }
+
+    private void deselectSound(SoundView soundView) {
+        builder.deselectSound(soundView);
+        deletedBtn.setEnabled(builder.isAllSelected());
     }
 
     private boolean startRecord(Track activeTrack) {
@@ -330,7 +341,10 @@ public class EditorActivity extends AppCompatActivity {
 
     private void prepareRecordedSounds() {
         if (recordedSoundPath != null && soundLength!=null && startPositionInWidth != null) {
-            builder.addRecordedSound(recordedSoundPath, soundLength, soundView.getTrack(), startPositionInWidth, soundView);
+            // prepare new sound
+            Sound sound = new Sound(recordedSoundPath, builder.getPositionInMs(soundLength), soundView.getTrack(), builder.getPositionInMs(startPositionInWidth), recordedSoundPath);
+            soundView.setSound(sound);
+            builder.addRecordedSound(sound, soundView.getTrack());
         }
     }
 

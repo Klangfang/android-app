@@ -51,7 +51,7 @@ public class CompositionBuilder
     private TracksTimer mTracksTimer;
     private boolean playing = false;
 
-    private List<Sound> soundsToDelete = new ArrayList<>();
+    private List<SoundView> soundsToDelete = new ArrayList<>();
 
     public CompositionBuilder(CompositionView compositionView, int tracks)
     {
@@ -309,9 +309,7 @@ public class CompositionBuilder
         return SOUND_SECOND_WIDTH;
     }
 
-    public void addRecordedSound(String soundPath, int length, int trackNumber, int startPositionInWidth, SoundView soundView) {
-        // prepare new sound
-        Sound sound = new Sound(soundPath, getPositionInMs(length), trackNumber, getPositionInMs(startPositionInWidth), soundPath, soundView);
+    public void addRecordedSound(Sound sound, int trackNumber) {
 
         // delete oldTrack
         Track track = tracks.get(trackNumber);
@@ -338,43 +336,40 @@ public class CompositionBuilder
        return isStoped;
     }
 
-    public Map<SoundView, Integer> deleteSounds() {
-        Map<SoundView, Integer> soundLengths = new HashMap<>();
+    public void deleteSounds() {
         Track track = getActiveTrack();
 
-        for (Sound sound : soundsToDelete) {
-            SoundView soundView = sound.getSoundView();
+        for (SoundView soundView : soundsToDelete) {
+            // delete sound file
             Integer trackNumber = soundView.getTrack();
+            Sound sound = soundView.getSound();
             tracks.remove(trackNumber);
             track.deleteSound(sound);
             tracks.add(trackNumber, track);
-            soundLengths.put(soundView, sound.getLength());
+
+            // delete sound view / track watch view
+            compositionView.deleteSoundView(soundView, soundView.getSoundLength() / 3 * 0.17f);        //TODO diese geheime Zahl genau checken!
         }
-
-        return soundLengths;
     }
 
-    public void deleteSoundView(Map<SoundView, Integer> soundInfo) {
-        soundInfo.forEach((soundView, soundLengthInMs) -> {
-            int soundLengthInWidth = getSoundViewWidth(soundLengthInMs);
-            compositionView.deleteSoundView(soundView, soundLengthInWidth / 3 * 0.17f);        //TODO diese geheime Zahl genau checken!
-        });
+    public void selectSound(SoundView soundView) {
+        soundsToDelete.add(soundView);
     }
 
-    public Sound selectSound(float xPosition) {
-        Sound selectedSound = null;
-        for (Sound sound : getActiveTrack().getSounds()) {
-            int startPos = getSoundViewWidth(sound.getStartPosition());
-            int endPos = startPos + getSoundViewWidth(sound.getLength());
-            if (startPos <= xPosition && endPos >= xPosition) {
-                selectedSound = sound;
-                break;
+    public boolean isSelectedSound(SoundView soundView) {
+        for (SoundView sView : soundsToDelete) {
+            if (sView.equals(soundView)) {
+                return true;
             }
         }
+        return false;
+    }
 
-        if (selectedSound != null) {
-            soundsToDelete.add(selectedSound);
-        }
-        return selectedSound;
+    public boolean isAllSelected() {
+        return !soundsToDelete.isEmpty();
+    }
+
+    public void deselectSound(SoundView soundView) {
+        soundsToDelete.remove(soundView);
     }
 }

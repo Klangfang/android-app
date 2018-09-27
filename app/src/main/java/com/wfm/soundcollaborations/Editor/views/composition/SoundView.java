@@ -10,6 +10,7 @@ import android.graphics.drawable.ColorDrawable;
 import android.util.AttributeSet;
 import android.view.View;
 
+import com.wfm.soundcollaborations.Editor.model.composition.Sound;
 import com.wfm.soundcollaborations.R;
 
 import java.util.ArrayList;
@@ -22,7 +23,7 @@ public class SoundView extends View
 {
     private static final String TAG = SoundView.class.getSimpleName();
 
-    private long soundId;
+    private static final int SOUND_SECOND_WIDTH = 60;
 
     private Paint linePaint;
     private ArrayList<Integer> waves;
@@ -34,6 +35,7 @@ public class SoundView extends View
     int radius = 50;
     private Paint viewPaint;
 
+    private Sound sound;
 
     public SoundView(Context context)
     {
@@ -141,7 +143,20 @@ public class SoundView extends View
         invalidate();
     }
 
-    public void setSoundId(long soundId) {
-        this.soundId = soundId;
+    public Sound getSound() {
+        return sound;
+    }
+
+    public void setSound(Sound sound) {
+        this.sound = sound;
+    }
+
+    public int getSoundLength()
+    {
+        int soundLength = sound.getLength();
+        int width = 0;
+        width += (soundLength / 1000) * SOUND_SECOND_WIDTH;
+        width += (soundLength % 1000) * SOUND_SECOND_WIDTH / 1000;
+        return width;
     }
 }

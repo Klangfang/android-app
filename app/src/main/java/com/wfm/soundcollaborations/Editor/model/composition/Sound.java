@@ -22,17 +22,10 @@ public class Sound
     private int track;
     private int startPosition;
     private AudioPlayer player;
-    private SoundView soundView;
 
     public Sound(String link, int length, int track, int startPosition, String uri)
     {
-       initSound(link, length, track, startPosition, uri);
-    }
-
-    public Sound(String link, int length, int track, int startPosition, String uri, SoundView soundView)
-    {
         initSound(link, length, track, startPosition, uri);
-        this.soundView = soundView;
     }
 
     private void initSound(String link, int length, int track, int startPosition, String uri) {
@@ -130,7 +123,4 @@ public class Sound
         return this.uri;
     }
 
-    public SoundView getSoundView() {
-        return soundView;
-    }
 }
