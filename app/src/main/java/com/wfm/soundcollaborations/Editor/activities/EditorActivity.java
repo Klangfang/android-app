@@ -19,18 +19,13 @@ import com.wfm.soundcollaborations.Editor.model.composition.Sound;
 import com.wfm.soundcollaborations.Editor.model.composition.Track;
 import com.wfm.soundcollaborations.R;
 import com.wfm.soundcollaborations.Editor.exceptions.NoActiveTrackException;
-import com.wfm.soundcollaborations.Editor.exceptions.RecordTimeOutExceededException;
 import com.wfm.soundcollaborations.Editor.exceptions.SoundWillBeOutOfCompositionException;
 import com.wfm.soundcollaborations.Editor.exceptions.SoundWillOverlapException;
-import com.wfm.soundcollaborations.Editor.model.audio.AudioRecorder;
 import com.wfm.soundcollaborations.Editor.model.composition.CompositionBuilder;
-import com.wfm.soundcollaborations.Editor.utils.AudioRecorderStatus;
 import com.wfm.soundcollaborations.Editor.utils.JSONUtils;
 import com.wfm.soundcollaborations.Editor.views.composition.CompositionView;
 import com.wfm.soundcollaborations.Editor.views.composition.SoundView;
 
-import java.util.List;
-import java.util.Map;
 import java.util.Timer;
 import java.util.TimerTask;
 
@@ -38,6 +33,9 @@ import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
 
+/**
+ * Platzhalter für UI und Zusammenspiel mit der Compositionlogik.
+ */
 public class EditorActivity extends AppCompatActivity {
     private static final String TAG = EditorActivity.class.getSimpleName();
     @BindView(R.id.composition)

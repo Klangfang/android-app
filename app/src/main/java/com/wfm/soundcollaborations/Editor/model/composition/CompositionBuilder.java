@@ -22,12 +22,10 @@ import com.wfm.soundcollaborations.Editor.views.composition.listeners.TrackViewO
 import com.wfm.soundcollaborations.Editor.views.composition.listeners.TrackWatchViewOnClickListener;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 /**
- * Created by mohammed on 10/29/17.
+ * Implementiert die Businesslogik des Composition Builders (Wird in der EditorActivity verwendet)
  */
 
 public class CompositionBuilder

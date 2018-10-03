@@ -127,10 +127,13 @@ public class CompositionView extends LinearLayout
         int trackNumber = soundView.getTrack();
         // Delete Sound View from Track View
         TrackView trackView = tracksViews.get(trackNumber);
+
         tracksViewsHolder.removeView(trackView);
+        tracksViews.remove(trackNumber);
         trackView.deleteSoundView(soundView);
-        tracksViewsHolder.addView(trackView);
-        //tracksViews.add(trackNumber, trackView);
+
+        tracksViewsHolder.addView(trackView, trackNumber);
+        tracksViews.add(trackNumber, trackView);
 
         // Decrease Track Watch Percentage
         decreaseTrackWatchPercentage(trackNumber, percentage);
