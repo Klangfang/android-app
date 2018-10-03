@@ -93,6 +93,7 @@ public class Track
     }
 
     public void deleteSound(Sound soundToDelete) {
+        recorder.increaseTime(soundToDelete.getLength());
         sounds.remove(soundToDelete);
     }
 }

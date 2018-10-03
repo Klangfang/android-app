@@ -112,13 +112,13 @@ public class CompositionBuilder
         return width;
     }
 
-    private int getSoundViewMargin(int positionInMs)
+    private int getSoundViewStartPositionInDP(int positionInMs)
     {
-        int width = 0;
-        width += (positionInMs / 1000) * SOUND_SECOND_WIDTH;
+        int dp = 0;
+        dp += (positionInMs / 1000) * SOUND_SECOND_WIDTH;
         //TODO Aufschluesseln was das ist!
-        width += (positionInMs % 1000) * SOUND_SECOND_WIDTH / 1000;
-        return width;
+        dp += (positionInMs % 1000) * SOUND_SECOND_WIDTH / 1000;
+        return dp;
     }
 
     public int getPositionInMs(int width) {
@@ -253,15 +253,15 @@ public class CompositionBuilder
     }
 
     public boolean isThereAnyOverlapping(int pos) {
-        int margin, width;
+        int dp, width;
         int trackNumber = compositionView.getActiveTrack();
         for (Sound sound : tracks.get(trackNumber).getSounds()) {
-            margin = getSoundViewMargin(sound.getStartPosition());
+            dp = getSoundViewStartPositionInDP(sound.getStartPosition());
             width = getSoundViewWidth(sound.getLength());
 
             // check one second forward
             // check if indicator above above track
-            if(sound.getTrack() == trackNumber && ((pos <= margin && (pos + SOUND_SECOND_WIDTH) >= margin) || (pos <= (margin+width) && pos >= margin))) {
+            if(sound.getTrack() == trackNumber && ((pos <= dp && (pos + SOUND_SECOND_WIDTH) >= dp) || (pos <= (dp+width) && pos >= dp))) {
                 return true;
             }
         }
@@ -348,6 +348,7 @@ public class CompositionBuilder
             // delete sound view / track watch view
             compositionView.deleteSoundView(soundView, soundView.getSoundLength() / 3 * 0.17f);        //TODO diese geheime Zahl genau checken!
         }
+        soundsToDelete.clear();
     }
 
     public void selectSound(SoundView soundView) {
@@ -363,11 +364,12 @@ public class CompositionBuilder
         return false;
     }
 
-    public boolean isAllSelected() {
-        return !soundsToDelete.isEmpty();
-    }
+   /* public boolean isAllDeselected() {
+        return soundsToDelete.isEmpty();
+    }*/
 
-    public void deselectSound(SoundView soundView) {
+    public boolean deselectSound(SoundView soundView) {
         soundsToDelete.remove(soundView);
+        return soundsToDelete.isEmpty();
     }
 }

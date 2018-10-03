@@ -233,8 +233,7 @@ public class EditorActivity extends AppCompatActivity {
     }
 
     private void deselectSound(SoundView soundView) {
-        builder.deselectSound(soundView);
-        deletedBtn.setEnabled(builder.isAllSelected());
+        deletedBtn.setEnabled(!builder.deselectSound(soundView));
     }
 
     private boolean startRecord(Track activeTrack) {

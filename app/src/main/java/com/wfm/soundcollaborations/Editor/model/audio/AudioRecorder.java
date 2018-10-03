@@ -51,7 +51,14 @@ public class AudioRecorder implements MediaRecorder.OnInfoListener
             mMediaRecorder.setOutputFormat(MediaRecorder.OutputFormat.THREE_GPP);
             mMediaRecorder.setOutputFile(this.filePath);
             mMediaRecorder.setAudioEncoder(MediaRecorder.AudioEncoder.AMR_NB);
-            mMediaRecorder.setMaxDuration(recordedTime >= MAX_DURATION ? 0 : MAX_DURATION - recordedTime);
+            int newMaxDuration = 0;
+            int restTime = MAX_DURATION - recordedTime;
+            if (restTime <=0 ) {
+                recordedTime = MAX_DURATION;
+            } else {
+                newMaxDuration = restTime;
+            }
+            mMediaRecorder.setMaxDuration(newMaxDuration);
             mMediaRecorder.setOnInfoListener(this);
 
             try
@@ -75,7 +82,7 @@ public class AudioRecorder implements MediaRecorder.OnInfoListener
 
     public void stop(int recordedTime)
     {
-        this.recordedTime = recordedTime;
+        this.recordedTime += recordedTime;
 
         try
         {
@@ -97,6 +104,12 @@ public class AudioRecorder implements MediaRecorder.OnInfoListener
             Log.d(TAG, "Recorded file has been deleted!");
         }
 
+    }
+
+    // Increases the time limit after deleting sound
+    public void increaseTime(int deletedTime) {
+        recordedTime -= deletedTime;
+        status = AudioRecorderStatus.EMPTY;
     }
 
     public int getMaxAmplitude()
