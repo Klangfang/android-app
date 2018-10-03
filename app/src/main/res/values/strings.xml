@@ -32,6 +32,9 @@
     <string name="bnm_compose">Compose</string>
     <string name="bnm_record">Record</string>
 
+    <!-- Menus -->
+    <string name="send">Send</string>
+
     <!-- MESSAGES GO HERE -->
     <string name="MESSAGE_PRESS_AND_HOLD_TO_RECORD">Please press and hold to record a voice clip</string>
 
