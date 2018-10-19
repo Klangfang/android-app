@@ -11,6 +11,7 @@ import com.liulishuo.filedownloader.BaseDownloadTask;
 import com.liulishuo.filedownloader.FileDownloadListener;
 import com.wfm.soundcollaborations.Editor.exceptions.NoActiveTrackException;
 import com.wfm.soundcollaborations.Editor.exceptions.SoundWillBeOutOfCompositionException;
+import com.wfm.soundcollaborations.Editor.exceptions.SoundWillOverlapException;
 import com.wfm.soundcollaborations.Editor.network.SoundDownloader;
 import com.wfm.soundcollaborations.Editor.tasks.VisualizeSoundTask;
 import com.wfm.soundcollaborations.Editor.utils.AudioRecorderStatus;
@@ -32,7 +33,7 @@ public class CompositionBuilder
 {
 
     private static final String TAG = CompositionBuilder.class.getSimpleName();
-    private static final int TRACK_WIDTH = 7200;
+    private static final int TRACK_WIDTH_IN_MS = 7200;
     private static final int SOUND_SECOND_WIDTH = 60;
     private static final int TRACK_HEIGHT = 75;
 
@@ -90,8 +91,8 @@ public class CompositionBuilder
             SoundView soundView = new SoundView(this.compositionView.getContext());
             Sound sound = sounds.get(i);
             RelativeLayout.LayoutParams soundParams =
-                    new RelativeLayout.LayoutParams(getSoundViewWidth(sound.getLength()), TRACK_HEIGHT);
-            soundParams.setMargins(getSoundViewMargin(sound.getStartPosition()), 0, 0, 0);
+                    new RelativeLayout.LayoutParams(getValueInDP(sound.getLength()), TRACK_HEIGHT);
+            soundParams.setMargins(getValueInDP(sound.getStartPosition()), 0, 0, 0);
             soundView.setLayoutParams(soundParams);
             soundView.setTrack(sound.getTrack());
             // add soundView to the list
@@ -104,21 +105,12 @@ public class CompositionBuilder
         downloadSounds();
     }
 
-    public int getSoundViewWidth(int lengthInMs)
+    public int getValueInDP(int valueInMs)
     {
-        int width = 0;
-        width += (lengthInMs / 1000) * SOUND_SECOND_WIDTH;
-        width += (lengthInMs % 1000) * SOUND_SECOND_WIDTH / 1000;
-        return width;
-    }
-
-    private int getSoundViewStartPositionInDP(int positionInMs)
-    {
-        int dp = 0;
-        dp += (positionInMs / 1000) * SOUND_SECOND_WIDTH;
-        //TODO Aufschluesseln was das ist!
-        dp += (positionInMs % 1000) * SOUND_SECOND_WIDTH / 1000;
-        return dp;
+        int valueInDP = 0;
+        valueInDP += (valueInMs / 1000) * SOUND_SECOND_WIDTH;
+        valueInDP += (valueInMs % 1000) * SOUND_SECOND_WIDTH / 1000;
+        return valueInDP;
     }
 
     public int getPositionInMs(int width) {
@@ -142,7 +134,7 @@ public class CompositionBuilder
             // tracks
             TrackView trackView = downloadedTrackViews.get(i);
             trackWatchView.setOnClickListener(new TrackViewOnClickListener(this.compositionView, i));
-            LinearLayout.LayoutParams trackParams  = new LinearLayout.LayoutParams(TRACK_WIDTH, TRACK_HEIGHT);
+            LinearLayout.LayoutParams trackParams  = new LinearLayout.LayoutParams(TRACK_WIDTH_IN_MS, TRACK_HEIGHT);
             trackParams.setMargins(0, 10, 0, 10);
             trackView.setLayoutParams(trackParams);
             this.compositionView.addTrackView(trackWatchView, trackView);
@@ -229,21 +221,21 @@ public class CompositionBuilder
 
     public SoundView getRecordSoundView(Context context) throws Exception
     {
+        SoundView recordingSoundView;
         int activeTrack = this.compositionView.getActiveTrack();
         if( activeTrack == -1)
             throw new NoActiveTrackException();
 
-        int pos = this.compositionView.getScrollPosition();
-        if((pos + SOUND_SECOND_WIDTH) > TRACK_WIDTH)
-            throw new SoundWillBeOutOfCompositionException();
 
-        isThereAnyOverlapping(pos);
+        // when there is a limit, an exception will be thrown.
+        checkLimits();
 
-        SoundView recordingSoundView = new SoundView(context);
+
+        recordingSoundView = new SoundView(context);
         recordingSoundView.setTrack(activeTrack);
         RelativeLayout.LayoutParams soundParams =
                 new RelativeLayout.LayoutParams(0, TRACK_HEIGHT);
-        soundParams.setMargins(pos, 0, 0, 0);
+        soundParams.setMargins(this.compositionView.getScrollPosition(), 0, 0, 0);
         recordingSoundView.setLayoutParams(soundParams);
         recordingSoundView.setYellowBackground();
 
@@ -252,20 +244,26 @@ public class CompositionBuilder
         return recordingSoundView;
     }
 
-    public boolean isThereAnyOverlapping(int pos) {
-        int dp, width;
+    public void checkLimits() throws SoundWillOverlapException, SoundWillBeOutOfCompositionException {
+        // Check Sound out of composition
+        int cursorPositionInDP = this.compositionView.getScrollPosition();
+        if((cursorPositionInDP + SOUND_SECOND_WIDTH) > TRACK_WIDTH_IN_MS) {
+            throw new SoundWillBeOutOfCompositionException();
+        }
+
+        // check sound overlapping
+        int startPositionInDP, lengthInDP;
         int trackNumber = compositionView.getActiveTrack();
         for (Sound sound : tracks.get(trackNumber).getSounds()) {
-            dp = getSoundViewStartPositionInDP(sound.getStartPosition());
-            width = getSoundViewWidth(sound.getLength());
-
-            // check one second forward
-            // check if indicator above above track
-            if(sound.getTrack() == trackNumber && ((pos <= dp && (pos + SOUND_SECOND_WIDTH) >= dp) || (pos <= (dp+width) && pos >= dp))) {
-                return true;
+            startPositionInDP = getValueInDP(sound.getStartPosition());
+            lengthInDP = getValueInDP(sound.getLength());
+            int endPositionInDP = startPositionInDP + lengthInDP;
+            int distanceToStartPos = cursorPositionInDP + 20 ;
+            int distanceToEndPos = cursorPositionInDP + 20 ;
+            if (distanceToStartPos > startPositionInDP && distanceToEndPos < endPositionInDP) {
+                throw new SoundWillOverlapException();
             }
         }
-        return false;
     }
 
     public void play() {
@@ -299,8 +297,8 @@ public class CompositionBuilder
         return this.compositionView;
     }
 
-    public static int getTrackWidth() {
-        return TRACK_WIDTH;
+    public static int getTrackWidthInMs() {
+        return TRACK_WIDTH_IN_MS;
     }
 
     public static int getSoundSecondWidth() {

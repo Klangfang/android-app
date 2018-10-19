@@ -80,14 +80,11 @@ public class AudioRecorder implements MediaRecorder.OnInfoListener
         stop(MAX_DURATION);
     }
 
-    public void stop(int recordedTime)
-    {
+    public void stop(int recordedTime) {
         this.recordedTime += recordedTime;
 
-        try
-        {
-            if(mMediaRecorder != null)
-            {
+        try {
+            if(mMediaRecorder != null) {
 
                 mMediaRecorder.stop();
                 mMediaRecorder.release();
@@ -97,9 +94,13 @@ public class AudioRecorder implements MediaRecorder.OnInfoListener
                     status = AudioRecorderStatus.EMPTY;
                 }
             }
+            // TODO das soll rein und muss gecheckt werden, warum die zeit danach kurzer wird
+            /*if (this.recordedTime >= MAX_DURATION) {
+                status = AudioRecorderStatus.STOPED;
+            }*/
         }
-        catch (Exception ex)
-        {
+
+        catch (Exception ex) {
             FileUtils.deleteFile(this.filePath);
             Log.d(TAG, "Recorded file has been deleted!");
         }
