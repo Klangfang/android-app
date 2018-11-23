@@ -11,6 +11,7 @@ import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.wfm.soundcollaborations.Editor.exceptions.RecordTimeOutExceededException;
 import com.wfm.soundcollaborations.R;
 import com.wfm.soundcollaborations.Editor.model.audio.AudioPlayer;
 import com.wfm.soundcollaborations.Editor.model.Constants;
@@ -84,15 +85,19 @@ public class RecordActivity extends AppCompatActivity
                 if(! isRecording)
                 {
                     resetPlayBtn();
-                    mAudioRecorder.start();
-                    initRecordTimeTimer();
-                    initVisualizeAmplitudesTimer();
-                    ((Button)(view)).setText("Finish");
-                    isRecording = true;
+                    try {
+                        mAudioRecorder.start();
+                        initRecordTimeTimer();
+                        initVisualizeAmplitudesTimer();
+                        ((Button)(view)).setText("Finish");
+                        isRecording = true;
+                    } catch (RecordTimeOutExceededException e) {
+                        // TODO for example log the exception!!!
+                    }
                 }
                 else
                 {
-                    mAudioRecorder.stop(0);
+                    mAudioRecorder.stop();
                     recordTimeTimer.cancel();
                     visualizeAmplitudesTimer.cancel();
                     resetValues();

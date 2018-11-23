@@ -4,9 +4,6 @@ import android.content.Context;
 import android.util.Log;
 
 import com.wfm.soundcollaborations.Editor.model.audio.AudioPlayer;
-import com.wfm.soundcollaborations.Editor.views.composition.SoundView;
-
-import java.util.Date;
 
 /**
  * Created by mohammed on 10/27/17.
@@ -18,21 +15,17 @@ public class Sound
 
     private String uri;
     private String link;
-    private int length;
+    private int lengthInMs;
     private int track;
-    private int startPosition;
+    private int startPositionInMs;
     private AudioPlayer player;
 
-    public Sound(String link, int length, int track, int startPosition, String uri)
+    public Sound(String link, int lengthInMs, int track, int startPositionInMs, String uri)
     {
-        initSound(link, length, track, startPosition, uri);
-    }
-
-    private void initSound(String link, int length, int track, int startPosition, String uri) {
         this.link = link;
-        this.length = length;
+        this.lengthInMs = lengthInMs;
         this.track = track;
-        this.startPosition = startPosition;
+        this.startPositionInMs = startPositionInMs;
         this.uri = uri;
     }
 
@@ -46,8 +39,8 @@ public class Sound
     {
         // Den Player starten, wenn an der Stelle einen Sound vorhanden ist.
         // Der Player selbst weiss nicht, wo die Sounds sich befinden.
-        int endPosition = startPosition + length;
-        if (startPosition <= positionInMillis && endPosition > positionInMillis) {
+        long endPosition = startPositionInMs + lengthInMs;
+        if (startPositionInMs <= positionInMillis && endPosition > positionInMillis) {
             if (!isPlaying()) {
                 player.play();
 
@@ -72,33 +65,33 @@ public class Sound
         return player.isPlaying();
     }
 
-    public void seek(int positionInMillis)
+    public void seek(long positionInMillis)
     {
-        int seekingPosition = calculateSeekingTimeForPlayer(positionInMillis);
+        long seekingPosition = calculateSeekingTimeForPlayer(positionInMillis);
         Log.d(TAG, "Track seeking Time is => "+seekingPosition);
         player.seek(seekingPosition);
     }
 
 
-    private int calculateSeekingTimeForPlayer(int positionInMillis) {
-        int maxPoint = positionInMillis;
-        int soundsInside = 0;
+    private long calculateSeekingTimeForPlayer(long positionInMillis) {
+        long maxPoint = positionInMillis;
+        long soundsInside = 0;
 
-            int endPosition = startPosition + length;
-            if(startPosition <= positionInMillis && endPosition > positionInMillis) {
-                maxPoint = startPosition;
+        long endPosition = startPositionInMs + lengthInMs;
+            if(startPositionInMs <= positionInMillis && endPosition > positionInMillis) {
+                maxPoint = startPositionInMs;
             }
 
             if(endPosition <= positionInMillis) {
-                soundsInside += length;
+                soundsInside += lengthInMs;
             }
 
         return positionInMillis - (maxPoint - soundsInside);
     }
 
-    public int getLength()
+    public int getLengthInMs()
     {
-        return this.length;
+        return this.lengthInMs;
     }
 
     public String getLink()
@@ -111,9 +104,9 @@ public class Sound
         return this.track;
     }
 
-    public int getStartPosition()
+    public long getStartPositionInMs()
     {
-        return this.startPosition;
+        return this.startPositionInMs;
     }
 
     public String getUri() throws NullPointerException

@@ -2,6 +2,7 @@ package com.wfm.soundcollaborations.Editor.model.composition;
 
 import android.content.Context;
 
+import com.wfm.soundcollaborations.Editor.exceptions.RecordTimeOutExceededException;
 import com.wfm.soundcollaborations.Editor.model.audio.AudioRecorder;
 import com.wfm.soundcollaborations.Editor.utils.AudioRecorderStatus;
 
@@ -23,7 +24,7 @@ public class Track
     public Track(){ recorder = new AudioRecorder(); }
 
     public void addSound(Sound sound) {
-        recorderTime = recorderTime + sound.getLength();
+        recorderTime = recorderTime + sound.getLengthInMs();
         sounds.add(sound);
     }
 
@@ -60,17 +61,17 @@ public class Track
         sound.prepare(context);
 
         //Sorting sounds:
-        Collections.sort(sounds, (Sound s1, Sound s2) -> Integer.valueOf(s1.getStartPosition()).compareTo(Integer.valueOf(s2.getStartPosition())));
+        Collections.sort(sounds, (Sound s1, Sound s2) -> Long.valueOf(s1.getStartPositionInMs()).compareTo(Long.valueOf(s2.getStartPositionInMs())));
     }
 
     // Startet den Recorder
-    public void startTrackRecorder() {
+    public void startTrackRecorder() throws RecordTimeOutExceededException {
         recorder.start();
     }
 
     // Stopt den Recorder
-    public void stopTrackRecorder(int recorderTime) {
-        recorder.stop(recorderTime);
+    public void stopTrackRecorder() {
+        recorder.stop();
     }
 
     // Liefert den Recorder-Status zurueck
@@ -93,7 +94,11 @@ public class Track
     }
 
     public void deleteSound(Sound soundToDelete) {
-        recorder.increaseTime(soundToDelete.getLength());
+        recorder.increaseTime(soundToDelete.getLengthInMs());
         sounds.remove(soundToDelete);
+    }
+
+    public int getSoundLengthInMs() {
+        return recorder.getSoundLengthInMs();
     }
 }

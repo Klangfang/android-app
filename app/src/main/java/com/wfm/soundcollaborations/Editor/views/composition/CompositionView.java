@@ -10,6 +10,7 @@ import android.view.View;
 import android.view.ViewTreeObserver;
 import android.widget.LinearLayout;
 
+import com.wfm.soundcollaborations.Editor.exceptions.SoundRecordingTimeException;
 import com.wfm.soundcollaborations.Editor.exceptions.SoundWillBeOutOfCompositionException;
 import com.wfm.soundcollaborations.R;
 
@@ -196,10 +197,9 @@ public class CompositionView extends LinearLayout
         holderScrollView.scrollTo(value, 0);
     }
 
-    public void increaseViewWatchPercentage(int trackNumber, float percentage) throws SoundWillBeOutOfCompositionException
-    {
+    public void increaseViewWatchPercentage(int trackNumber, float percentage) throws SoundRecordingTimeException {
         if (isTrackWatchPercentageFull(trackNumber)) {
-            throw new SoundWillBeOutOfCompositionException();
+            throw new SoundRecordingTimeException(getContext());
         }
         this.tracksWatchViews.get(trackNumber).increasePercentage(percentage);
     }

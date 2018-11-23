@@ -107,7 +107,7 @@ public class AudioPlayer
         return this.isPlaying;
     }
 
-    public void seek(int positionsMs)
+    public void seek(long positionsMs)
     {
         player.seekTo(0, positionsMs);
     }

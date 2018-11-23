@@ -151,9 +151,9 @@ public class SoundView extends View
         this.sound = sound;
     }
 
-    public int getSoundLength()
+    public long getSoundLength()
     {
-        int soundLength = sound.getLength();
+        long soundLength = sound.getLengthInMs();
         int width = 0;
         width += (soundLength / 1000) * SOUND_SECOND_WIDTH;
         width += (soundLength % 1000) * SOUND_SECOND_WIDTH / 1000;

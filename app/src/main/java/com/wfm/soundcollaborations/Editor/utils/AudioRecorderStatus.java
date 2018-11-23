@@ -7,5 +7,5 @@ package com.wfm.soundcollaborations.Editor.utils;
 public enum  AudioRecorderStatus {
     EMPTY,
     RECORDING,
-    STOPED;
+    STOPPED;
 }

@@ -3,6 +3,7 @@ package com.wfm.soundcollaborations.Editor.model.audio;
 import android.media.MediaRecorder;
 import android.util.Log;
 
+import com.wfm.soundcollaborations.Editor.exceptions.RecordTimeOutExceededException;
 import com.wfm.soundcollaborations.Editor.model.Constants;
 import com.wfm.soundcollaborations.Editor.utils.AudioRecorderStatus;
 import com.wfm.soundcollaborations.Editor.utils.DateUtils;
@@ -26,26 +27,25 @@ public class AudioRecorder implements MediaRecorder.OnInfoListener
     private final String SOUND_FILE_EXTENSION = ".3gp";
     private String filePath;
     private AudioRecorderStatus status = AudioRecorderStatus.EMPTY;
-    private int recordedTime;
+    private int recordedTime = 0;
+    private int startTime;
+    private int soundLengthInMs;
 
     public AudioRecorder() {}
 
 
-    public void start()
-    {
+    public void start() throws RecordTimeOutExceededException {
         // create new sound file path
         if (status.equals(AudioRecorderStatus.EMPTY)) {
             status = AudioRecorderStatus.RECORDING;
-            if (this.filePath != null)
+
+            if (this.filePath != null) {
                 FileUtils.deleteFile(this.filePath);
+            }
 
             this.filePath = SOUND_FILE_BASE_URI_DIR + "SOUND_" +
                     DateUtils.getCurrentDate("yyyyMMdd_HHmmss") + SOUND_FILE_EXTENSION;
-            this.mMediaRecorder = null;
-        }
 
-        if(mMediaRecorder == null)
-        {
             mMediaRecorder = new MediaRecorder();
             mMediaRecorder.setAudioSource(MediaRecorder.AudioSource.MIC);
             mMediaRecorder.setOutputFormat(MediaRecorder.OutputFormat.THREE_GPP);
@@ -53,7 +53,7 @@ public class AudioRecorder implements MediaRecorder.OnInfoListener
             mMediaRecorder.setAudioEncoder(MediaRecorder.AudioEncoder.AMR_NB);
             int newMaxDuration = 0;
             int restTime = MAX_DURATION - recordedTime;
-            if (restTime <=0 ) {
+            if (restTime <= 0) {
                 recordedTime = MAX_DURATION;
             } else {
                 newMaxDuration = restTime;
@@ -61,30 +61,29 @@ public class AudioRecorder implements MediaRecorder.OnInfoListener
             mMediaRecorder.setMaxDuration(newMaxDuration);
             mMediaRecorder.setOnInfoListener(this);
 
-            try
-            {
+            try {
                 mMediaRecorder.prepare();
-            }
-            catch (IOException e)
-            {
+            } catch (IOException e) {
                 Log.e(TAG, "prepare() failed");
             }
 
             mMediaRecorder.start();
-            status = AudioRecorderStatus.RECORDING;
+            startTime = Long.valueOf(System.currentTimeMillis()).intValue();
+        } else if (status.equals(AudioRecorderStatus.RECORDING) && recordedTime >= MAX_DURATION) {
+            status = AudioRecorderStatus.STOPPED;
+            throw new RecordTimeOutExceededException();
         }
     }
 
     // Stop and set max time is reached
-    public void stop() {
-        stop(MAX_DURATION);
-    }
+   /* public void stop() {
+        stop();
+    }*/
 
-    public void stop(int recordedTime) {
-        this.recordedTime += recordedTime;
+    public void stop() {
 
         try {
-            if(mMediaRecorder != null) {
+            if (mMediaRecorder != null) {
 
                 mMediaRecorder.stop();
                 mMediaRecorder.release();
@@ -94,21 +93,20 @@ public class AudioRecorder implements MediaRecorder.OnInfoListener
                     status = AudioRecorderStatus.EMPTY;
                 }
             }
-            // TODO das soll rein und muss gecheckt werden, warum die zeit danach kurzer wird
-            /*if (this.recordedTime >= MAX_DURATION) {
-                status = AudioRecorderStatus.STOPED;
-            }*/
-        }
 
-        catch (Exception ex) {
+            // sound length
+            soundLengthInMs = Long.valueOf(System.currentTimeMillis() - startTime).intValue();
+
+            // total recorded time for the track
+            this.recordedTime = this.recordedTime + soundLengthInMs;
+        } catch (Exception ex) {
             FileUtils.deleteFile(this.filePath);
             Log.d(TAG, "Recorded file has been deleted!");
         }
-
     }
 
     // Increases the time limit after deleting sound
-    public void increaseTime(int deletedTime) {
+    public void increaseTime(long deletedTime) {
         recordedTime -= deletedTime;
         status = AudioRecorderStatus.EMPTY;
     }
@@ -129,13 +127,17 @@ public class AudioRecorder implements MediaRecorder.OnInfoListener
         return status;
     }
 
+    public int getSoundLengthInMs() {
+        return soundLengthInMs - startTime;
+}
+
     @Override
     public void onInfo(MediaRecorder mediaRecorder, int i, int i1) {
         if (i == MediaRecorder.MEDIA_RECORDER_INFO_MAX_DURATION_REACHED)
         {
             Log.e(TAG, "Max Duration Reached");
            // stop(MAX_DURATION); //TODO Fuehrt dazu, dass die Aufnahme verschwindet....
-            status = AudioRecorderStatus.STOPED;
+            status = AudioRecorderStatus.STOPPED;
         }
     }
 }
