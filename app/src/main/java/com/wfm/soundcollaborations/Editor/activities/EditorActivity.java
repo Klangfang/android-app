@@ -17,8 +17,6 @@ import android.widget.Toast;
 import com.ohoussein.playpause.PlayPauseView;
 import com.wfm.soundcollaborations.Editor.exceptions.RecordTimeOutExceededException;
 import com.wfm.soundcollaborations.Editor.exceptions.SoundRecordingTimeException;
-import com.wfm.soundcollaborations.Editor.model.composition.Sound;
-import com.wfm.soundcollaborations.Editor.model.composition.Track;
 import com.wfm.soundcollaborations.R;
 import com.wfm.soundcollaborations.Editor.exceptions.NoActiveTrackException;
 import com.wfm.soundcollaborations.Editor.exceptions.SoundWillBeOutOfCompositionException;
@@ -169,10 +167,10 @@ public class EditorActivity extends AppCompatActivity {
                     float xPosition = clickView.getX();
                     Log.v("long clicked", "pos: " + xPosition);
                     if (builder.isSelectedSound((SoundView) clickView)) {
-                        clickView.setBackgroundResource(R.color.yellow_light);
+                        ((SoundView) clickView).setDefaultSoundColor();
                         deselectSound((SoundView) clickView);
                     } else {
-                        clickView.setBackgroundResource(R.color.red);
+                        ((SoundView) clickView).setSelectedSoundColor();
                         selectSound((SoundView) clickView);
                     }
                     clickView.invalidate();
