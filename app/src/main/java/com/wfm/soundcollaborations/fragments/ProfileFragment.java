@@ -1,13 +1,9 @@
 package com.wfm.soundcollaborations.fragments;
 
-import android.graphics.Color;
-import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
 import android.support.design.widget.TabLayout;
 import android.support.v4.app.Fragment;
 import android.support.v4.view.ViewPager;
-import android.support.v7.app.ActionBar;
-import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -83,7 +79,7 @@ public class ProfileFragment extends Fragment
 
     @Override
     public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
-        inflater.inflate(R.menu.user_profile, menu);
+        inflater.inflate(R.menu.collect_activity_menu, menu);
         super.onCreateOptionsMenu(menu,inflater);
     }
 }

@@ -56,7 +56,7 @@ public class SoundView extends View
         rectPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
         rectPaint.setStyle(Paint.Style.FILL);
         rectPaint.setStrokeCap(Paint.Cap.ROUND);
-        rectPaint.setColor(Color.rgb(0x1f, 0x5a, 0x37));
+        rectPaint.setColor(getResources().getColor(R.color.color_accent)); // sets the color of downloaded sounds
         setBackground(new ColorDrawable(Color.TRANSPARENT));
         clipPath = new Path();
         clipPath.addRoundRect(rectangle, radius, radius, Path.Direction.CW);
@@ -68,7 +68,7 @@ public class SoundView extends View
 
         viewPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
         viewPaint.setStyle(Paint.Style.FILL);
-        viewPaint.setColor(Color.rgb(0x1f, 0x5a, 0x37));
+        viewPaint.setColor(getResources().getColor(R.color.color_error)); // TODO This Does not change anything
     }
 
     @Override
@@ -96,7 +96,7 @@ public class SoundView extends View
         int currentLineX = 0;
         for(int i=0; i<waves.size(); i++)
         {
-            linePaint.setColor(Color.argb(getWaveAlpha(waves.get(i)), 0, 0, 0));
+            linePaint.setColor(Color.argb(getWaveAlpha(waves.get(i)), 0, 0, 0)); // TODO How to use Hex Colors here?
             canvas.drawLine(currentLineX, 0, currentLineX, getHeight(), linePaint);
             currentLineX += width;
         }
@@ -134,7 +134,7 @@ public class SoundView extends View
 
     public void setYellowBackground()
     {
-        rectPaint.setColor(getResources().getColor(R.color.color_my_sound));
+        rectPaint.setColor(getResources().getColor(R.color.color_error)); // This sets the fill color of recorded sounds
         invalidate();
     }
 

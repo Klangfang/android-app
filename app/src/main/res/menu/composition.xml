@@ -3,7 +3,7 @@
     xmlns:app="http://schemas.android.com/apk/res-auto">
     <item android:id="@+id/btn_edit"
         app:showAsAction="always"
-        android:title="History"
+        android:title="@string/history"
         android:icon="@drawable/composition_history"/>
 
 </menu>

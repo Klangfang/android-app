@@ -12,4 +12,17 @@
     <string name="bnm_compose">Komponieren</string>
     <string name="bnm_record">Sammeln</string>
 
+    <!-- Menus -->
+    <string name="send">Senden</string>
+    <string name="done">Fertig</string>
+    <string name="settings">Einstellungen</string>
+    <string name="friends">Freunde</string>
+    <string name="sort">Sortieren</string>
+    <string name="filter">Filtern</string>
+    <string name="drawer_open">Öffnen</string>
+    <string name="drawer_close">Schließen</string>
+    <string name="sound_file_prefix" translatable="false">Klang</string>
+    <string name="history">Verlauf deiner Collagen</string>
+
+
 </resources>

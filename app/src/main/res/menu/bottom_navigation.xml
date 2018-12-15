@@ -8,7 +8,8 @@
         android:icon="@drawable/composition"
         android:title="@string/bnm_compose" />
 
-    <item android:id="@+id/bnm_record"
-        android:icon="@drawable/collection"
+    <item
+        android:id="@+id/bnm_record"
+        android:icon="@drawable/ic_keyboard_voice_black_24dp"
         android:title="@string/bnm_record" />
 </menu>
