@@ -50,29 +50,30 @@ public class SoundView extends View {
         // clipping
         rectangle = new RectF();
         rectPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
-        rectPaint.setStyle(Paint.Style.FILL);
-        rectPaint.setStrokeCap(Paint.Cap.ROUND);
+        //rectPaint.setStyle(Paint.Style.FILL); //das hier macht nichts
+        //rectPaint.setStrokeCap(Paint.Cap.ROUND); //das hier macht nichts
         rectPaint.setColor(getResources().getColor(R.color.color_primary)); // sets the color of downloaded sounds
-        setBackground(new ColorDrawable(Color.TRANSPARENT));
+        //setBackground(new ColorDrawable(getResources().getColor(R.color.color_error))); //sets the wrapper background color of downloaded sounds
         clipPath = new Path();
-        clipPath.addRoundRect(rectangle, radius, radius, Path.Direction.CW);
+        //clipPath.addRoundRect(rectangle, radius, radius, Path.Direction.CW);
+
         // waves
         waves = new ArrayList<>();
         linePaint = new Paint(Paint.ANTI_ALIAS_FLAG);
-        linePaint.setStyle(Paint.Style.STROKE);
+        //linePaint.setStyle(Paint.Style.STROKE); /das hier macht nichts
 
-
-        viewPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
-        viewPaint.setStyle(Paint.Style.FILL);
+        // Das folgende macht nichts
+        //viewPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
+        //viewPaint.setStyle(Paint.Style.FILL);
     }
 
     @Override
     protected void onDraw(Canvas canvas) {
         super.onDraw(canvas);
         rectangle.set(0, 0, getLayoutParams().width, getLayoutParams().height);
-        canvas.drawRoundRect(rectangle, radius, radius, rectPaint);
-        drawWaves(canvas);
-        canvas.clipPath(clipPath);
+        canvas.drawRoundRect(rectangle, radius, radius, rectPaint); //This draws the soundView shape with rounded corners for both downloaded and recorded sounds
+        drawWaves(canvas); //This draws vertical lines on top of the soundView shape to represent the amplitude
+        //canvas.clipPath(clipPath); //This does nothing
 
     }
 
@@ -118,13 +119,13 @@ public class SoundView extends View {
         return this.track;
     }
 
-    // Set color of recorded sounds
+    // Set fill color of recorded sounds
     public void setDefaultSoundColor() {
-        rectPaint.setColor(getResources().getColor(R.color.color_my_sound)); // This sets the fill color of recorded sounds
+        rectPaint.setColor(getResources().getColor(R.color.color_my_sound));
         invalidate();
     }
 
-    // Change color of recorded sound when longclicked
+    // Change fill color of recorded sound when longclicked
     public void setSelectedSoundColor() {
         rectPaint.setColor(getResources().getColor(R.color.color_error));
         invalidate();
