@@ -1,10 +1,14 @@
 package com.wfm.soundcollaborations.Editor.activities;
 
+import android.Manifest;
 import android.content.Context;
 import android.content.DialogInterface;
+import android.content.pm.PackageManager;
 import android.os.Build;
 import android.os.Handler;
 import android.support.annotation.RequiresApi;
+import android.support.v4.app.ActivityCompat;
+import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -17,8 +21,6 @@ import android.widget.Toast;
 import com.ohoussein.playpause.PlayPauseView;
 import com.wfm.soundcollaborations.Editor.exceptions.RecordTimeOutExceededException;
 import com.wfm.soundcollaborations.Editor.exceptions.SoundRecordingTimeException;
-import com.wfm.soundcollaborations.Editor.model.composition.Sound;
-import com.wfm.soundcollaborations.Editor.model.composition.Track;
 import com.wfm.soundcollaborations.R;
 import com.wfm.soundcollaborations.Editor.exceptions.NoActiveTrackException;
 import com.wfm.soundcollaborations.Editor.exceptions.SoundWillBeOutOfCompositionException;
@@ -68,6 +70,10 @@ public class EditorActivity extends AppCompatActivity {
     private String recordedSoundPath=null;
     private Integer startPositionInWidth=null;
     private Integer soundLength=null;
+
+    //Create placeholder for user's consent to record_audio permission.
+    //This will be used in handling callback from the runtime permission
+    private final int RECORD_AUDIO_PERMISSIONS_DECISIONS = 1;
 
     @Override
     protected void onCreate(Bundle savedInstanceState)
@@ -145,22 +151,54 @@ public class EditorActivity extends AppCompatActivity {
         ((PlayPauseView) view).toggle();
     }
 
-    @OnClick(R.id.btn_record)
-    public void record(final View view)
-    {
+    // Request recording and storage permission when the record-button is clicked.
+    public void requestRecordingPermissions(View view) {
+        // checks if the permission is not granted
+        if (ContextCompat.checkSelfPermission(this, Manifest.permission.RECORD_AUDIO) +
+                ContextCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE)
+                != PackageManager.PERMISSION_GRANTED) {
+            //Permission is not granted
+            //Show native permission dialog
+            ActivityCompat.requestPermissions(this, new String[]{
+                    Manifest.permission.RECORD_AUDIO,
+                    Manifest.permission.WRITE_EXTERNAL_STORAGE},
+                    RECORD_AUDIO_PERMISSIONS_DECISIONS);
+        } else {
+            //Permission is granted
+            //Start recording
+            record(soundView);
+        }
+    }
 
+    //Handling callback from recording permissions permission
+    @Override
+    public void onRequestPermissionsResult(int requestCode,
+                                           String permissions[], int[] grantResults) {
+        switch (requestCode) {
+            case RECORD_AUDIO_PERMISSIONS_DECISIONS: {
+                if (grantResults.length > 0
+                        && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                    // permission was granted!
+                    // start recording
+                    record(soundView);
+                } else {
+                    // permission denied! Disables functionality that depends on this permission.
+                    Toast.makeText(this, "Some Permission was denied. Cannot record audio.", Toast.LENGTH_LONG).show();
+                }
+            }
+        }
+    }
+
+    public void record(final View view) {
         try {
             soundView = builder.getRecordSoundView(this);
             layoutParams = (RelativeLayout.LayoutParams) soundView.getLayoutParams();
-
 
             // Stop recording
             if (recording) {
                 resetEditorValues();
                 builder.prepareRecordedSound(soundView, soundLength, startPositionInWidth);
-            }
-
-            else {
+            } else {
                 // Beim Zeitlimit oder bei einer Ueberlappung keine Aufnahme starten.
                 builder.checkLimits(soundView, soundLength, startPositionInWidth);
 
@@ -243,7 +281,7 @@ public class EditorActivity extends AppCompatActivity {
         } catch (SoundWillOverlapException ex) {
 
         } catch (SoundWillBeOutOfCompositionException ex) {
-        } catch(SoundRecordingTimeException ex){
+        } catch (SoundRecordingTimeException ex) {
             resetEditorValues();
             builder.prepareRecordedSound(soundView, soundLength, startPositionInWidth);
         } catch (Exception ex) {
