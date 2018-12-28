@@ -166,7 +166,7 @@ public class EditorActivity extends AppCompatActivity {
         } else {
             //Permission is granted
             //Start recording
-            record(soundView);
+            record();
         }
     }
 
@@ -180,7 +180,7 @@ public class EditorActivity extends AppCompatActivity {
                         && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                     // permission was granted!
                     // start recording
-                    record(soundView);
+                    record();
                 } else {
                     // permission denied! Disables functionality that depends on this permission.
                     Toast.makeText(this, "Some Permission was denied. Cannot record audio.", Toast.LENGTH_LONG).show();
@@ -189,7 +189,7 @@ public class EditorActivity extends AppCompatActivity {
         }
     }
 
-    public void record(final View view) {
+    public void record() {
         try {
             soundView = builder.getRecordSoundView(this);
             layoutParams = (RelativeLayout.LayoutParams) soundView.getLayoutParams();
