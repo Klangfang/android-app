@@ -41,8 +41,12 @@
     <string name="filter">Filter</string>
     <string name="history">Composition History</string>
 
-    <!-- MESSAGES GO HERE -->
+    <!-- Messages to the user -->
     <string name="MESSAGE_PRESS_AND_HOLD_TO_RECORD">Please press and hold to record a voice clip</string>
+    <string name="record_audio_permission_denied">Recording permission was denied. Cannot record audio.</string>
+    <string name="external_storage_permission_denied">Storage permission was denied. Cannot record audio.</string>
+    <string name="all_audio_permissions_denied">Recording and storage permissions were denied. Cannot record audio.</string>
+
 
     <string name="sound_file_prefix" translatable="false">Sound</string>
 

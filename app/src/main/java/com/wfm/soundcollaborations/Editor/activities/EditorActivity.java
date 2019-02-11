@@ -71,8 +71,10 @@ public class EditorActivity extends AppCompatActivity {
     private Integer startPositionInWidth=null;
     private Integer soundLength=null;
 
-    //Create placeholder for user's consent to record_audio permission.
-    //This will be used in handling callback from the runtime permission
+    /**
+     * This constant creates a placeholder for the user's consent of the record audio permission.
+     * It will be used when handling callback from the runtime permission (onRequestPermissionsResult)
+     */
     private final int RECORD_AUDIO_PERMISSIONS_DECISIONS = 1;
 
     @Override
@@ -151,43 +153,62 @@ public class EditorActivity extends AppCompatActivity {
         ((PlayPauseView) view).toggle();
     }
 
-    // Request recording and storage permission when the record-button is clicked.
+    /**
+     * This method is called, when the record-button is clicked.
+     * It requests audio and storage permissions.
+     */
     public void requestRecordingPermissions(View view) {
-        // checks if the permission is not granted
+        // First: check if the permission is not granted
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.RECORD_AUDIO) +
                 ContextCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE)
                 != PackageManager.PERMISSION_GRANTED) {
-            //Permission is not granted
-            //Show native permission dialog
+            //Permission is not granted. Show system permission dialog
             ActivityCompat.requestPermissions(this, new String[]{
                     Manifest.permission.RECORD_AUDIO,
                     Manifest.permission.WRITE_EXTERNAL_STORAGE},
                     RECORD_AUDIO_PERMISSIONS_DECISIONS);
         } else {
-            //Permission is granted
-            //Start recording
+            //Permission is granted. Start recording
             record();
         }
     }
 
-    //Handling callback from recording permissions permission
+    /**
+     * This method is called, when the user interacts with the system dialog for permissions.
+     * It handles the callback of audio and storage permissions.
+     */
     @Override
     public void onRequestPermissionsResult(int requestCode,
-                                           String permissions[], int[] grantResults) {
+                                           String permissions[],
+                                           int[] grantResults) {
         switch (requestCode) {
             case RECORD_AUDIO_PERMISSIONS_DECISIONS: {
-                if (grantResults.length > 0
+                if (grantResults.length > 1
+                        && grantResults[0] == PackageManager.PERMISSION_GRANTED
+                        && grantResults[1] == PackageManager.PERMISSION_GRANTED) {
+                    record(); // All permissions were granted! Start recording
+                } else if (grantResults.length > 1
                         && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                    // permission was granted!
-                    // start recording
-                    record();
+                    // Only recording permission was granted
+                    Toast.makeText(this,
+                            this.getString(R.string.external_storage_permission_denied),
+                            Toast.LENGTH_LONG).show();
+                } else if (grantResults.length > 1
+                        && grantResults[1] == PackageManager.PERMISSION_GRANTED) {
+                    // Only Storage permission was granted
+                    Toast.makeText(this,
+                            this.getString(R.string.record_audio_permission_denied),
+                            Toast.LENGTH_LONG).show();
                 } else {
-                    // permission denied! Disables functionality that depends on this permission.
-                    Toast.makeText(this, "Some Permission was denied. Cannot record audio.", Toast.LENGTH_LONG).show();
+                    // All permissions were denied.
+                    Toast.makeText(this,
+                            this.getString(R.string.all_audio_permissions_denied),
+                            Toast.LENGTH_LONG).show();
                 }
             }
         }
     }
+
 
     public void record() {
         try {

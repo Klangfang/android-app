@@ -25,4 +25,9 @@
     <string name="history">Verlauf deiner Collagen</string>
 
 
+    <!-- Messages to the user -->
+    <string name="record_audio_permission_denied">Bitte erlaube den Zugriff auf dein Mikrofon, um Aufnahmen machen zu können.</string>
+    <string name="external_storage_permission_denied">Bitte erlaube den Zugriff auf deinen Speicher, um Aufnahmen machen zu können.</string>
+    <string name="all_audio_permissions_denied">Bitte erlaube den Zugriff auf Mikrofon und Speicher, um Aufnahmen machen zu können.</string>
+
 </resources>
