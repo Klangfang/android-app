@@ -237,7 +237,7 @@ public class CompositionBuilder
                 new RelativeLayout.LayoutParams(0, TRACK_HEIGHT);
         soundParams.setMargins(this.compositionView.getScrollPosition(), 0, 0, 0);
         recordingSoundView.setLayoutParams(soundParams);
-        recordingSoundView.setYellowBackground();
+        recordingSoundView.setDefaultSoundColor();
 
         downloadedTrackViews.get(activeTrack).addSoundView(recordingSoundView);
 
