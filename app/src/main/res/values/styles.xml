@@ -50,6 +50,11 @@
         <item name="colorAccent">@color/yellow_light</item>
     </style>
 
+    <!-- General Styling -->
+    <style name="general">
+        <item name="android:background">@color/grey_light</item>
+    </style>
+
 
     <!-- Card View Styling -->
     <style name="card_view" parent="CardView">

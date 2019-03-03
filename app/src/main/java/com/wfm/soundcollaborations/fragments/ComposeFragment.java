@@ -33,6 +33,7 @@ public class ComposeFragment extends Fragment {
     private void initToolbar()
     {
         MainActivity mainActivity = (MainActivity) getActivity();
+        assert mainActivity != null;
         Toolbar toolbar = mainActivity.getToolbar();
         if(toolbar != null)
         {
@@ -41,12 +42,4 @@ public class ComposeFragment extends Fragment {
             setHasOptionsMenu(true);
         }
     }
-
-    @Override
-    public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
-        inflater.inflate(R.menu.composition, menu);
-        super.onCreateOptionsMenu(menu,inflater);
-    }
-
-
 }
