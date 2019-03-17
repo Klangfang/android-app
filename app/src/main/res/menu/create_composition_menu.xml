@@ -4,6 +4,7 @@
     <item
         android:id="@+id/create_composition_menu"
         android:icon="@drawable/ic_check_24dp"
+        android:iconTint="@color/grey_light"
         android:title="@string/done"
         app:showAsAction="always" />
 </menu>
