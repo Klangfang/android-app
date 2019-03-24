@@ -5,6 +5,9 @@ import android.os.Environment;
 import com.wfm.soundcollaborations.Editor.model.Constants;
 
 import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
 
 /**
  * Created by mohammed on 10/9/17.
@@ -56,5 +59,17 @@ public class FileUtils
             return path;
         directory.mkdirs();
         return path;
+    }
+
+    public static byte[] getBytes(String filePath) {
+        byte[] bytes = new byte[1024];
+        try (FileOutputStream stream = new FileOutputStream(filePath)) {
+            stream.write(bytes);
+        } catch (FileNotFoundException e) {
+            e.printStackTrace(); //TODO
+        } catch (IOException e) {
+            e.printStackTrace(); //TODO
+        }
+        return bytes;
     }
 }

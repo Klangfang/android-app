@@ -3,7 +3,9 @@ package com.wfm.soundcollaborations.Editor.activities;
 import android.Manifest;
 import android.content.Context;
 import android.content.DialogInterface;
+import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Handler;
 import android.support.annotation.RequiresApi;
@@ -21,6 +23,7 @@ import android.widget.Toast;
 import com.ohoussein.playpause.PlayPauseView;
 import com.wfm.soundcollaborations.Editor.exceptions.RecordTimeOutExceededException;
 import com.wfm.soundcollaborations.Editor.exceptions.SoundRecordingTimeException;
+import com.wfm.soundcollaborations.Editor.model.composition.Sound;
 import com.wfm.soundcollaborations.R;
 import com.wfm.soundcollaborations.Editor.exceptions.NoActiveTrackException;
 import com.wfm.soundcollaborations.Editor.exceptions.SoundWillBeOutOfCompositionException;
@@ -29,13 +32,18 @@ import com.wfm.soundcollaborations.Editor.model.composition.CompositionBuilder;
 import com.wfm.soundcollaborations.Editor.utils.JSONUtils;
 import com.wfm.soundcollaborations.Editor.views.composition.CompositionView;
 import com.wfm.soundcollaborations.Editor.views.composition.SoundView;
+import com.wfm.soundcollaborations.webservice.CompositionResultServiceReceiver;
+import com.wfm.soundcollaborations.webservice.CompositionService;
 
+import java.util.List;
 import java.util.Timer;
 import java.util.TimerTask;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
+
+import static android.os.AsyncTask.Status.RUNNING;
 
 /**
  * Platzhalter für UI und Zusammenspiel mit der Compositionlogik.
@@ -71,6 +79,8 @@ public class EditorActivity extends AppCompatActivity {
     private Integer startPositionInWidth=null;
     private Integer soundLength=null;
 
+    private CompositionResultServiceReceiver mReceiver;
+
     /**
      * This constant creates a placeholder for the user's consent of the record audio permission.
      * It will be used when handling callback from the runtime permission (onRequestPermissionsResult)
@@ -83,40 +93,69 @@ public class EditorActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_editor);
         ButterKnife.bind(this);
-        String jsonData = "{"
-                + " 'uuid': '3423423-432434-43243241-33-22222',"
-                + " 'sounds': ["
-               // + "   {'length': 28260, 'track': 1, 'start_position': 0, 'link': "
-               // + "'https://stereoninjamusic.weebly.com/uploads/4/5/7/5/45756923/we_wish_you_a_merry_xmas.ogg'},"
+        mReceiver = new CompositionResultServiceReceiver(new Handler());
+        final Intent intent = new Intent(Intent.ACTION_SYNC, null, this, CompositionService.class);
+        intent.putExtra("receiver", mReceiver);
+        intent.putExtra("command", "query");
+        startService(intent);
+    }
 
-               // + "   {'length': 29760, 'track': 2, 'start_position': 20000, 'link': "
-               // + "'https://stereoninjamusic.weebly.com/uploads/4/5/7/5/45756923/we_three_kings.ogg'},"
+    public void onPause() {
+        super.onPause();
+        mReceiver.setmResultReceiver(null); // clear receiver so no leaks.
+    }
 
-                //+ "   {'length': 30580, 'track': 3, 'start_position': 30000, 'link': "
-                //+ "'https://stereoninjamusic.weebly.com/uploads/4/5/7/5/45756923/deck_the_halls.ogg'},"
+    public void onReceiveResult(int resultCode, Bundle resultData) {
+        switch (resultCode) {
+            case 0:
+                //show progress
+                break;
+            case 1:
+                List results = resultData.getParcelableArrayList("results");
+                // do something interesting
+                // hide progress
 
-                //+ "   {'length': 29100, 'track': 4, 'start_position': 20000, 'link': "
-               // + "'https://stereoninjamusic.weebly.com/uploads/4/5/7/5/45756923/jingle_bells.ogg'},"
+                String jsonData = "{"
+                        + " 'uuid': '3423423-432434-43243241-33-22222',"
+                        + " 'sounds': ["
+                        // + "   {'length': 28260, 'track': 1, 'start_position': 0, 'link': "
+                        // + "'https://stereoninjamusic.weebly.com/uploads/4/5/7/5/45756923/we_wish_you_a_merry_xmas.ogg'},"
 
-                //+ "   {'length': 4920, 'track': 3, 'start_position': 40000, 'link': "
-                //+ "'https://stereoninjamusic.weebly.com/uploads/4/5/7/5/45756923/the_heart_of_a_galaxy.ogg'},"
+                        // + "   {'length': 29760, 'track': 2, 'start_position': 20000, 'link': "
+                        // + "'https://stereoninjamusic.weebly.com/uploads/4/5/7/5/45756923/we_three_kings.ogg'},"
 
-                + "   {'length': 30580, 'track': 1, 'start_position': 10000, 'link': "
-                + "'https://stereoninjamusic.weebly.com/uploads/4/5/7/5/45756923/solar_eclipse.ogg'},"
+                        //+ "   {'length': 30580, 'track': 3, 'start_position': 30000, 'link': "
+                        //+ "'https://stereoninjamusic.weebly.com/uploads/4/5/7/5/45756923/deck_the_halls.ogg'},"
 
-                + "   {'length': 30680, 'track': 2, 'start_position': 20000, 'link': "
-                + "'https://stereoninjamusic.weebly.com/uploads/4/5/7/5/45756923/the_midnight_ninja.ogg'}"
+                        //+ "   {'length': 29100, 'track': 4, 'start_position': 20000, 'link': "
+                        // + "'https://stereoninjamusic.weebly.com/uploads/4/5/7/5/45756923/jingle_bells.ogg'},"
 
-                + " ]"
-                + "}";
-        // create soundViews to be added to the corresponding tracks
-        // let SoundDownloader update these views using listener
-        // when a view finished downloading it add itself to the track
-        // when all sounds are loaded the Composition will be ready to play the sounds
-        builder = new CompositionBuilder(compositionView, 4);
-        builder.addSounds(JSONUtils.getSounds(jsonData));
+                        //+ "   {'length': 4920, 'track': 3, 'start_position': 40000, 'link': "
+                        //+ "'https://stereoninjamusic.weebly.com/uploads/4/5/7/5/45756923/the_heart_of_a_galaxy.ogg'},"
 
-        deletedBtn.setOnClickListener(delBtnview -> deleteConfirmation(delBtnview.getContext()));
+                        + "   {'length': 30580, 'track': 1, 'start_position': 10000, 'link': "
+                        + "'https://stereoninjamusic.weebly.com/uploads/4/5/7/5/45756923/solar_eclipse.ogg'},"
+
+                        + "   {'length': 30680, 'track': 2, 'start_position': 20000, 'link': "
+                        + "'https://stereoninjamusic.weebly.com/uploads/4/5/7/5/45756923/the_midnight_ninja.ogg'}"
+
+                        + " ]"
+                        + "}";
+                // create soundViews to be added to the corresponding tracks
+                // let SoundDownloader update these views using listener
+                // when a view finished downloading it add itself to the track
+                // when all sounds are loaded the Composition will be ready to play the sounds
+                builder = new CompositionBuilder(compositionView, 4);
+                //builder.addSounds(JSONUtils.getSounds(jsonData));
+                builder.addSounds(results); // tracks because : there is no track number!
+
+                deletedBtn.setOnClickListener(delBtnview -> deleteConfirmation(delBtnview.getContext()));
+
+                break;
+            case -1:
+                // handle the error;
+                break;
+        }
     }
 
     private void deleteConfirmation(Context context) {

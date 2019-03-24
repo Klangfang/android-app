@@ -40,4 +40,5 @@ dependencies {
     compile 'com.google.android.exoplayer:exoplayer:r2.5.3'
     compile 'com.liulishuo.filedownloader:library:1.6.8'
     compile 'com.github.ohoussein.playpauseview:playpauseview:1.0.1'
+    compile 'com.loopj.android:android-async-http:1.4.9'
 }
