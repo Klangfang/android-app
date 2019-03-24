@@ -53,4 +53,10 @@
             />
     </android.support.design.widget.TextInputLayout>
 
+    <Button
+        android:id="@+id/testButtonId"
+        android:layout_height="wrap_content"
+        android:layout_width="wrap_content"
+        android:text="Test Button" />
+
 </android.support.v7.widget.LinearLayoutCompat>
