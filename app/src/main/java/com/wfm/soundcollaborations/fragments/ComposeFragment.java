@@ -10,15 +10,24 @@ import android.support.v7.widget.Toolbar;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Adapter;
+import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
+import android.widget.ListView;
 
+import com.wfm.soundcollaborations.Classes.Composition;
 import com.wfm.soundcollaborations.R;
 import com.wfm.soundcollaborations.activities.MainActivity;
+import com.wfm.soundcollaborations.adapter.CompositionAdapter;
+
+import java.util.ArrayList;
+import java.util.Objects;
 
 public class ComposeFragment extends Fragment {
 
-    private RecyclerView recyclerView;
-    private RecyclerView.Adapter mAdapter;
-    private RecyclerView.LayoutManager layoutManager;
+    //private RecyclerView recyclerView;
+    //private RecyclerView.Adapter mAdapter;
+    //private RecyclerView.LayoutManager layoutManager;
     private View root;
 
     @Override
@@ -26,7 +35,21 @@ public class ComposeFragment extends Fragment {
                              Bundle savedInstanceState) {
         root = inflater.inflate(R.layout.fragment_compose, container, false);
         initToolbar();
-        initRecyclerView();
+        //initRecyclerView();
+
+        //New array with test data for composition views
+        ArrayList<Composition> compositions = new ArrayList<>();
+        compositions.add(new Composition("Uni Sounds", "Hamburg, München", "1/4 Mitglieder"));
+        compositions.add(new Composition("Quiet Fire", "Hamburg, München", "1/4 Mitglieder"));
+        compositions.add(new Composition("Baobab", "Hamburg, München", "1/4 Mitglieder"));
+        compositions.add(new Composition("Nom Nom Sounds", "Hamburg, München", "1/4 Mitglieder"));
+        compositions.add(new Composition("Blablabla", "Hamburg, München", "1/4 Mitglieder"));
+
+        CompositionAdapter compositionAdapter = new CompositionAdapter(Objects.requireNonNull(getActivity()), compositions);
+
+        ListView listView = root.findViewById(R.id.public_compositions_list);
+        listView.setAdapter(compositionAdapter);
+
         return root;
     }
 
@@ -43,9 +66,14 @@ public class ComposeFragment extends Fragment {
         toolbar.setTitleTextColor(getResources().getColor(R.color.toolbar_title));
     }
 
-    /**
+
+
+
+
+    /* TODO Use recycler view here instead of list view
      * This method initializes the recycler view that holds all public compositions
      * */
+    /*
     private void initRecyclerView() {
         recyclerView = root.findViewById(R.id.open_compositions_recycler_view);
 
@@ -60,5 +88,6 @@ public class ComposeFragment extends Fragment {
         // TODO create adapter.java file to manage the views that will be loaded into the recycler view
         //mAdapter = new MyAdapter(myDataset);
         recyclerView.setAdapter(mAdapter);
-    }
+    }*/
+
 }

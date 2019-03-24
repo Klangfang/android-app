@@ -1,88 +1,86 @@
 <?xml version="1.0" encoding="utf-8"?>
-<merge xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_marginStart="@dimen/xl"
+    android:layout_marginEnd="@dimen/xl"
     android:layout_width="wrap_content"
     android:layout_height="wrap_content">
 
-    <LinearLayout
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content">
+    <android.support.v7.widget.CardView style="@style/card_view">
 
-        <android.support.v7.widget.CardView
-            android:id="@+id/composition_view"
-            style="@style/card_view">
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
+
+            <TextView
+                android:id="@+id/composition_title"
+                style="@style/card_view_title"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                tools:text="composition_title" />
+
+            <View
+                android:id="@+id/composition_player_view"
+                android:layout_width="match_parent"
+                android:layout_height="@dimen/xxxl"
+                android:background="@color/color_primary" />
 
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:orientation="vertical">
+                android:orientation="horizontal"
+                android:padding="@dimen/s">
+
+                <ImageView
+                    android:src="@drawable/ic_location_24dp"
+                    android:tint="@color/grey_middle"
+                    android:layout_width="@dimen/l"
+                    android:layout_height="@dimen/l" />
 
                 <TextView
-                    android:id="@+id/composition_title"
-                    style="@style/card_view_title"
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:text="composition_title" />
+                    android:id="@+id/locations_text_view"
+                    style="@style/text_label"
+                    android:drawableStart="@color/color_primary"
+                    android:drawablePadding="@dimen/s"
+                    tools:text="locations_text_view" />
 
-                <View
-                    android:id="@+id/composition_player_view"
-                    android:layout_width="match_parent"
-                    android:layout_height="@dimen/xxxl"
-                    android:background="@color/color_primary" />
-
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:orientation="horizontal"
-                    android:padding="@dimen/s">
-
-                    <ImageView
-                        android:src="@drawable/ic_location_24dp"
-                        android:tint="@color/grey_middle"
-                        android:layout_width="@dimen/l"
-                        android:layout_height="@dimen/l"
-                        android:layout_marginRight="@dimen/s" />
-
-                    <TextView
-                        android:id="@+id/locations_text_view"
-                        style="@style/text_label"
-                        android:drawableStart="@color/color_primary"
-                        android:drawablePadding="@dimen/s"
-                        android:text="locations_text_view" />
-
-                </LinearLayout>
-
-                <View style="@style/horizontal_divider" />
-
-                <android.support.constraint.ConstraintLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content">
-
-                    <TextView
-                        android:id="@+id/members_text_view"
-                        style="@style/text_label"
-                        android:layout_marginStart="@dimen/s"
-                        android:layout_marginTop="@dimen/s"
-                        android:layout_marginBottom="@dimen/s"
-                        android:text="members_text_view"
-                        app:layout_constraintBottom_toBottomOf="parent"
-                        app:layout_constraintLeft_toLeftOf="parent"
-                        app:layout_constraintTop_toTopOf="parent" />
-
-                    <Button
-                        android:id="@+id/join_button"
-                        style="@style/primary_button"
-                        android:layout_marginTop="@dimen/xs"
-                        android:layout_marginEnd="@dimen/xs"
-                        android:layout_marginBottom="@dimen/xs"
-                        android:text="@string/join_button"
-                        app:layout_constraintBottom_toBottomOf="parent"
-                        app:layout_constraintRight_toRightOf="parent"
-                        app:layout_constraintTop_toTopOf="parent" />
-
-                </android.support.constraint.ConstraintLayout>
             </LinearLayout>
 
-        </android.support.v7.widget.CardView>
-    </LinearLayout>
-</merge>
+            <View style="@style/horizontal_divider" />
+
+            <android.support.constraint.ConstraintLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content">
+
+                <TextView
+                    android:id="@+id/members_text_view"
+                    style="@style/text_label"
+                    android:layout_marginStart="@dimen/s"
+                    android:layout_marginTop="@dimen/s"
+                    android:layout_marginBottom="@dimen/s"
+                    tools:text="members_text_view"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintLeft_toLeftOf="parent"
+                    app:layout_constraintTop_toTopOf="parent" />
+
+                <Button
+                    android:id="@+id/join_button"
+                    style="@style/primary_button"
+                    android:layout_marginTop="@dimen/xs"
+                    android:layout_marginEnd="@dimen/xs"
+                    android:layout_marginBottom="@dimen/xs"
+                    android:text="@string/join_button"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintRight_toRightOf="parent"
+                    app:layout_constraintTop_toTopOf="parent" />
+
+            </android.support.constraint.ConstraintLayout>
+
+        </LinearLayout>
+
+    </android.support.v7.widget.CardView>
+
+</LinearLayout>
