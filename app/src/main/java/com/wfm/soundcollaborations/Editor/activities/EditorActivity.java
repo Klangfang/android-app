@@ -3,12 +3,10 @@ package com.wfm.soundcollaborations.Editor.activities;
 import android.Manifest;
 import android.content.Context;
 import android.content.DialogInterface;
-import android.content.Intent;
 import android.content.pm.PackageManager;
-import android.os.AsyncTask;
+import android.net.ConnectivityManager;
 import android.os.Build;
 import android.os.Handler;
-import android.os.Parcelable;
 import android.support.annotation.RequiresApi;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
@@ -21,12 +19,9 @@ import android.widget.Button;
 import android.widget.RelativeLayout;
 import android.widget.Toast;
 
-import com.loopj.android.http.JsonHttpResponseHandler;
 import com.ohoussein.playpause.PlayPauseView;
 import com.wfm.soundcollaborations.Editor.exceptions.RecordTimeOutExceededException;
 import com.wfm.soundcollaborations.Editor.exceptions.SoundRecordingTimeException;
-import com.wfm.soundcollaborations.Editor.model.composition.Sound;
-import com.wfm.soundcollaborations.Editor.model.composition.Track;
 import com.wfm.soundcollaborations.R;
 import com.wfm.soundcollaborations.Editor.exceptions.NoActiveTrackException;
 import com.wfm.soundcollaborations.Editor.exceptions.SoundWillBeOutOfCompositionException;
@@ -35,26 +30,14 @@ import com.wfm.soundcollaborations.Editor.model.composition.CompositionBuilder;
 import com.wfm.soundcollaborations.Editor.utils.JSONUtils;
 import com.wfm.soundcollaborations.Editor.views.composition.CompositionView;
 import com.wfm.soundcollaborations.Editor.views.composition.SoundView;
-import com.wfm.soundcollaborations.webservice.CompositionResultServiceReceiver;
 import com.wfm.soundcollaborations.webservice.CompositionService;
-import com.wfm.soundcollaborations.webservice.HttpUtils;
 
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
-
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Timer;
 import java.util.TimerTask;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
-import cz.msebera.android.httpclient.Header;
-
-import static android.app.DownloadManager.STATUS_RUNNING;
-import static android.os.AsyncTask.Status.RUNNING;
 
 /**
  * Platzhalter für UI und Zusammenspiel mit der Compositionlogik.
@@ -86,9 +69,10 @@ public class EditorActivity extends AppCompatActivity {
     @BindView(R.id.btn_play)
     PlayPauseView playBtn;
 
-    private String recordedSoundPath=null;
     private Integer startPositionInWidth=null;
     private Integer soundLength=null;
+
+    private CompositionService compositionService;
 
     /**
      * This constant creates a placeholder for the user's consent of the record audio permission.
@@ -136,8 +120,11 @@ public class EditorActivity extends AppCompatActivity {
         builder.addSounds(JSONUtils.getSounds(jsonData));
 
         deletedBtn.setOnClickListener(delBtnview -> deleteConfirmation(delBtnview.getContext()));
+
+        compositionService = new CompositionService(getSupportFragmentManager(), (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE));
+        compositionService.startDownload();
     }
-    
+
     private void deleteConfirmation(Context context) {
         DialogInterface.OnClickListener dialogClickListener = (dialog, which) -> {
             switch (which){
