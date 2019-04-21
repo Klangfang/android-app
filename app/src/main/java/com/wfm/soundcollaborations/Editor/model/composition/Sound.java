@@ -29,6 +29,13 @@ public class Sound
         this.uri = uri;
     }
 
+    public Sound(String link, int lengthInMs, int startPositionInMs)
+    {
+        this.link = link;
+        this.lengthInMs = lengthInMs;
+        this.startPositionInMs = startPositionInMs;
+    }
+
     public void prepare(Context context) throws NullPointerException
     {
         player = new AudioPlayer(context);
