@@ -24,6 +24,9 @@
     <string name="sound_file_prefix" translatable="false">Klang</string>
     <string name="history">Verlauf deiner Collagen</string>
 
+    <!-- Buttons -->
+    <string name="join_button">Mitmachen</string>
+
 
     <!-- Messages to the user -->
     <string name="record_audio_permission_denied">Bitte erlaube den Zugriff auf dein Mikrofon, um Aufnahmen machen zu können.</string>

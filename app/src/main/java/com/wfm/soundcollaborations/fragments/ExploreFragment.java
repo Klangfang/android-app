@@ -33,9 +33,11 @@ public class ExploreFragment extends Fragment
     private void initToolbar()
     {
         MainActivity mainActivity = (MainActivity) getActivity();
+        assert mainActivity != null;
         Toolbar toolbar = mainActivity.getToolbar();
         if(toolbar != null)
         {
+            toolbar.setTitle(R.string.app_name);
             toolbar.setBackgroundColor(getResources().getColor(R.color.navigation));
             toolbar.setTitleTextColor(getResources().getColor(R.color.toolbar_title));
             setHasOptionsMenu(true);

@@ -5,11 +5,13 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
-import android.os.AsyncTask;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.os.Build;
 import android.os.Handler;
 import android.support.annotation.RequiresApi;
 import android.support.v4.app.ActivityCompat;
+import android.support.v4.app.FragmentActivity;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
@@ -23,7 +25,8 @@ import android.widget.Toast;
 import com.ohoussein.playpause.PlayPauseView;
 import com.wfm.soundcollaborations.Editor.exceptions.RecordTimeOutExceededException;
 import com.wfm.soundcollaborations.Editor.exceptions.SoundRecordingTimeException;
-import com.wfm.soundcollaborations.Editor.model.composition.Sound;
+import com.wfm.soundcollaborations.Editor.network.DownloadCallback;
+import com.wfm.soundcollaborations.Editor.network.NetworkFragment;
 import com.wfm.soundcollaborations.R;
 import com.wfm.soundcollaborations.Editor.exceptions.NoActiveTrackException;
 import com.wfm.soundcollaborations.Editor.exceptions.SoundWillBeOutOfCompositionException;
@@ -32,7 +35,6 @@ import com.wfm.soundcollaborations.Editor.model.composition.CompositionBuilder;
 import com.wfm.soundcollaborations.Editor.utils.JSONUtils;
 import com.wfm.soundcollaborations.Editor.views.composition.CompositionView;
 import com.wfm.soundcollaborations.Editor.views.composition.SoundView;
-import com.wfm.soundcollaborations.webservice.CompositionResultServiceReceiver;
 import com.wfm.soundcollaborations.webservice.CompositionService;
 
 import java.util.List;
@@ -48,7 +50,7 @@ import static android.os.AsyncTask.Status.RUNNING;
 /**
  * Platzhalter für UI und Zusammenspiel mit der Compositionlogik.
  */
-public class EditorActivity extends AppCompatActivity {
+public class EditorActivity extends FragmentActivity implements DownloadCallback {
     private static final String TAG = EditorActivity.class.getSimpleName();
     @BindView(R.id.composition)
     CompositionView compositionView;
@@ -75,11 +77,20 @@ public class EditorActivity extends AppCompatActivity {
     @BindView(R.id.btn_play)
     PlayPauseView playBtn;
 
-    private String recordedSoundPath=null;
     private Integer startPositionInWidth=null;
     private Integer soundLength=null;
 
-    private CompositionResultServiceReceiver mReceiver;
+    // Keep a reference to the NetworkFragment, which owns the AsyncTask object
+    // that is used to execute network ops.
+    private NetworkFragment networkFragment;
+
+    private ConnectivityManager connectivityManager;
+
+    // Boolean telling us whether a download is in progress, so we don't trigger overlapping
+    // downloads with consecutive button clicks.
+    private boolean downloading = false;
+
+    private String URL = "http://localhost:5000/compositions/compositionsOverview?page=0&size=5";
 
     /**
      * This constant creates a placeholder for the user's consent of the record audio permission.
@@ -93,17 +104,16 @@ public class EditorActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_editor);
         ButterKnife.bind(this);
-        mReceiver = new CompositionResultServiceReceiver(new Handler());
-        final Intent intent = new Intent(Intent.ACTION_SYNC, null, this, CompositionService.class);
-        intent.putExtra("receiver", mReceiver);
-        intent.putExtra("command", "query");
-        startService(intent);
-    }
+        connectivityManager = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
+        networkFragment = NetworkFragment.getInstance(getSupportFragmentManager(), URL);
+        String jsonData = "{"
+                + " 'uuid': '3423423-432434-43243241-33-22222',"
+                + " 'sounds': ["
+                // + "   {'length': 28260, 'track': 1, 'start_position': 0, 'link': "
+                // + "'https://stereoninjamusic.weebly.com/uploads/4/5/7/5/45756923/we_wish_you_a_merry_xmas.ogg'},"
 
-    public void onPause() {
-        super.onPause();
-        mReceiver.setmResultReceiver(null); // clear receiver so no leaks.
-    }
+                // + "   {'length': 29760, 'track': 2, 'start_position': 20000, 'link': "
+                // + "'https://stereoninjamusic.weebly.com/uploads/4/5/7/5/45756923/we_three_kings.ogg'},"
 
     public void onReceiveResult(int resultCode, Bundle resultData) {
         switch (resultCode) {
@@ -115,11 +125,8 @@ public class EditorActivity extends AppCompatActivity {
                 // do something interesting
                 // hide progress
 
-                String jsonData = "{"
-                        + " 'uuid': '3423423-432434-43243241-33-22222',"
-                        + " 'sounds': ["
-                        // + "   {'length': 28260, 'track': 1, 'start_position': 0, 'link': "
-                        // + "'https://stereoninjamusic.weebly.com/uploads/4/5/7/5/45756923/we_wish_you_a_merry_xmas.ogg'},"
+                //+ "   {'length': 29100, 'track': 4, 'start_position': 20000, 'link': "
+                // + "'https://stereoninjamusic.weebly.com/uploads/4/5/7/5/45756923/jingle_bells.ogg'},"
 
                         // + "   {'length': 29760, 'track': 2, 'start_position': 20000, 'link': "
                         // + "'https://stereoninjamusic.weebly.com/uploads/4/5/7/5/45756923/we_three_kings.ogg'},"
@@ -133,28 +140,58 @@ public class EditorActivity extends AppCompatActivity {
                         //+ "   {'length': 4920, 'track': 3, 'start_position': 40000, 'link': "
                         //+ "'https://stereoninjamusic.weebly.com/uploads/4/5/7/5/45756923/the_heart_of_a_galaxy.ogg'},"
 
-                        + "   {'length': 30580, 'track': 1, 'start_position': 10000, 'link': "
-                        + "'https://stereoninjamusic.weebly.com/uploads/4/5/7/5/45756923/solar_eclipse.ogg'},"
+        deletedBtn.setOnClickListener(delBtnview -> deleteConfirmation(delBtnview.getContext()));
 
-                        + "   {'length': 30680, 'track': 2, 'start_position': 20000, 'link': "
-                        + "'https://stereoninjamusic.weebly.com/uploads/4/5/7/5/45756923/the_midnight_ninja.ogg'}"
+        startDownload();
+    }
 
-                        + " ]"
-                        + "}";
-                // create soundViews to be added to the corresponding tracks
-                // let SoundDownloader update these views using listener
-                // when a view finished downloading it add itself to the track
-                // when all sounds are loaded the Composition will be ready to play the sounds
-                builder = new CompositionBuilder(compositionView, 4);
-                //builder.addSounds(JSONUtils.getSounds(jsonData));
-                builder.addSounds(results); // tracks because : there is no track number!
 
-                deletedBtn.setOnClickListener(delBtnview -> deleteConfirmation(delBtnview.getContext()));
+    public void startDownload() {
+        if (!downloading && networkFragment != null) {
+            // Execute the async download.
+            networkFragment.startDownload();
+            downloading = true;
+        }
+    }
 
+    @Override
+    public void updateFromDownload(Object result) {
+        // Update your UI here based on result of download.
+    }
+
+    @Override
+    public NetworkInfo getActiveNetworkInfo() {
+        NetworkInfo networkInfo = connectivityManager.getActiveNetworkInfo();
+        return networkInfo;
+    }
+
+    @Override
+    public void onProgressUpdate(int progressCode, int percentComplete) {
+        switch(progressCode) {
+            // You can add UI behavior for progress updates here.
+            case DownloadCallback.Progress.ERROR:
+                //TODO
                 break;
-            case -1:
-                // handle the error;
+            case DownloadCallback.Progress.CONNECT_SUCCESS:
+                //TODO
                 break;
+            case DownloadCallback.Progress.GET_INPUT_STREAM_SUCCESS:
+                //TODO
+                break;
+            case DownloadCallback.Progress.PROCESS_INPUT_STREAM_IN_PROGRESS:
+                //TODO
+                break;
+            case DownloadCallback.Progress.PROCESS_INPUT_STREAM_SUCCESS:
+                //TODO
+                break;
+        }
+    }
+
+    @Override
+    public void finishDownloading() {
+        downloading = false;
+        if (networkFragment != null) {
+            networkFragment.cancelDownload();
         }
     }
 
