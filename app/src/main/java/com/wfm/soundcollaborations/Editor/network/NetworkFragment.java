@@ -17,18 +17,26 @@ public class NetworkFragment extends Fragment {
 
     private DownloadCallback<String> callback;
     private DownloadTask downloadTask;
-    private String urlString;
+    private String urlString = "https://klangfang-service.herokuapp.com/compositions/compositionsOverview?page=0&size=5";
 
     /**
      * Static initializer for NetworkFragment that sets the URL of the host it will be downloading
      * from.
      */
     public static NetworkFragment getInstance(FragmentManager fragmentManager, String url) {
-        NetworkFragment networkFragment = new NetworkFragment();
-        Bundle args = new Bundle();
-        args.putString(URL_KEY, url);
-        networkFragment.setArguments(args);
-        fragmentManager.beginTransaction().add(networkFragment, TAG).commit();
+        // Recover NetworkFragment in case we are re-creating the Activity due to a config change.
+        // This is necessary because NetworkFragment might have a task that began running before
+        // the config change occurred and has not finished yet.
+        // The NetworkFragment is recoverable because it calls setRetainInstance(true).
+        NetworkFragment networkFragment = (NetworkFragment) fragmentManager
+                .findFragmentByTag(NetworkFragment.TAG);
+        if (networkFragment == null) {
+            networkFragment = new NetworkFragment();
+            Bundle args = new Bundle();
+            args.putString(URL_KEY, url);
+            networkFragment.setArguments(args);
+            fragmentManager.beginTransaction().add(networkFragment, TAG).commit();
+        }
         return networkFragment;
     }
 
@@ -36,6 +44,8 @@ public class NetworkFragment extends Fragment {
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         urlString = getArguments().getString(URL_KEY);
+        // Retain this Fragment across configuration changes in the host Activity.
+        setRetainInstance(true);
     }
 
     @Override

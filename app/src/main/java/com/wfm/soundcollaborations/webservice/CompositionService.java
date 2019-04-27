@@ -14,6 +14,7 @@ import android.support.annotation.Nullable;
 import android.support.v4.app.FragmentManager;
 
 import com.loopj.android.http.JsonHttpResponseHandler;
+import com.wfm.soundcollaborations.Editor.model.composition.CompositionBuilder;
 import com.wfm.soundcollaborations.Editor.model.composition.Sound;
 import com.wfm.soundcollaborations.Editor.model.composition.Track;
 import com.wfm.soundcollaborations.Editor.network.DownloadCallback;
@@ -36,6 +37,7 @@ import cz.msebera.android.httpclient.Header;
 import static android.app.DownloadManager.STATUS_RUNNING;
 
 /**
+ * TODO not used, delete!
  * Implementation of AsyncTask designed to fetch data from the composition service via network.
  */
 public class CompositionService implements DownloadCallback {
@@ -50,11 +52,14 @@ public class CompositionService implements DownloadCallback {
     // downloads with consecutive button clicks.
     private boolean downloading = false;
 
-    private String URL = "https://www.google.com";
+    private String URL = "http://localhost:5000/compositions/compositionsOverview?page=0&size=5";
 
-    public CompositionService(FragmentManager fragmentManager, ConnectivityManager connectivityManager) {
+    private CompositionBuilder compositionBuilder;
+
+    public CompositionService(FragmentManager fragmentManager, ConnectivityManager connectivityManager, CompositionBuilder compositionBuilder) {
         networkFragment = NetworkFragment.getInstance(fragmentManager, URL);
         this.connectivityManager = connectivityManager;
+        this.compositionBuilder = compositionBuilder;
     }
 
     protected void wip(@Nullable Intent intent) {
@@ -111,6 +116,7 @@ public class CompositionService implements DownloadCallback {
     @Override
     public void updateFromDownload(Object result) {
         // Update your UI here based on result of download.
+        compositionBuilder.addSounds(null);
     }
 
     @Override

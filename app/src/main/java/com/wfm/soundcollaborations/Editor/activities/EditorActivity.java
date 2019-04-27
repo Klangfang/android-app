@@ -5,10 +5,12 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.pm.PackageManager;
 import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.os.Build;
 import android.os.Handler;
 import android.support.annotation.RequiresApi;
 import android.support.v4.app.ActivityCompat;
+import android.support.v4.app.FragmentActivity;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
@@ -22,6 +24,8 @@ import android.widget.Toast;
 import com.ohoussein.playpause.PlayPauseView;
 import com.wfm.soundcollaborations.Editor.exceptions.RecordTimeOutExceededException;
 import com.wfm.soundcollaborations.Editor.exceptions.SoundRecordingTimeException;
+import com.wfm.soundcollaborations.Editor.network.DownloadCallback;
+import com.wfm.soundcollaborations.Editor.network.NetworkFragment;
 import com.wfm.soundcollaborations.R;
 import com.wfm.soundcollaborations.Editor.exceptions.NoActiveTrackException;
 import com.wfm.soundcollaborations.Editor.exceptions.SoundWillBeOutOfCompositionException;
@@ -42,7 +46,7 @@ import butterknife.OnClick;
 /**
  * Platzhalter für UI und Zusammenspiel mit der Compositionlogik.
  */
-public class EditorActivity extends AppCompatActivity {
+public class EditorActivity extends FragmentActivity implements DownloadCallback {
     private static final String TAG = EditorActivity.class.getSimpleName();
     @BindView(R.id.composition)
     CompositionView compositionView;
@@ -72,7 +76,17 @@ public class EditorActivity extends AppCompatActivity {
     private Integer startPositionInWidth=null;
     private Integer soundLength=null;
 
-    private CompositionService compositionService;
+    // Keep a reference to the NetworkFragment, which owns the AsyncTask object
+    // that is used to execute network ops.
+    private NetworkFragment networkFragment;
+
+    private ConnectivityManager connectivityManager;
+
+    // Boolean telling us whether a download is in progress, so we don't trigger overlapping
+    // downloads with consecutive button clicks.
+    private boolean downloading = false;
+
+    private String URL = "http://localhost:5000/compositions/compositionsOverview?page=0&size=5";
 
     /**
      * This constant creates a placeholder for the user's consent of the record audio permission.
@@ -86,6 +100,8 @@ public class EditorActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_editor);
         ButterKnife.bind(this);
+        connectivityManager = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
+        networkFragment = NetworkFragment.getInstance(getSupportFragmentManager(), URL);
         String jsonData = "{"
                 + " 'uuid': '3423423-432434-43243241-33-22222',"
                 + " 'sounds': ["
@@ -121,8 +137,57 @@ public class EditorActivity extends AppCompatActivity {
 
         deletedBtn.setOnClickListener(delBtnview -> deleteConfirmation(delBtnview.getContext()));
 
-        compositionService = new CompositionService(getSupportFragmentManager(), (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE));
-        compositionService.startDownload();
+        startDownload();
+    }
+
+
+    public void startDownload() {
+        if (!downloading && networkFragment != null) {
+            // Execute the async download.
+            networkFragment.startDownload();
+            downloading = true;
+        }
+    }
+
+    @Override
+    public void updateFromDownload(Object result) {
+        // Update your UI here based on result of download.
+    }
+
+    @Override
+    public NetworkInfo getActiveNetworkInfo() {
+        NetworkInfo networkInfo = connectivityManager.getActiveNetworkInfo();
+        return networkInfo;
+    }
+
+    @Override
+    public void onProgressUpdate(int progressCode, int percentComplete) {
+        switch(progressCode) {
+            // You can add UI behavior for progress updates here.
+            case DownloadCallback.Progress.ERROR:
+                //TODO
+                break;
+            case DownloadCallback.Progress.CONNECT_SUCCESS:
+                //TODO
+                break;
+            case DownloadCallback.Progress.GET_INPUT_STREAM_SUCCESS:
+                //TODO
+                break;
+            case DownloadCallback.Progress.PROCESS_INPUT_STREAM_IN_PROGRESS:
+                //TODO
+                break;
+            case DownloadCallback.Progress.PROCESS_INPUT_STREAM_SUCCESS:
+                //TODO
+                break;
+        }
+    }
+
+    @Override
+    public void finishDownloading() {
+        downloading = false;
+        if (networkFragment != null) {
+            networkFragment.cancelDownload();
+        }
     }
 
     private void deleteConfirmation(Context context) {
