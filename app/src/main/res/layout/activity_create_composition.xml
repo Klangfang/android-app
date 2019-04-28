@@ -45,7 +45,7 @@
             android:hint="Titel"
             android:maxLength="40"
             android:maxLines="1"
-            android:paddingBottom="12dp"
+            android:paddingBottom="20dp"
             android:textColor="@color/white"
             android:textSize="16sp"
             app:backgroundTint="@color/grey_light"
@@ -55,8 +55,9 @@
 
     <Button
         android:id="@+id/testButtonId"
+        android:layout_gravity="center_horizontal"
         android:layout_height="wrap_content"
         android:layout_width="wrap_content"
-        android:text="Test Button" />
+        android:text="Klangcollage starten" />
 
 </android.support.v7.widget.LinearLayoutCompat>
