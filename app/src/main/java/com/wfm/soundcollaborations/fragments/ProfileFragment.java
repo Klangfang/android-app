@@ -47,11 +47,13 @@ public class ProfileFragment extends Fragment
     private void initToolbar()
     {
         MainActivity mainActivity = (MainActivity) getActivity();
+        assert mainActivity != null;
         Toolbar toolbar = mainActivity.getToolbar();
         if(toolbar != null)
         {
+            toolbar.setTitle(R.string.bnm_record);
             toolbar.setTitleTextColor(getResources().getColor(R.color.toolbar_profile_title));
-            toolbar.setBackgroundColor(getResources().getColor(R.color.color_primary));
+            toolbar.setBackgroundColor(getResources().getColor(R.color.color_accent));
             setHasOptionsMenu(true);
         }
     }

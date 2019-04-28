@@ -1,10 +1,18 @@
 package com.wfm.soundcollaborations.Editor.activities;
 
+import android.Manifest;
 import android.content.Context;
 import android.content.DialogInterface;
+import android.content.Intent;
+import android.content.pm.PackageManager;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.os.Build;
 import android.os.Handler;
 import android.support.annotation.RequiresApi;
+import android.support.v4.app.ActivityCompat;
+import android.support.v4.app.FragmentActivity;
+import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -17,6 +25,8 @@ import android.widget.Toast;
 import com.ohoussein.playpause.PlayPauseView;
 import com.wfm.soundcollaborations.Editor.exceptions.RecordTimeOutExceededException;
 import com.wfm.soundcollaborations.Editor.exceptions.SoundRecordingTimeException;
+import com.wfm.soundcollaborations.Editor.network.DownloadCallback;
+import com.wfm.soundcollaborations.Editor.network.NetworkFragment;
 import com.wfm.soundcollaborations.R;
 import com.wfm.soundcollaborations.Editor.exceptions.NoActiveTrackException;
 import com.wfm.soundcollaborations.Editor.exceptions.SoundWillBeOutOfCompositionException;
@@ -25,7 +35,9 @@ import com.wfm.soundcollaborations.Editor.model.composition.CompositionBuilder;
 import com.wfm.soundcollaborations.Editor.utils.JSONUtils;
 import com.wfm.soundcollaborations.Editor.views.composition.CompositionView;
 import com.wfm.soundcollaborations.Editor.views.composition.SoundView;
+import com.wfm.soundcollaborations.webservice.CompositionService;
 
+import java.util.List;
 import java.util.Timer;
 import java.util.TimerTask;
 
@@ -33,10 +45,12 @@ import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
 
+import static android.os.AsyncTask.Status.RUNNING;
+
 /**
  * Platzhalter für UI und Zusammenspiel mit der Compositionlogik.
  */
-public class EditorActivity extends AppCompatActivity {
+public class EditorActivity extends FragmentActivity implements DownloadCallback {
     private static final String TAG = EditorActivity.class.getSimpleName();
     @BindView(R.id.composition)
     CompositionView compositionView;
@@ -63,9 +77,26 @@ public class EditorActivity extends AppCompatActivity {
     @BindView(R.id.btn_play)
     PlayPauseView playBtn;
 
-    private String recordedSoundPath=null;
     private Integer startPositionInWidth=null;
     private Integer soundLength=null;
+
+    // Keep a reference to the NetworkFragment, which owns the AsyncTask object
+    // that is used to execute network ops.
+    private NetworkFragment networkFragment;
+
+    private ConnectivityManager connectivityManager;
+
+    // Boolean telling us whether a download is in progress, so we don't trigger overlapping
+    // downloads with consecutive button clicks.
+    private boolean downloading = false;
+
+    private String URL = "https://klangfang-service.herokuapp.com/compositions/compositionsOverview?page=0&size=5";
+
+    /**
+     * This constant creates a placeholder for the user's consent of the record audio permission.
+     * It will be used when handling callback from the runtime permission (onRequestPermissionsResult)
+     */
+    private final int RECORD_AUDIO_PERMISSIONS_DECISIONS = 1;
 
     @Override
     protected void onCreate(Bundle savedInstanceState)
@@ -73,20 +104,24 @@ public class EditorActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_editor);
         ButterKnife.bind(this);
+        connectivityManager = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
+        networkFragment = NetworkFragment.getInstance(getSupportFragmentManager(), URL);
+
+
         String jsonData = "{"
                 + " 'uuid': '3423423-432434-43243241-33-22222',"
                 + " 'sounds': ["
-               // + "   {'length': 28260, 'track': 1, 'start_position': 0, 'link': "
-               // + "'https://stereoninjamusic.weebly.com/uploads/4/5/7/5/45756923/we_wish_you_a_merry_xmas.ogg'},"
+                // + "   {'length': 28260, 'track': 1, 'start_position': 0, 'link': "
+                // + "'https://stereoninjamusic.weebly.com/uploads/4/5/7/5/45756923/we_wish_you_a_merry_xmas.ogg'},"
 
-               // + "   {'length': 29760, 'track': 2, 'start_position': 20000, 'link': "
-               // + "'https://stereoninjamusic.weebly.com/uploads/4/5/7/5/45756923/we_three_kings.ogg'},"
+                // + "   {'length': 29760, 'track': 2, 'start_position': 20000, 'link': "
+                // + "'https://stereoninjamusic.weebly.com/uploads/4/5/7/5/45756923/we_three_kings.ogg'},"
 
                 //+ "   {'length': 30580, 'track': 3, 'start_position': 30000, 'link': "
                 //+ "'https://stereoninjamusic.weebly.com/uploads/4/5/7/5/45756923/deck_the_halls.ogg'},"
 
                 //+ "   {'length': 29100, 'track': 4, 'start_position': 20000, 'link': "
-               // + "'https://stereoninjamusic.weebly.com/uploads/4/5/7/5/45756923/jingle_bells.ogg'},"
+                // + "'https://stereoninjamusic.weebly.com/uploads/4/5/7/5/45756923/jingle_bells.ogg'},"
 
                 //+ "   {'length': 4920, 'track': 3, 'start_position': 40000, 'link': "
                 //+ "'https://stereoninjamusic.weebly.com/uploads/4/5/7/5/45756923/the_heart_of_a_galaxy.ogg'},"
@@ -106,7 +141,61 @@ public class EditorActivity extends AppCompatActivity {
         builder = new CompositionBuilder(compositionView, 4);
         builder.addSounds(JSONUtils.getSounds(jsonData));
 
+
         deletedBtn.setOnClickListener(delBtnview -> deleteConfirmation(delBtnview.getContext()));
+
+        startDownload();
+    }
+
+
+    public void startDownload() {
+        if (!downloading && networkFragment != null) {
+            // Execute the async download.
+            networkFragment.startDownload();
+            downloading = true;
+        }
+    }
+
+    @Override
+    public void updateFromDownload(Object result) {
+        // Update your UI here based on result of download.
+        boolean test = true;
+    }
+
+    @Override
+    public NetworkInfo getActiveNetworkInfo() {
+        NetworkInfo networkInfo = connectivityManager.getActiveNetworkInfo();
+        return networkInfo;
+    }
+
+    @Override
+    public void onProgressUpdate(int progressCode, int percentComplete) {
+        switch(progressCode) {
+            // You can add UI behavior for progress updates here.
+            case DownloadCallback.Progress.ERROR:
+                //TODO
+                break;
+            case DownloadCallback.Progress.CONNECT_SUCCESS:
+                //TODO
+                break;
+            case DownloadCallback.Progress.GET_INPUT_STREAM_SUCCESS:
+                //TODO
+                break;
+            case DownloadCallback.Progress.PROCESS_INPUT_STREAM_IN_PROGRESS:
+                //TODO
+                break;
+            case DownloadCallback.Progress.PROCESS_INPUT_STREAM_SUCCESS:
+                //TODO
+                break;
+        }
+    }
+
+    @Override
+    public void finishDownloading() {
+        downloading = false;
+        if (networkFragment != null) {
+            networkFragment.cancelDownload();
+        }
     }
 
     private void deleteConfirmation(Context context) {
@@ -143,22 +232,73 @@ public class EditorActivity extends AppCompatActivity {
         ((PlayPauseView) view).toggle();
     }
 
-    @OnClick(R.id.btn_record)
-    public void record(final View view)
-    {
+    /**
+     * This method is called, when the record-button is clicked.
+     * It requests audio and storage permissions.
+     */
+    public void requestRecordingPermissions(View view) {
+        // First: check if the permission is not granted
+        if (ContextCompat.checkSelfPermission(this, Manifest.permission.RECORD_AUDIO) +
+                ContextCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE)
+                != PackageManager.PERMISSION_GRANTED) {
+            //Permission is not granted. Show system permission dialog
+            ActivityCompat.requestPermissions(this, new String[]{
+                    Manifest.permission.RECORD_AUDIO,
+                    Manifest.permission.WRITE_EXTERNAL_STORAGE},
+                    RECORD_AUDIO_PERMISSIONS_DECISIONS);
+        } else {
+            //Permission is granted. Start recording
+            record();
+        }
+    }
 
+    /**
+     * This method is called, when the user interacts with the system dialog for permissions.
+     * It handles the callback of audio and storage permissions.
+     */
+    @Override
+    public void onRequestPermissionsResult(int requestCode,
+                                           String permissions[],
+                                           int[] grantResults) {
+        switch (requestCode) {
+            case RECORD_AUDIO_PERMISSIONS_DECISIONS: {
+                if (grantResults.length > 1
+                        && grantResults[0] == PackageManager.PERMISSION_GRANTED
+                        && grantResults[1] == PackageManager.PERMISSION_GRANTED) {
+                    record(); // All permissions were granted! Start recording
+                } else if (grantResults.length > 1
+                        && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                    // Only recording permission was granted
+                    Toast.makeText(this,
+                            this.getString(R.string.external_storage_permission_denied),
+                            Toast.LENGTH_LONG).show();
+                } else if (grantResults.length > 1
+                        && grantResults[1] == PackageManager.PERMISSION_GRANTED) {
+                    // Only Storage permission was granted
+                    Toast.makeText(this,
+                            this.getString(R.string.record_audio_permission_denied),
+                            Toast.LENGTH_LONG).show();
+                } else {
+                    // All permissions were denied.
+                    Toast.makeText(this,
+                            this.getString(R.string.all_audio_permissions_denied),
+                            Toast.LENGTH_LONG).show();
+                }
+            }
+        }
+    }
+
+
+    public void record() {
         try {
             soundView = builder.getRecordSoundView(this);
             layoutParams = (RelativeLayout.LayoutParams) soundView.getLayoutParams();
-
 
             // Stop recording
             if (recording) {
                 resetEditorValues();
                 builder.prepareRecordedSound(soundView, soundLength, startPositionInWidth);
-            }
-
-            else {
+            } else {
                 // Beim Zeitlimit oder bei einer Ueberlappung keine Aufnahme starten.
                 builder.checkLimits(soundView, soundLength, startPositionInWidth);
 
@@ -241,7 +381,7 @@ public class EditorActivity extends AppCompatActivity {
         } catch (SoundWillOverlapException ex) {
 
         } catch (SoundWillBeOutOfCompositionException ex) {
-        } catch(SoundRecordingTimeException ex){
+        } catch (SoundRecordingTimeException ex) {
             resetEditorValues();
             builder.prepareRecordedSound(soundView, soundLength, startPositionInWidth);
         } catch (Exception ex) {

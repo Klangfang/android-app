@@ -58,7 +58,7 @@ public class MainActivity extends AppCompatActivity
                                 startExploreFragment();
                                 break;
                             case R.id.bnm_compose:
-                                startSoundPostFragment();
+                                startComposeFragment();
                                 break;
                             case R.id.bnm_record:
                                 startProfileFragment();
@@ -77,7 +77,7 @@ public class MainActivity extends AppCompatActivity
         transaction.commit();
     }
 
-    private void startSoundPostFragment(){
+    private void startComposeFragment(){
         ComposeFragment composeFragment = new ComposeFragment();
 
         FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
