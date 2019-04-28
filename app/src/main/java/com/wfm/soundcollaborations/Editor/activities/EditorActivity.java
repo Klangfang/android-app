@@ -106,39 +106,7 @@ public class EditorActivity extends FragmentActivity implements DownloadCallback
         ButterKnife.bind(this);
         connectivityManager = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
         networkFragment = NetworkFragment.getInstance(getSupportFragmentManager(), URL);
-        String jsonData = "{"
-                + " 'uuid': '3423423-432434-43243241-33-22222',"
-                + " 'sounds': ["
-                // + "   {'length': 28260, 'track': 1, 'start_position': 0, 'link': "
-                // + "'https://stereoninjamusic.weebly.com/uploads/4/5/7/5/45756923/we_wish_you_a_merry_xmas.ogg'},"
 
-                // + "   {'length': 29760, 'track': 2, 'start_position': 20000, 'link': "
-                // + "'https://stereoninjamusic.weebly.com/uploads/4/5/7/5/45756923/we_three_kings.ogg'},"
-
-    public void onReceiveResult(int resultCode, Bundle resultData) {
-        switch (resultCode) {
-            case 0:
-                //show progress
-                break;
-            case 1:
-                List results = resultData.getParcelableArrayList("results");
-                // do something interesting
-                // hide progress
-
-                //+ "   {'length': 29100, 'track': 4, 'start_position': 20000, 'link': "
-                // + "'https://stereoninjamusic.weebly.com/uploads/4/5/7/5/45756923/jingle_bells.ogg'},"
-
-                        // + "   {'length': 29760, 'track': 2, 'start_position': 20000, 'link': "
-                        // + "'https://stereoninjamusic.weebly.com/uploads/4/5/7/5/45756923/we_three_kings.ogg'},"
-
-                        //+ "   {'length': 30580, 'track': 3, 'start_position': 30000, 'link': "
-                        //+ "'https://stereoninjamusic.weebly.com/uploads/4/5/7/5/45756923/deck_the_halls.ogg'},"
-
-                        //+ "   {'length': 29100, 'track': 4, 'start_position': 20000, 'link': "
-                        // + "'https://stereoninjamusic.weebly.com/uploads/4/5/7/5/45756923/jingle_bells.ogg'},"
-
-                        //+ "   {'length': 4920, 'track': 3, 'start_position': 40000, 'link': "
-                        //+ "'https://stereoninjamusic.weebly.com/uploads/4/5/7/5/45756923/the_heart_of_a_galaxy.ogg'},"
 
         deletedBtn.setOnClickListener(delBtnview -> deleteConfirmation(delBtnview.getContext()));
 
@@ -157,6 +125,7 @@ public class EditorActivity extends FragmentActivity implements DownloadCallback
     @Override
     public void updateFromDownload(Object result) {
         // Update your UI here based on result of download.
+        boolean test = true;
     }
 
     @Override
