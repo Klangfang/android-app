@@ -28,6 +28,10 @@ public class Track
         sounds.add(sound);
     }
 
+    public void addSounds(List<Sound> sounds) {
+        sounds.addAll(sounds);
+    }
+
     public void prepare(Context context) throws NullPointerException {
         for (Sound sound : sounds) {
             sound.prepare(context);

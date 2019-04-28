@@ -16,6 +16,7 @@ import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.util.JsonReader;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
@@ -25,6 +26,8 @@ import android.widget.Toast;
 import com.ohoussein.playpause.PlayPauseView;
 import com.wfm.soundcollaborations.Editor.exceptions.RecordTimeOutExceededException;
 import com.wfm.soundcollaborations.Editor.exceptions.SoundRecordingTimeException;
+import com.wfm.soundcollaborations.Editor.model.composition.Composition;
+import com.wfm.soundcollaborations.Editor.model.composition.CompositionOverview;
 import com.wfm.soundcollaborations.Editor.network.DownloadCallback;
 import com.wfm.soundcollaborations.Editor.network.NetworkFragment;
 import com.wfm.soundcollaborations.R;
@@ -36,7 +39,13 @@ import com.wfm.soundcollaborations.Editor.utils.JSONUtils;
 import com.wfm.soundcollaborations.Editor.views.composition.CompositionView;
 import com.wfm.soundcollaborations.Editor.views.composition.SoundView;
 import com.wfm.soundcollaborations.webservice.CompositionService;
+import com.wfm.soundcollaborations.webservice.HttpUtils;
 
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Timer;
 import java.util.TimerTask;
@@ -90,7 +99,7 @@ public class EditorActivity extends FragmentActivity implements DownloadCallback
     // downloads with consecutive button clicks.
     private boolean downloading = false;
 
-    private String URL = "https://klangfang-service.herokuapp.com/compositions/compositionsOverview?page=0&size=5";
+    private String URL = "https://klangfang-service.herokuapp.com/compositions/1/pick";
 
     /**
      * This constant creates a placeholder for the user's consent of the record audio permission.
@@ -160,6 +169,9 @@ public class EditorActivity extends FragmentActivity implements DownloadCallback
     public void updateFromDownload(Object result) {
         // Update your UI here based on result of download.
         boolean test = true;
+        Composition composition = HttpUtils.getComposition(result.toString());
+        //TODO move to francas activity (it creates new composition) we handle it first as pick!
+        //TODO load composition data in new editor and create it
     }
 
     @Override
