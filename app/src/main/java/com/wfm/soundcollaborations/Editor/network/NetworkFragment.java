@@ -53,6 +53,7 @@ public class NetworkFragment extends Fragment {
         super.onAttach(context);
         // Host Activity will handle callbacks from task.
         callback = (DownloadCallback<String>) context;
+        downloadTask.setCallback(callback);
     }
 
     @Override

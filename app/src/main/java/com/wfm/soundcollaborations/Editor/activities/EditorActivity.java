@@ -90,7 +90,7 @@ public class EditorActivity extends FragmentActivity implements DownloadCallback
     // downloads with consecutive button clicks.
     private boolean downloading = false;
 
-    private String URL = "http://localhost:5000/compositions/compositionsOverview?page=0&size=5";
+    private String URL = "https://klangfang-service.herokuapp.com/compositions/compositionsOverview?page=0&size=5";
 
     /**
      * This constant creates a placeholder for the user's consent of the record audio permission.
@@ -106,6 +106,40 @@ public class EditorActivity extends FragmentActivity implements DownloadCallback
         ButterKnife.bind(this);
         connectivityManager = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
         networkFragment = NetworkFragment.getInstance(getSupportFragmentManager(), URL);
+
+
+        String jsonData = "{"
+                + " 'uuid': '3423423-432434-43243241-33-22222',"
+                + " 'sounds': ["
+                // + "   {'length': 28260, 'track': 1, 'start_position': 0, 'link': "
+                // + "'https://stereoninjamusic.weebly.com/uploads/4/5/7/5/45756923/we_wish_you_a_merry_xmas.ogg'},"
+
+                // + "   {'length': 29760, 'track': 2, 'start_position': 20000, 'link': "
+                // + "'https://stereoninjamusic.weebly.com/uploads/4/5/7/5/45756923/we_three_kings.ogg'},"
+
+                //+ "   {'length': 30580, 'track': 3, 'start_position': 30000, 'link': "
+                //+ "'https://stereoninjamusic.weebly.com/uploads/4/5/7/5/45756923/deck_the_halls.ogg'},"
+
+                //+ "   {'length': 29100, 'track': 4, 'start_position': 20000, 'link': "
+                // + "'https://stereoninjamusic.weebly.com/uploads/4/5/7/5/45756923/jingle_bells.ogg'},"
+
+                //+ "   {'length': 4920, 'track': 3, 'start_position': 40000, 'link': "
+                //+ "'https://stereoninjamusic.weebly.com/uploads/4/5/7/5/45756923/the_heart_of_a_galaxy.ogg'},"
+
+                + "   {'length': 30580, 'track': 1, 'start_position': 10000, 'link': "
+                + "'https://stereoninjamusic.weebly.com/uploads/4/5/7/5/45756923/solar_eclipse.ogg'},"
+
+                + "   {'length': 30680, 'track': 2, 'start_position': 20000, 'link': "
+                + "'https://stereoninjamusic.weebly.com/uploads/4/5/7/5/45756923/the_midnight_ninja.ogg'}"
+
+                + " ]"
+                + "}";
+        // create soundViews to be added to the corresponding tracks
+        // let SoundDownloader update these views using listener
+        // when a view finished downloading it add itself to the track
+        // when all sounds are loaded the Composition will be ready to play the sounds
+        builder = new CompositionBuilder(compositionView, 4);
+        builder.addSounds(JSONUtils.getSounds(jsonData));
 
 
         deletedBtn.setOnClickListener(delBtnview -> deleteConfirmation(delBtnview.getContext()));
