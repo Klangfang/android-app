@@ -1,5 +1,8 @@
 package com.wfm.soundcollaborations.webservice;
 
+import android.util.JsonReader;
+import android.util.JsonWriter;
+
 import com.loopj.android.http.AsyncHttpClient;
 import com.loopj.android.http.AsyncHttpResponseHandler;
 import com.loopj.android.http.JsonHttpResponseHandler;
@@ -72,10 +75,10 @@ public class HttpUtils {
     }
 
     public static Composition getComposition(String jsonResponse) {
+        //jsonResponse = jsonResponse.replaceAll("\n", "");
         Composition composition = null;
         try {
             JSONObject jsonObject = new JSONObject(jsonResponse);
-            Long id = jsonObject.getLong("id");
             String title = jsonObject.getString("title");
             String creatorname = jsonObject.getString("creatorname");
             String creationDate = jsonObject.getString("creationDate");
@@ -102,9 +105,10 @@ public class HttpUtils {
                 track.addSounds(sounds);
                 tracks.add(track);
             }
-            composition = new Composition(id, title, creatorname, tracks, creationDate, status,
+            composition = new Composition(title, creatorname, tracks, creationDate, status,
                     numberOfParticipants);
         } catch (JSONException e) {
+            System.err.println(e.getMessage());
         }
         return composition;
     }

@@ -83,23 +83,25 @@ public class CompositionBuilder
         mTracksTimer = new TracksTimer(this.tracks, this.compositionView);
     }
 
-    public void addSounds(List<Sound> sounds)
+    public void addSounds(Composition composition)
     {
-        downloadedSounds.addAll(sounds);
-        for(int i=0; i<sounds.size(); i++)
-        {
-            // create sounds view
-            SoundView soundView = new SoundView(this.compositionView.getContext());
-            Sound sound = sounds.get(i);
-            RelativeLayout.LayoutParams soundParams =
-                    new RelativeLayout.LayoutParams(getValueInDP(sound.getLengthInMs()), TRACK_HEIGHT);
-            soundParams.setMargins(getValueInDP(sound.getStartPositionInMs()), 0, 0, 0);
-            soundView.setLayoutParams(soundParams);
-            soundView.setTrack(sound.getTrack());
-            // add soundView to the list
-            downloadedSoundViews.add(soundView);
-            // add sound view to the track
-            downloadedTrackViews.get(sounds.get(i).getTrack()).addSoundView(soundView);
+        int trackPosition = 0;
+        for (Track track : composition.tracks) {
+            for (Sound sound : track.getSounds()) {
+                SoundView soundView = new SoundView(this.compositionView.getContext());
+                RelativeLayout.LayoutParams soundParams =
+                        new RelativeLayout.LayoutParams(getValueInDP(sound.getLengthInMs()), TRACK_HEIGHT);
+                soundParams.setMargins(getValueInDP(sound.getStartPositionInMs()), 0, 0, 0);
+                soundView.setLayoutParams(soundParams);
+                soundView.setTrack(sound.getTrack());
+                // add soundView to the list
+                downloadedSoundViews.add(soundView);
+                // add sound view to the track
+                downloadedTrackViews.get(trackPosition).addSoundView(soundView);
+
+                downloadedSounds.add(sound);
+            }
+            trackPosition++;
         }
         // we will add everything to the composition view
         build();

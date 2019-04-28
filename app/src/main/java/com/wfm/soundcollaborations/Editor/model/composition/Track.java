@@ -29,7 +29,7 @@ public class Track
     }
 
     public void addSounds(List<Sound> sounds) {
-        sounds.addAll(sounds);
+        this.sounds.addAll(sounds);
     }
 
     public void prepare(Context context) throws NullPointerException {

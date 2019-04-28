@@ -53,7 +53,11 @@ public class NetworkFragment extends Fragment {
         super.onAttach(context);
         // Host Activity will handle callbacks from task.
         callback = (DownloadCallback<String>) context;
-        downloadTask.setCallback(callback);
+        //TODO Quick solution:
+        // the network fragement get attached before the startDownload Method, NullPointer -> downloadTask
+        if (downloadTask != null) {
+            downloadTask.setCallback(callback);
+        }
     }
 
     @Override
@@ -73,9 +77,14 @@ public class NetworkFragment extends Fragment {
     /**
      * Start non-blocking execution of DownloadTask.
      */
-    public void startDownload() {
+    public void startDownload(Context context) {
         cancelDownload();
         downloadTask = new DownloadTask(callback);
+        // Host Activity will handle callbacks from task.
+        callback = (DownloadCallback<String>) context;
+        //TODO Quick Solution:
+        // set callback after get dettached
+        downloadTask.setCallback(callback);
         downloadTask.execute(urlString);
     }
 

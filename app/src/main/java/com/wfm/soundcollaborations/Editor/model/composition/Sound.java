@@ -29,11 +29,11 @@ public class Sound
         this.uri = uri;
     }
 
-    public Sound(String link, int lengthInMs, int startPositionInMs)
+    public Sound(String link, int startPositionInMs, int lengthInMs)
     {
         this.link = link;
-        this.lengthInMs = lengthInMs;
         this.startPositionInMs = startPositionInMs;
+        this.lengthInMs = lengthInMs;
     }
 
     public void prepare(Context context) throws NullPointerException
