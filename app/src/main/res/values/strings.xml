@@ -44,6 +44,9 @@
     <!-- Buttons -->
     <string name="join_button">Join</string>
 
+    <!-- Image Content Descriptions -->
+    <string name="locations">Composition Locations</string>
+
     <!-- Messages to the user -->
     <string name="MESSAGE_PRESS_AND_HOLD_TO_RECORD">Please press and hold to record a voice clip</string>
     <string name="record_audio_permission_denied">Recording permission was denied. Cannot record audio.</string>

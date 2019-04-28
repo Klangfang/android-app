@@ -14,6 +14,7 @@
         app:layout_constraintTop_toTopOf="parent"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
+        android:scrollbars="none"
         tools:context="com.example.android.soundcollabroations.ComposeFragment" />
 
     <!-- TODO Use Recycler View instead of List View

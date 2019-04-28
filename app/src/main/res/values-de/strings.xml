@@ -27,6 +27,9 @@
     <!-- Buttons -->
     <string name="join_button">Mitmachen</string>
 
+    <!-- Image Content Descriptions -->
+    <string name="locations">Orte aller Collagen</string>
+
 
     <!-- Messages to the user -->
     <string name="record_audio_permission_denied">Bitte erlaube den Zugriff auf dein Mikrofon, um Aufnahmen machen zu können.</string>

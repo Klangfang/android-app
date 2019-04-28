@@ -3,8 +3,7 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
-    android:layout_marginStart="@dimen/xl"
-    android:layout_marginEnd="@dimen/xl"
+    android:paddingBottom="@dimen/m"
     android:layout_width="wrap_content"
     android:layout_height="wrap_content">
 
@@ -22,11 +21,28 @@
                 android:layout_height="match_parent"
                 tools:text="composition_title" />
 
-            <View
+            <android.support.constraint.ConstraintLayout
                 android:id="@+id/composition_player_view"
                 android:layout_width="match_parent"
                 android:layout_height="@dimen/xxxl"
-                android:background="@color/color_primary" />
+                android:background="@color/color_primary" >
+
+                <com.ohoussein.playpause.PlayPauseView
+                    android:id="@+id/btn_play_public_composition"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:clickable="true"
+                    android:focusable="true"
+                    android:foreground="?android:selectableItemBackground"
+                    app:fill_color="@color/white"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toTopOf="parent"
+                    app:play_bg="@color/color_primary"
+                    android:onClick="" />
+
+            </android.support.constraint.ConstraintLayout>
 
             <LinearLayout
                 android:layout_width="match_parent"
@@ -38,7 +54,8 @@
                     android:src="@drawable/ic_location_24dp"
                     android:tint="@color/grey_middle"
                     android:layout_width="@dimen/l"
-                    android:layout_height="@dimen/l" />
+                    android:layout_height="@dimen/l"
+                    android:contentDescription="@string/locations" />
 
                 <TextView
                     android:id="@+id/locations_text_view"
