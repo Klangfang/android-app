@@ -23,7 +23,7 @@
         android:layout_marginLeft="16dp"
         android:layout_marginTop="32dp"
         android:layout_marginRight="16dp"
-        android:text="Wie möchtest du deine Klangcollage nennen?"
+        android:text="@string/name_composition"
         android:textColor="@color/white"
         android:textSize="20sp"
         />
@@ -31,9 +31,10 @@
     <android.support.design.widget.TextInputLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginLeft="16dp"
         android:layout_marginTop="32dp"
+        android:layout_marginLeft="16dp"
         android:layout_marginRight="16dp"
+        android:layout_marginBottom="32dp"
         android:textColorHint="@color/grey_light"
         app:counterEnabled="true"
         app:counterMaxLength="20"
@@ -42,10 +43,9 @@
         <android.support.design.widget.TextInputEditText
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:hint="Titel"
+            android:hint="@string/title"
             android:maxLength="40"
             android:maxLines="1"
-            android:paddingBottom="20dp"
             android:textColor="@color/white"
             android:textSize="16sp"
             app:backgroundTint="@color/grey_light"
@@ -58,6 +58,6 @@
         android:layout_gravity="center_horizontal"
         android:layout_height="wrap_content"
         android:layout_width="wrap_content"
-        android:text="Klangcollage starten" />
+        android:text="@string/start_composition" />
 
 </android.support.v7.widget.LinearLayoutCompat>
