@@ -31,7 +31,8 @@ public class CreateCompositionActivity extends AppCompatActivity implements Down
     // downloads with consecutive button clicks.
     private boolean downloading = false;
 
-    private String URL = "https://klangfang-service.herokuapp.com/compositions/19/pick";
+    private final String COMPOSITION_VIEW_URL = "https://klangfang-service.herokuapp.com/compositions/compositionsOverview?page=0&size=5";
+    private final String COMPOSITION_PICK_URL = "https://klangfang-service.herokuapp.com/compositions/1/pick";
 
     // If Activity starts, following onCreate function will be executed.
     @Override
@@ -43,7 +44,7 @@ public class CreateCompositionActivity extends AppCompatActivity implements Down
 
         //init attributes needed to consume the compositionservice api
         connectivityManager = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
-        networkFragment = NetworkFragment.getInstance(getSupportFragmentManager(), URL);
+        networkFragment = NetworkFragment.getInstance(getSupportFragmentManager(), COMPOSITION_PICK_URL);
 
         // When user taps confirm button
         // Capture button from layout to add functionality
@@ -77,6 +78,7 @@ public class CreateCompositionActivity extends AppCompatActivity implements Down
         intent.putExtra(COMPOSITION_RESPONSE, result.toString());
         // Start an instance of the DisplayMessageActivity specified by the Intent
         view.getContext().startActivity(intent);
+       // CreateCompositionActivity.this.startActivity(intent);
     }
 
     @Override

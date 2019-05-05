@@ -20,6 +20,9 @@ public class Sound
     private int startPositionInMs;
     private AudioPlayer player;
 
+    // TODO think about where to move
+    private final String COMPOSITION_FILES_URL = "https://klangfang-service.herokuapp.com/compositions/";
+
     public Sound(String link, int lengthInMs, int track, int startPositionInMs, String uri)
     {
         this.link = link;
@@ -31,7 +34,7 @@ public class Sound
 
     public Sound(String link, int startPositionInMs, int lengthInMs)
     {
-        this.link = link;
+        this.link = COMPOSITION_FILES_URL + link + "?compositionId=1";
         this.startPositionInMs = startPositionInMs;
         this.lengthInMs = lengthInMs;
     }
@@ -39,7 +42,7 @@ public class Sound
     public void prepare(Context context) throws NullPointerException
     {
         player = new AudioPlayer(context);
-        player.addSounds(new String[]{uri});
+        player.addSounds(new String[]{link});
     }
 
     public void play(int trackNumber, int positionInMillis)

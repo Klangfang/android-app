@@ -40,6 +40,7 @@ public class SoundDownloader
     public void addSoundUrl(String url, int index)
     {
         String name = url.split("/")[url.split("/").length - 1];
+        name = name.replace("?compositionId=1", "");
         downloadTasks.add(FileDownloader.getImpl().create(url).setPath(FileUtils.getKlangfangCacheDirectory()+"/"+name).setTag(index));
     }
 

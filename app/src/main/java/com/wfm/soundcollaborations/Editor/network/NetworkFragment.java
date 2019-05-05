@@ -17,7 +17,8 @@ public class NetworkFragment extends Fragment {
 
     private DownloadCallback<String> callback;
     private DownloadTask downloadTask;
-    private String urlString = "https://klangfang-service.herokuapp.com/compositions/compositionsOverview?page=0&size=5";
+
+    private String urlString;
 
     /**
      * Static initializer for NetworkFragment that sets the URL of the host it will be downloading
