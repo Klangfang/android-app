@@ -7,21 +7,21 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
+import android.widget.Button;
 import android.widget.TextView;
 
-import com.wfm.soundcollaborations.Classes.Composition;
-import com.wfm.soundcollaborations.Editor.views.composition.CompositionScrollView;
+import com.wfm.soundcollaborations.Classes.CompositionOverview;
 import com.wfm.soundcollaborations.R;
 
 import java.util.ArrayList;
 
 /**
  * {@link CompositionAdapter} is an {@link ArrayAdapter} that can provide the layout for each list item
- * based on a data source, which is a list of {@link Composition} objects
+ * based on a data source, which is a list of {@link CompositionOverview} objects
  **/
-public class CompositionAdapter extends ArrayAdapter<Composition> {
+public class CompositionAdapter extends ArrayAdapter<CompositionOverview> {
 
-    public CompositionAdapter(Activity context, ArrayList<Composition> compositions) {
+    public CompositionAdapter(Activity context, ArrayList<CompositionOverview> compositions) {
         super(context, 0, compositions);
     }
 
@@ -37,9 +37,9 @@ public class CompositionAdapter extends ArrayAdapter<Composition> {
                     R.layout.song_composition, parent, false);
         }
 
-        Composition currentComposition = getItem(position);
+        CompositionOverview currentComposition = getItem(position);
 
-        //Assign String values of {@link Composition} to the text views of song_composition.xml
+        //Assign String values of {@link CompositionOverview} to the text views of song_composition.xml
         TextView compositionTitleTextView = listItemView.findViewById(R.id.composition_title);
         assert currentComposition != null;
         compositionTitleTextView.setText(currentComposition.getCompositionTitle());
@@ -49,6 +49,9 @@ public class CompositionAdapter extends ArrayAdapter<Composition> {
 
         TextView membersTextView = listItemView.findViewById(R.id.members_text_view);
         membersTextView.setText(currentComposition.getNumberOfMembers());
+
+        //Button playButton = listItemView.findViewById(R.id.btn_play_public_composition);
+        // TODO What happens with playButton?
 
         return listItemView;
     }

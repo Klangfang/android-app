@@ -40,7 +40,7 @@
                     app:layout_constraintStart_toStartOf="parent"
                     app:layout_constraintTop_toTopOf="parent"
                     app:play_bg="@color/color_primary"
-                    android:onClick="" />
+                    app:pause_bg="@color/color_primary" />
 
             </android.support.constraint.ConstraintLayout>
 

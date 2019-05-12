@@ -27,7 +27,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Implementiert die Businesslogik des Composition Builders (Wird in der EditorActivity verwendet)
+ * Implementiert die Businesslogik des CompositionOverview Builders (Wird in der EditorActivity verwendet)
  */
 
 public class CompositionBuilder
