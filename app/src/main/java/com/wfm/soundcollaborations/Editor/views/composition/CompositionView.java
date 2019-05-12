@@ -105,7 +105,7 @@ public class CompositionView extends LinearLayout
     }
 
     public void addSoundView(SoundView soundView) {
-       // int trackNumber = soundView.getTrack();
+       // int trackNumber = soundView.getTrackNumber();
        // TrackView trackView = tracksViews.remove(trackNumber);
        // tracksViewsHolder.removeView(trackView);
        // trackView.addSoundView(soundView);
@@ -125,7 +125,7 @@ public class CompositionView extends LinearLayout
     }
 
     public void deleteSoundView(SoundView soundView, float percentage) {
-        int trackNumber = soundView.getTrack();
+        int trackNumber = soundView.getTrackNumber();
         // Delete Sound View from Track View
         TrackView trackView = tracksViews.get(trackNumber);
 

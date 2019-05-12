@@ -6,23 +6,23 @@ public class Composition {
 
     public String title;
 
-    public String creatorname;
+    public String creatorName;
 
-    public List<Track> tracks;
+    public List<Sound> sounds;
 
     public String creationDate;
 
     public String status;
 
-    public Integer numberOfParticipants;
+    public Integer numberOfMembers;
 
-    public Composition(String title, String creatorname, List<Track> tracks,
-                       String creationDate, String status, Integer numberOfParticipants) {
+    public Composition(String title, String creatorName, List<Sound> sounds,
+                       String creationDate, String status, Integer numberOfMembers) {
         this.title = title;
-        this.creatorname = creatorname;
-        this.tracks = tracks;
+        this.creatorName = creatorName;
+        this.sounds = sounds;
         this.creationDate = creationDate;
         this.status = status;
-        this.numberOfParticipants = numberOfParticipants;
+        this.numberOfMembers = numberOfMembers;
     }
 }

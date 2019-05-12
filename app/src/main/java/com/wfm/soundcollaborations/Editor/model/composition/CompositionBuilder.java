@@ -83,25 +83,20 @@ public class CompositionBuilder
         mTracksTimer = new TracksTimer(this.tracks, this.compositionView);
     }
 
-    public void addSounds(Composition composition)
-    {
-        int trackPosition = 0;
-        for (Track track : composition.tracks) {
-            for (Sound sound : track.getSounds()) {
-                SoundView soundView = new SoundView(this.compositionView.getContext());
-                RelativeLayout.LayoutParams soundParams =
-                        new RelativeLayout.LayoutParams(getValueInDP(sound.getLengthInMs()), TRACK_HEIGHT);
-                soundParams.setMargins(getValueInDP(sound.getStartPositionInMs()), 0, 0, 0);
-                soundView.setLayoutParams(soundParams);
-                soundView.setTrack(sound.getTrack());
-                // add soundView to the list
-                downloadedSoundViews.add(soundView);
-                // add sound view to the track
-                downloadedTrackViews.get(trackPosition).addSoundView(soundView);
+    public void addSounds(Composition composition) {
+        for (Sound sound : composition.sounds) {
+            SoundView soundView = new SoundView(this.compositionView.getContext());
+            RelativeLayout.LayoutParams soundParams =
+                    new RelativeLayout.LayoutParams(getValueInDP(sound.getDuration()), TRACK_HEIGHT);
+            soundParams.setMargins(getValueInDP(sound.getStartPosition()), 0, 0, 0);
+            soundView.setLayoutParams(soundParams);
+            soundView.setTrackNumber(sound.getTrackNumber());
+            // add soundView to the list
+            downloadedSoundViews.add(soundView);
+            // add sound view to the track
+            downloadedTrackViews.get(sound.getTrackNumber()).addSoundView(soundView);
 
-                downloadedSounds.add(sound);
-            }
-            trackPosition++;
+            downloadedSounds.add(sound);
         }
         // we will add everything to the composition view
         build();
@@ -135,7 +130,7 @@ public class CompositionBuilder
             LinearLayout.LayoutParams watchParams  = new LinearLayout.LayoutParams(TRACK_HEIGHT, TRACK_HEIGHT);
             watchParams.setMargins(10, 10, 0, 10);
             trackWatchView.setLayoutParams(watchParams);
-            // tracks
+            // sounds
             TrackView trackView = downloadedTrackViews.get(i);
             trackWatchView.setOnClickListener(new TrackViewOnClickListener(this.compositionView, i));
             LinearLayout.LayoutParams trackParams  = new LinearLayout.LayoutParams(TRACK_WIDTH_IN_MS, TRACK_HEIGHT);
@@ -189,7 +184,7 @@ public class CompositionBuilder
                         int index = (int) task.getTag();
                         VisualizeSoundTask soundTask = new VisualizeSoundTask(downloadedSoundViews.get(index), downloadedSounds.get(index));
                         soundTask.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
-                        tracks.get(downloadedSounds.get(index).getTrack()).addSound(downloadedSounds.get(index));
+                        tracks.get(downloadedSounds.get(index).getTrackNumber()).addSound(downloadedSounds.get(index));
                         numberOfDownloadedSounds++;
                         if(numberOfDownloadedSounds == downloadedSounds.size()) {
                             prepareTracks();
@@ -212,7 +207,7 @@ public class CompositionBuilder
                     }
                 });
         for(int i = 0; i< downloadedSounds.size(); i++)
-            this.downloader.addSoundUrl(downloadedSounds.get(i).getLink(), i);
+            this.downloader.addSoundUrl(downloadedSounds.get(i).getFilePath(), i);
 
         this.downloader.download();
     }
@@ -234,7 +229,7 @@ public class CompositionBuilder
         //TODO checkLimits();
 
         recordingSoundView = new SoundView(context);
-        recordingSoundView.setTrack(activeTrack);
+        recordingSoundView.setTrackNumber(activeTrack);
         RelativeLayout.LayoutParams soundParams =
                 new RelativeLayout.LayoutParams(0, TRACK_HEIGHT);
         soundParams.setMargins(this.compositionView.getScrollPosition(), 0, 0, 0);
@@ -263,13 +258,13 @@ public class CompositionBuilder
         long startPositionInDP, lengthInDP;
         int trackNumber = compositionView.getActiveTrack();
         for (Sound sound : tracks.get(trackNumber).getSounds()) {
-            startPositionInDP = getValueInDP(sound.getStartPositionInMs());
-            lengthInDP = getValueInDP(sound.getLengthInMs());
+            startPositionInDP = getValueInDP(sound.getStartPosition());
+            lengthInDP = getValueInDP(sound.getDuration());
             long endPositionInDP = startPositionInDP + lengthInDP;
             int distanceToStartPos = cursorPositionInDP + 20 ;
             int distanceToEndPos = cursorPositionInDP + 20 ;
             if (distanceToStartPos > startPositionInDP && distanceToEndPos < endPositionInDP) {
-                //stopTrackRecorder(sound.getLengthInMs());
+                //stopTrackRecorder(sound.getDuration());
                 prepareRecordedSound(soundView, soundLengthInWidth, startPositionInWidth);
                 throw new SoundWillOverlapException(compositionView.getContext());
             }
@@ -342,7 +337,7 @@ public class CompositionBuilder
 
         for (SoundView soundView : soundsToDelete) {
             // delete sound file
-            Integer trackNumber = soundView.getTrack();
+            Integer trackNumber = soundView.getTrackNumber();
             Sound sound = soundView.getSound();
             tracks.remove(trackNumber);
             track.deleteSound(sound);
@@ -379,12 +374,13 @@ public class CompositionBuilder
     public void prepareRecordedSound(SoundView soundView, Integer soundLengthInWidth, Integer startPositionInWidth) {
         stopTrackRecorder();
         Track activeTrack = getActiveTrack();
-        String recordedSoundPath = activeTrack.getRecordedFilePath();
-        if (recordedSoundPath != null && soundLengthInWidth!=null && startPositionInWidth != null) {
+        String filePath = activeTrack.getFilePath();
+        Integer trackNumber = soundView.getTrackNumber();
+        if (filePath != null && soundLengthInWidth!=null && startPositionInWidth != null) {
             // prepare new sound
-            Sound sound = new Sound(recordedSoundPath, activeTrack.getSoundLengthInMs(), soundView.getTrack(), getPositionInMs(startPositionInWidth), recordedSoundPath);
+            Sound sound = new Sound(trackNumber, getPositionInMs(startPositionInWidth), activeTrack.getDuration(), filePath);
             soundView.setSound(sound);
-            addRecordedSound(sound, soundView.getTrack());
+            addRecordedSound(sound, trackNumber);
         }
     }
 }

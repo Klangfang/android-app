@@ -11,7 +11,6 @@ import com.loopj.android.http.SyncHttpClient;
 import com.wfm.soundcollaborations.Editor.model.composition.Composition;
 import com.wfm.soundcollaborations.Editor.model.composition.CompositionOverview;
 import com.wfm.soundcollaborations.Editor.model.composition.Sound;
-import com.wfm.soundcollaborations.Editor.model.composition.Track;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -63,8 +62,8 @@ public class HttpUtils {
             for (int i = 0; i < compositionOverviewDtoes.length(); ++i) {
                 final JSONObject compositionOverview = compositionOverviewDtoes.getJSONObject(i);
                 String title = compositionOverview.getString("title");
-                int numberOfParticipation = compositionOverview.getInt("numberOfParticipation");
-                String soundFilePath = compositionOverview.getString("soundFilePath");
+                int numberOfParticipation = compositionOverview.getInt("numberOfMembers");
+                String soundFilePath = compositionOverview.getString("snippet");
                 JSONObject links = compositionOverview.getJSONObject("_links");
                 String pickUrl = links.getJSONObject("pick").getString("href");
                 compositionOverviews.add(new CompositionOverview(title, numberOfParticipation, soundFilePath, pickUrl));
@@ -79,33 +78,25 @@ public class HttpUtils {
         Composition composition = null;
         try {
             JSONObject jsonObject = new JSONObject(jsonResponse);
-            String title = jsonObject.getString("title");
-            String creatorname = jsonObject.getString("creatorname");
+            String compositionTitle = jsonObject.getString("title");
+            String compositionCreatorName = jsonObject.getString("creatorName");
             String creationDate = jsonObject.getString("creationDate");
             String status = jsonObject.getString("status");
-            int numberOfParticipants = jsonObject.getInt("numberOfParticipants");
-            JSONArray jsonTracks = jsonObject.getJSONArray("tracks");
-            List<Track> tracks = new ArrayList<>();
-            for (int i = 0; i < jsonTracks.length(); i++) {
-                final JSONObject jsonTrack = jsonTracks.getJSONObject(i);
-                JSONArray jsonSounds = jsonTrack.getJSONArray("sounds");
-                List<Sound> sounds = new ArrayList<>();
-                for (int j = 0; j < jsonSounds.length(); j++) {
-                    JSONObject jsonSound = jsonSounds.getJSONObject(j);
-                    String filename = jsonSound.getString("filename");
-                    String soundTitle = jsonSound.getString("title");
-                    String startPositionInMs = jsonSound.getString("startPositionInMs");
-                    String durationInMs = jsonSound.getString("durationInMs");
-                    String SoundCreatorname = jsonSound.getString("creatorname");
-                    Sound sound = new Sound(filename, Integer.parseInt(startPositionInMs), Integer.parseInt(durationInMs));
-                    sounds.add(sound);
-                }
-                String durationInMs = jsonTrack.getString("durationInMs");
-                Track track = new Track();
-                track.addSounds(sounds);
-                tracks.add(track);
+            int numberOfParticipants = jsonObject.getInt("numberOfMembers");
+            JSONArray jsonSounds = jsonObject.getJSONArray("sounds");
+            List<Sound> sounds = new ArrayList<>();
+            for (int j = 0; j < jsonSounds.length(); j++) {
+                JSONObject jsonSound = jsonSounds.getJSONObject(j);
+                Integer trackNumber = jsonSound.getInt("trackNumber");
+                String soundTitle = jsonSound.getString("title");
+                Integer startPosition = jsonSound.getInt("startPosition");
+                Integer duration = jsonSound.getInt("duration");
+                String filePath = jsonSound.getString("filePath");
+                String SoundCreatorName = jsonSound.getString("creatorName");
+                Sound sound = new Sound(trackNumber, soundTitle, startPosition, duration, SoundCreatorName, filePath);
+                sounds.add(sound);
             }
-            composition = new Composition(title, creatorname, tracks, creationDate, status,
+            composition = new Composition(compositionTitle, compositionCreatorName, sounds, creationDate, status,
                     numberOfParticipants);
         } catch (JSONException e) {
             System.err.println(e.getMessage());

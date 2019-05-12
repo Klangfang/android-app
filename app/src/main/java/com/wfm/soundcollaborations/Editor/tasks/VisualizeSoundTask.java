@@ -31,7 +31,7 @@ public class VisualizeSoundTask extends AsyncTask<Void, Chunk, Void>
     @Override
     protected Void doInBackground(Void... voids)
     {
-        String name = sound.getLink().split("/")[sound.getLink().split("/").length - 1];
+        String name = sound.getFilePath().split("/")[sound.getFilePath().split("/").length - 1];
         String path = FileUtils.getKlangfangCacheDirectory()+"/"+name;
 
         this.mAudioDecoder.decode(path, new AudioDecoder.Listener() {

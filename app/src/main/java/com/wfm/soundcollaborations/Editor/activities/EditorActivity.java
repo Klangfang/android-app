@@ -86,7 +86,7 @@ public class EditorActivity extends AppCompatActivity {
         setContentView(R.layout.activity_editor);
         ButterKnife.bind(this);
 
-        // create soundViews to be added to the corresponding tracks
+        // create soundViews to be added to the corresponding sounds
         // let SoundDownloader update these views using listener
         // when a view finished downloading it add itself to the track
         // when all sounds are loaded the Composition will be ready to play the sounds
@@ -247,7 +247,7 @@ public class EditorActivity extends AppCompatActivity {
                                             Log.d(TAG, "Max Amplitude Recieved -> " + max);
                                             soundView.invalidate();
                                             builder.getCompositionView().increaseScrollPosition(3);
-                                            builder.getCompositionView().increaseViewWatchPercentage(soundView.getTrack(), 0.17f);
+                                            builder.getCompositionView().increaseViewWatchPercentage(soundView.getTrackNumber(), 0.17f);
                                         }
 
                                     } catch (SoundWillBeOutOfCompositionException e) {

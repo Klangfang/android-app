@@ -6,7 +6,6 @@ import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.Path;
 import android.graphics.RectF;
-import android.graphics.drawable.ColorDrawable;
 import android.util.AttributeSet;
 import android.view.View;
 
@@ -26,7 +25,7 @@ public class SoundView extends View {
 
     private Paint linePaint;
     private ArrayList<Integer> waves;
-    private int track = -1;
+    private Integer trackNumber = -1;
 
     private Path clipPath;
     private RectF rectangle;
@@ -106,8 +105,8 @@ public class SoundView extends View {
         invalidate();
     }
 
-    public void setTrack(int track) {
-        this.track = track;
+    public void setTrackNumber(int trackNumber) {
+        this.trackNumber = trackNumber;
     }
 
     public void increaseWidth(int width) {
@@ -115,8 +114,8 @@ public class SoundView extends View {
         invalidate();
     }
 
-    public int getTrack() {
-        return this.track;
+    public Integer getTrackNumber() {
+        return this.trackNumber;
     }
 
     // Set fill color of recorded sounds
@@ -140,7 +139,7 @@ public class SoundView extends View {
     }
 
     public long getSoundLength() {
-        long soundLength = sound.getLengthInMs();
+        long soundLength = sound.getDuration();
         int width = 0;
         width += (soundLength / 1000) * SOUND_SECOND_WIDTH;
         width += (soundLength % 1000) * SOUND_SECOND_WIDTH / 1000;

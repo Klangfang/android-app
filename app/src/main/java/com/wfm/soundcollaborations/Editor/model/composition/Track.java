@@ -24,7 +24,7 @@ public class Track
     public Track(){ recorder = new AudioRecorder(); }
 
     public void addSound(Sound sound) {
-        recorderTime = recorderTime + sound.getLengthInMs();
+        recorderTime = recorderTime + sound.getDuration();
         sounds.add(sound);
     }
 
@@ -65,7 +65,7 @@ public class Track
         sound.prepare(context);
 
         //Sorting sounds:
-        Collections.sort(sounds, (Sound s1, Sound s2) -> Long.valueOf(s1.getStartPositionInMs()).compareTo(Long.valueOf(s2.getStartPositionInMs())));
+        Collections.sort(sounds, (Sound s1, Sound s2) -> Long.valueOf(s1.getStartPosition()).compareTo(Long.valueOf(s2.getStartPosition())));
     }
 
     // Startet den Recorder
@@ -84,7 +84,7 @@ public class Track
     }
 
     // Liefert den erzeugten Sound-Dateipfad zurueck
-    public String getRecordedFilePath() {
+    public String getFilePath() {
         return recorder.getRecordedFilePath();
     }
 
@@ -98,11 +98,11 @@ public class Track
     }
 
     public void deleteSound(Sound soundToDelete) {
-        recorder.increaseTime(soundToDelete.getLengthInMs());
+        recorder.increaseTime(soundToDelete.getDuration());
         sounds.remove(soundToDelete);
     }
 
-    public int getSoundLengthInMs() {
-        return recorder.getSoundLengthInMs();
+    public Integer getDuration() {
+        return recorder.getDuration();
     }
 }
