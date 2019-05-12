@@ -3,8 +3,8 @@ package com.wfm.soundcollaborations.Classes;
 import android.widget.Button;
 
 /**
- *  {@link CompositionOverview} represents a CompositionOverview that the user can listen to.
- *  It contains the meta data, such as title, number of participants and a audio preview file.
+ *  {@link CompositionOverview} represents a Composition that the user can listen to.
+ *  It contains the meta data, such as title, number of members and an audio preview file.
  **/
 public class CompositionOverview {
 

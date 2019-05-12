@@ -23,7 +23,6 @@ import java.util.Objects;
  *
  * It loads and displays {@link CompositionOverview} objects.
  * */
-
 public class ComposeFragment extends Fragment {
 
     private View root;
