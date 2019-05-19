@@ -1,22 +1,31 @@
 package com.wfm.soundcollaborations.Classes;
 
 /**
- *  {@link CompositionOverview} represents a Composition that the user can listen to.
- *  It contains the meta data, such as title, number of members and an audio preview file.
+ *  {@link CompositionOverview} represents a composition that the user can listen to.
+ *  It is the helper class to connect ComposeFragment.java and CompositionAdapter.java
+ *  It contains following meta data of the composition:
+ *  - title (of the composition)
+ *  - number of members (in the composition)
+ *  - an audio preview file //TODO @willi: Add Audio Preview
  **/
 public class CompositionOverview {
-
-    private String mCompositionTitle; //TODO change to mTitle
-    private String mLocations;
+    // Placeholder
+    private String mTitle;
     private String mNumberOfMembers;
 
-    public CompositionOverview(String compositionTitle, String locations, String numberOfMembers) {
-        mCompositionTitle = compositionTitle;
-        mLocations = locations;
+    // Helper class to replace placeholder with real content
+    // Title and numberOfMembers are loaded from ComposeFragment.java
+    public CompositionOverview(String title, String numberOfMembers) {
+        mTitle = title;
         mNumberOfMembers = numberOfMembers;
     }
 
-    public String getCompositionTitle() {return mCompositionTitle;}
-    public String getCompositionLocations() {return mLocations;}
-    public String getNumberOfMembers() {return mNumberOfMembers;}
+    // Return new replaced content
+    // Function is called in CompositionAdapter.java
+    public String getCompositionTitle() {
+        return mTitle; // Real title
+    }
+    public String getNumberOfMembers() {
+        return mNumberOfMembers; // Real Number
+    }
 }
