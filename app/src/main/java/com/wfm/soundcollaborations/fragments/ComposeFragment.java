@@ -33,17 +33,6 @@ public class ComposeFragment extends Fragment {
         root = inflater.inflate(R.layout.fragment_compose, container, false);
         initToolbar();
 
-        //JSON Audio Mock Data
-        String jsonData = "{"
-                + " 'uuid': '3423423-432434-43243241-33-22222',"
-                + " 'sounds': ["
-
-                + "   {'length': 30680, 'track': 2, 'start_position': 20000, 'link': "
-                + "'https://stereoninjamusic.weebly.com/uploads/4/5/7/5/45756923/the_midnight_ninja.ogg'}"
-
-                + " ]"
-                + "}";
-
         //New array with test data for composition views
         ArrayList<CompositionOverview> compositions = new ArrayList<>();
         compositions.add(new CompositionOverview("Uni Sounds", "Hamburg, München", "1/4 Mitglieder"));

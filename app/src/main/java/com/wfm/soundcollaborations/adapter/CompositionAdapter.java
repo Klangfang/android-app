@@ -50,9 +50,6 @@ public class CompositionAdapter extends ArrayAdapter<CompositionOverview> {
         TextView membersTextView = listItemView.findViewById(R.id.members_text_view);
         membersTextView.setText(currentComposition.getNumberOfMembers());
 
-        //Button playButton = listItemView.findViewById(R.id.btn_play_public_composition);
-        // TODO What happens with playButton?
-
         return listItemView;
     }
 }
