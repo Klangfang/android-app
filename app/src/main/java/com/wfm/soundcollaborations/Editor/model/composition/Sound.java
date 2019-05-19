@@ -30,7 +30,7 @@ public class Sound {
     private AudioPlayer player;
 
     // TODO think about where to move
-    private final String COMPOSITION_FILES_URL = "https://klangfang-service.herokuapp.com/compositions/";
+    private final String COMPOSITION_FILES_URL = "https://klangfang-service.herokuapp.com/compositions/1";
 
 
     public Sound(Integer trackNumber, String title, Integer startPosition, Integer duration, String filePath) {
@@ -55,7 +55,7 @@ public class Sound {
         this.startPosition = startPosition;
         this.duration = duration;
         this.creatorName = creatorName;
-        this.filePath = COMPOSITION_FILES_URL + filePath + "?compositionId=1";
+        this.filePath = COMPOSITION_FILES_URL + filePath;
     }
 
     public void prepare(Context context) {

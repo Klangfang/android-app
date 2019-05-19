@@ -24,6 +24,7 @@ import com.ohoussein.playpause.PlayPauseView;
 import com.wfm.soundcollaborations.Editor.exceptions.RecordTimeOutExceededException;
 import com.wfm.soundcollaborations.Editor.exceptions.SoundRecordingTimeException;
 import com.wfm.soundcollaborations.Editor.model.composition.Composition;
+import com.wfm.soundcollaborations.Editor.model.composition.CompositionResponse;
 import com.wfm.soundcollaborations.R;
 import com.wfm.soundcollaborations.Editor.exceptions.NoActiveTrackException;
 import com.wfm.soundcollaborations.Editor.exceptions.SoundWillBeOutOfCompositionException;
@@ -93,7 +94,10 @@ public class EditorActivity extends AppCompatActivity {
         builder = new CompositionBuilder(compositionView, 4);
         Intent intent = getIntent();
         String compositionResponse = intent.getStringExtra(CreateCompositionActivity.COMPOSITION_RESPONSE);
-        builder.addSounds(HttpUtils.getComposition(compositionResponse));
+        CompositionResponse response = HttpUtils.getComposition(compositionResponse);
+        if (response != null) {
+            builder.addSounds(response.composition);
+        }
 
         deletedBtn.setOnClickListener(delBtnview -> deleteConfirmation(delBtnview.getContext()));
     }

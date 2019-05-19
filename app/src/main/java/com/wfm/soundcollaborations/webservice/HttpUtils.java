@@ -10,6 +10,8 @@ import com.loopj.android.http.RequestParams;
 import com.loopj.android.http.SyncHttpClient;
 import com.wfm.soundcollaborations.Editor.model.composition.Composition;
 import com.wfm.soundcollaborations.Editor.model.composition.CompositionOverview;
+import com.wfm.soundcollaborations.Editor.model.composition.CompositionResponse;
+import com.wfm.soundcollaborations.Editor.model.composition.OverviewResponse;
 import com.wfm.soundcollaborations.Editor.model.composition.Sound;
 
 import org.json.JSONArray;
@@ -17,7 +19,10 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Optional;
+import java.util.Set;
 
 /**
  * Http Utility methods that handle the interactive with the rest webservice api
@@ -53,37 +58,37 @@ public class HttpUtils {
         return BASE_URL + relativeUrl;
     }
 
-    public static List<CompositionOverview> getCompositionOverviews(String jsonResponse) {
-        List<CompositionOverview> compositionOverviews = new ArrayList<>();
+    public static OverviewResponse getCompositionOverviews(String jsonResponse) {
+        Set<CompositionOverview> compositionOverviews = new HashSet<>();
         try {
-            JSONObject jsonObject = new JSONObject(jsonResponse);
-            JSONObject embedded = jsonObject.getJSONObject("_embedded");
-            JSONArray compositionOverviewDtoes = embedded.getJSONArray("compositionOverviewDtoes");
-            for (int i = 0; i < compositionOverviewDtoes.length(); ++i) {
-                final JSONObject compositionOverview = compositionOverviewDtoes.getJSONObject(i);
+            JSONObject response = new JSONObject(jsonResponse);
+            JSONArray overviews = response.getJSONArray("overviews");
+            for (int i = 0; i < overviews.length(); ++i) {
+                final JSONObject compositionOverview = overviews.getJSONObject(i);
                 String title = compositionOverview.getString("title");
                 int numberOfParticipation = compositionOverview.getInt("numberOfMembers");
-                String soundFilePath = compositionOverview.getString("snippet");
-                JSONObject links = compositionOverview.getJSONObject("_links");
-                String pickUrl = links.getJSONObject("pick").getString("href");
-                compositionOverviews.add(new CompositionOverview(title, numberOfParticipation, soundFilePath, pickUrl));
+                String snippetUrl = compositionOverview.getString("snippetUrl");
+                String pickUrl = compositionOverview.getString("pickUrl");
+                compositionOverviews.add(new CompositionOverview(title, numberOfParticipation, snippetUrl, pickUrl));
             }
+            return new OverviewResponse(compositionOverviews, response.getString("nextPage"));
         } catch (JSONException e) {
+            return null;
         }
-        return compositionOverviews;
     }
 
-    public static Composition getComposition(String jsonResponse) {
+    public static CompositionResponse getComposition(String jsonResponse) {
         //jsonResponse = jsonResponse.replaceAll("\n", "");
         Composition composition = null;
         try {
-            JSONObject jsonObject = new JSONObject(jsonResponse);
-            String compositionTitle = jsonObject.getString("title");
-            String compositionCreatorName = jsonObject.getString("creatorName");
-            String creationDate = jsonObject.getString("creationDate");
-            String status = jsonObject.getString("status");
-            int numberOfParticipants = jsonObject.getInt("numberOfMembers");
-            JSONArray jsonSounds = jsonObject.getJSONArray("sounds");
+            JSONObject response = new JSONObject(jsonResponse);
+            JSONObject compositionResponse = response.getJSONObject("composition");
+            String compositionTitle = compositionResponse.getString("title");
+            String compositionCreatorName = compositionResponse.getString("creatorName");
+            String creationDate = compositionResponse.getString("creationDate");
+            String status = compositionResponse.getString("status");
+            int numberOfParticipants = compositionResponse.getInt("numberOfMembers");
+            JSONArray jsonSounds = compositionResponse.getJSONArray("sounds");
             List<Sound> sounds = new ArrayList<>();
             for (int j = 0; j < jsonSounds.length(); j++) {
                 JSONObject jsonSound = jsonSounds.getJSONObject(j);
@@ -98,9 +103,12 @@ public class HttpUtils {
             }
             composition = new Composition(compositionTitle, compositionCreatorName, sounds, creationDate, status,
                     numberOfParticipants);
+
+            return new CompositionResponse(composition, response.getString("pickUrl"));
+
         } catch (JSONException e) {
             System.err.println(e.getMessage());
+            return null;
         }
-        return composition;
     }
 }

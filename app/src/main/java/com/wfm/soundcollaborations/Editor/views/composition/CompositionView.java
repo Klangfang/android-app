@@ -160,10 +160,13 @@ public class CompositionView extends LinearLayout
         drawPlayerLine(canvas);
     }
 
-    private void drawPlayerLine(Canvas canvas)
-    {
+    private void drawPlayerLine(Canvas canvas) {
+
         float x = getWidth() / 2;
-        canvas.drawLine(x, 0, x, getHeight()- (tracksWatchViews.get(0).getWidth() / 2) - 20, playerLinePaint);
+
+        if (!tracksViews.isEmpty()) {
+            canvas.drawLine(x, 0, x, getHeight() - (tracksWatchViews.get(0).getWidth() / 2) - 20, playerLinePaint);
+        }
 
         playerLineTriangle = new Path();
         playerLineTriangle.moveTo(x+10, 0);
