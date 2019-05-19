@@ -29,7 +29,7 @@ public class AudioRecorder implements MediaRecorder.OnInfoListener
     private AudioRecorderStatus status = AudioRecorderStatus.EMPTY;
     private int recordedTime = 0;
     private int startTime;
-    private int soundLengthInMs;
+    private int duration;
 
     public AudioRecorder() {}
 
@@ -95,10 +95,10 @@ public class AudioRecorder implements MediaRecorder.OnInfoListener
             }
 
             // sound length
-            soundLengthInMs = Long.valueOf(System.currentTimeMillis() - startTime).intValue();
+            duration = Long.valueOf(System.currentTimeMillis() - startTime).intValue();
 
             // total recorded time for the track
-            this.recordedTime = this.recordedTime + soundLengthInMs;
+            this.recordedTime = this.recordedTime + duration;
         } catch (Exception ex) {
             FileUtils.deleteFile(this.filePath);
             Log.d(TAG, "Recorded file has been deleted!");
@@ -127,8 +127,8 @@ public class AudioRecorder implements MediaRecorder.OnInfoListener
         return status;
     }
 
-    public int getSoundLengthInMs() {
-        return soundLengthInMs - startTime;
+    public Integer getDuration() {
+        return duration - startTime;
 }
 
     @Override

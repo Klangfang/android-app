@@ -5,49 +5,69 @@ import android.util.Log;
 
 import com.wfm.soundcollaborations.Editor.model.audio.AudioPlayer;
 
+import java.time.LocalDate;
+
 /**
  * Created by mohammed on 10/27/17.
+ * Edited by Talal
  */
 
-public class Sound
-{
+public class Sound {
+
     private static final String TAG = Sound.class.getSimpleName();
 
-    private String uri;
-    private String link;
-    private int lengthInMs;
-    private int track;
-    private int startPositionInMs;
+    private Integer trackNumber;
+
+    private String title;
+
+    private Integer startPosition;
+    private Integer duration;
+
+    private String creatorName;
+
+    private String filePath;
+    
     private AudioPlayer player;
 
-    public Sound(String link, int lengthInMs, int track, int startPositionInMs, String uri)
-    {
-        this.link = link;
-        this.lengthInMs = lengthInMs;
-        this.track = track;
-        this.startPositionInMs = startPositionInMs;
-        this.uri = uri;
+    // TODO think about where to move
+    private final String COMPOSITION_FILES_URL = "https://klangfang-service.herokuapp.com/compositions/1";
+
+
+    public Sound(Integer trackNumber, String title, Integer startPosition, Integer duration, String filePath) {
+        this.trackNumber = trackNumber;
+        this.title = title;
+        this.startPosition = startPosition;
+        this.duration = duration;
+        this.filePath = filePath;
     }
 
-    public Sound(String link, int lengthInMs, int startPositionInMs)
-    {
-        this.link = link;
-        this.lengthInMs = lengthInMs;
-        this.startPositionInMs = startPositionInMs;
+    public Sound(Integer trackNumber, Integer startPosition, Integer duration, String filePath) {
+        this.trackNumber = trackNumber;
+        this.startPosition = startPosition;
+        this.duration = duration;
+        this.filePath = filePath;
     }
 
-    public void prepare(Context context) throws NullPointerException
-    {
+    public Sound(Integer trackNumber, String title, Integer startPosition, Integer duration,
+                 String creatorName, String filePath) {
+        this.trackNumber = trackNumber;
+        this.title = title;
+        this.startPosition = startPosition;
+        this.duration = duration;
+        this.creatorName = creatorName;
+        this.filePath = COMPOSITION_FILES_URL + filePath;
+    }
+
+    public void prepare(Context context) {
         player = new AudioPlayer(context);
-        player.addSounds(new String[]{uri});
+        player.addSounds(new String[]{filePath});
     }
 
-    public void play(int trackNumber, int positionInMillis)
-    {
+    public void play(int trackNumber, int positionInMillis) {
         // Den Player starten, wenn an der Stelle einen Sound vorhanden ist.
         // Der Player selbst weiss nicht, wo die Sounds sich befinden.
-        long endPosition = startPositionInMs + lengthInMs;
-        if (startPositionInMs <= positionInMillis && endPosition > positionInMillis) {
+        long endPosition = startPosition + duration;
+        if (startPosition <= positionInMillis && endPosition > positionInMillis) {
             if (!isPlaying()) {
                 player.play();
 
@@ -60,8 +80,7 @@ public class Sound
         }
     }
 
-    public void pause(int trackNumber)
-    {
+    public void pause(int trackNumber) {
         player.pause();
 
         Log.d(TAG, "Track " + trackNumber + " is Paused");
@@ -72,8 +91,7 @@ public class Sound
         return player.isPlaying();
     }
 
-    public void seek(long positionInMillis)
-    {
+    public void seek(long positionInMillis) {
         long seekingPosition = calculateSeekingTimeForPlayer(positionInMillis);
         Log.d(TAG, "Track seeking Time is => "+seekingPosition);
         player.seek(seekingPosition);
@@ -84,43 +102,39 @@ public class Sound
         long maxPoint = positionInMillis;
         long soundsInside = 0;
 
-        long endPosition = startPositionInMs + lengthInMs;
-            if(startPositionInMs <= positionInMillis && endPosition > positionInMillis) {
-                maxPoint = startPositionInMs;
+        long endPosition = startPosition + duration;
+            if(startPosition <= positionInMillis && endPosition > positionInMillis) {
+                maxPoint = startPosition;
             }
 
             if(endPosition <= positionInMillis) {
-                soundsInside += lengthInMs;
+                soundsInside += duration;
             }
 
         return positionInMillis - (maxPoint - soundsInside);
     }
 
-    public int getLengthInMs()
-    {
-        return this.lengthInMs;
+    public Integer getTrackNumber() {
+        return trackNumber;
     }
 
-    public String getLink()
-    {
-        return this.link;
+    public String getTitle() {
+        return title;
     }
 
-    public int getTrack()
-    {
-        return this.track;
+    public Integer getStartPosition() {
+        return startPosition;
     }
 
-    public long getStartPositionInMs()
-    {
-        return this.startPositionInMs;
+    public Integer getDuration() {
+        return duration;
     }
 
-    public String getUri() throws NullPointerException
-    {
-        if(this.uri.isEmpty())
-            throw new NullPointerException("No Uri found for the sound file!");
-        return this.uri;
+    public String getCreatorName() {
+        return creatorName;
     }
 
+    public String getFilePath() {
+        return filePath;
+    }
 }

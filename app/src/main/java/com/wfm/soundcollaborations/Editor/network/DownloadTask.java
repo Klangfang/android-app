@@ -122,7 +122,7 @@ class DownloadTask extends AsyncTask<String, Integer, DownloadTask.Result> {
             // Timeout for connection.connect() arbitrarily set to 3000ms.
             connection.setConnectTimeout(3000);
             // For this use case, set HTTP method to GET.
-            connection.setRequestMethod("GET");
+            connection.setRequestMethod("PUT");
             // Already true by default but setting just in case; needs to be true since this request
             // is carrying an input (response) body.
             connection.setDoInput(true);
@@ -137,8 +137,8 @@ class DownloadTask extends AsyncTask<String, Integer, DownloadTask.Result> {
             stream = connection.getInputStream();
             publishProgress(DownloadCallback.Progress.GET_INPUT_STREAM_SUCCESS, 0);
             if (stream != null) {
-                // Converts Stream to String with max length of 500.
-                result = readStream(stream, 500);
+                // Converts Stream to String with max length of 2000.
+                result = readStream(stream, 2000);
             }
         } finally {
             // Close Stream and disconnect HTTPS connection.

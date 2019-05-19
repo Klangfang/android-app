@@ -25,13 +25,13 @@ public class JSONUtils
             for(int i=0; i<jsonSounds.length(); i++)
             {
                 JSONObject soundObj = jsonSounds.getJSONObject(i);
-                String link = soundObj.getString("link");
-                int length = soundObj.getInt("length");
-                int track = soundObj.getInt("track") - 1;
-                int startPosition = soundObj.getInt("start_position");
-                String name = link.split("/")[link.split("/").length - 1];
-                String uri = FileUtils.getKlangfangCacheDirectory()+"/" + name;
-                Sound sound = new Sound(link, length, track, startPosition, uri);
+                String serverFilePath = soundObj.getString("filePath");
+                Integer duration = soundObj.getInt("duration");
+                Integer trackNumber = soundObj.getInt("trackNumber") - 1;
+                Integer startPosition = soundObj.getInt("start_position");
+                String name = serverFilePath.split("/")[serverFilePath.split("/").length - 1];
+                String filePath = FileUtils.getKlangfangCacheDirectory()+"/" + name;
+                Sound sound = new Sound(trackNumber, startPosition, duration, filePath);
                 sounds.add(sound);
             }
 

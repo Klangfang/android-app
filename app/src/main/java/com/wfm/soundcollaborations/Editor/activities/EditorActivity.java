@@ -5,8 +5,6 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
-import android.net.ConnectivityManager;
-import android.net.NetworkInfo;
 import android.os.Build;
 import android.os.Handler;
 import android.support.annotation.RequiresApi;
@@ -14,8 +12,8 @@ import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AlertDialog;
-import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
@@ -25,19 +23,17 @@ import android.widget.Toast;
 import com.ohoussein.playpause.PlayPauseView;
 import com.wfm.soundcollaborations.Editor.exceptions.RecordTimeOutExceededException;
 import com.wfm.soundcollaborations.Editor.exceptions.SoundRecordingTimeException;
-import com.wfm.soundcollaborations.Editor.network.DownloadCallback;
-import com.wfm.soundcollaborations.Editor.network.NetworkFragment;
+import com.wfm.soundcollaborations.Editor.model.composition.Composition;
+import com.wfm.soundcollaborations.Editor.model.composition.CompositionResponse;
 import com.wfm.soundcollaborations.R;
 import com.wfm.soundcollaborations.Editor.exceptions.NoActiveTrackException;
 import com.wfm.soundcollaborations.Editor.exceptions.SoundWillBeOutOfCompositionException;
 import com.wfm.soundcollaborations.Editor.exceptions.SoundWillOverlapException;
 import com.wfm.soundcollaborations.Editor.model.composition.CompositionBuilder;
-import com.wfm.soundcollaborations.Editor.utils.JSONUtils;
 import com.wfm.soundcollaborations.Editor.views.composition.CompositionView;
 import com.wfm.soundcollaborations.Editor.views.composition.SoundView;
-import com.wfm.soundcollaborations.webservice.CompositionService;
+import com.wfm.soundcollaborations.webservice.HttpUtils;
 
-import java.util.List;
 import java.util.Timer;
 import java.util.TimerTask;
 
@@ -45,12 +41,10 @@ import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
 
-import static android.os.AsyncTask.Status.RUNNING;
-
 /**
  * Platzhalter für UI und Zusammenspiel mit der Compositionlogik.
  */
-public class EditorActivity extends FragmentActivity implements DownloadCallback {
+public class EditorActivity extends AppCompatActivity {
     private static final String TAG = EditorActivity.class.getSimpleName();
     @BindView(R.id.composition)
     CompositionView compositionView;
@@ -80,18 +74,6 @@ public class EditorActivity extends FragmentActivity implements DownloadCallback
     private Integer startPositionInWidth=null;
     private Integer soundLength=null;
 
-    // Keep a reference to the NetworkFragment, which owns the AsyncTask object
-    // that is used to execute network ops.
-    private NetworkFragment networkFragment;
-
-    private ConnectivityManager connectivityManager;
-
-    // Boolean telling us whether a download is in progress, so we don't trigger overlapping
-    // downloads with consecutive button clicks.
-    private boolean downloading = false;
-
-    private String URL = "https://klangfang-service.herokuapp.com/compositions/compositionsOverview?page=0&size=5";
-
     /**
      * This constant creates a placeholder for the user's consent of the record audio permission.
      * It will be used when handling callback from the runtime permission (onRequestPermissionsResult)
@@ -104,98 +86,20 @@ public class EditorActivity extends FragmentActivity implements DownloadCallback
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_editor);
         ButterKnife.bind(this);
-        connectivityManager = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
-        networkFragment = NetworkFragment.getInstance(getSupportFragmentManager(), URL);
 
-
-        String jsonData = "{"
-                + " 'uuid': '3423423-432434-43243241-33-22222',"
-                + " 'sounds': ["
-                // + "   {'length': 28260, 'track': 1, 'start_position': 0, 'link': "
-                // + "'https://stereoninjamusic.weebly.com/uploads/4/5/7/5/45756923/we_wish_you_a_merry_xmas.ogg'},"
-
-                // + "   {'length': 29760, 'track': 2, 'start_position': 20000, 'link': "
-                // + "'https://stereoninjamusic.weebly.com/uploads/4/5/7/5/45756923/we_three_kings.ogg'},"
-
-                //+ "   {'length': 30580, 'track': 3, 'start_position': 30000, 'link': "
-                //+ "'https://stereoninjamusic.weebly.com/uploads/4/5/7/5/45756923/deck_the_halls.ogg'},"
-
-                //+ "   {'length': 29100, 'track': 4, 'start_position': 20000, 'link': "
-                // + "'https://stereoninjamusic.weebly.com/uploads/4/5/7/5/45756923/jingle_bells.ogg'},"
-
-                //+ "   {'length': 4920, 'track': 3, 'start_position': 40000, 'link': "
-                //+ "'https://stereoninjamusic.weebly.com/uploads/4/5/7/5/45756923/the_heart_of_a_galaxy.ogg'},"
-
-                + "   {'length': 30580, 'track': 1, 'start_position': 10000, 'link': "
-                + "'https://stereoninjamusic.weebly.com/uploads/4/5/7/5/45756923/solar_eclipse.ogg'},"
-
-                + "   {'length': 30680, 'track': 2, 'start_position': 20000, 'link': "
-                + "'https://stereoninjamusic.weebly.com/uploads/4/5/7/5/45756923/the_midnight_ninja.ogg'}"
-
-                + " ]"
-                + "}";
-        // create soundViews to be added to the corresponding tracks
+        // create soundViews to be added to the corresponding sounds
         // let SoundDownloader update these views using listener
         // when a view finished downloading it add itself to the track
         // when all sounds are loaded the Composition will be ready to play the sounds
         builder = new CompositionBuilder(compositionView, 4);
-        builder.addSounds(JSONUtils.getSounds(jsonData));
-
+        Intent intent = getIntent();
+        String compositionResponse = intent.getStringExtra(CreateCompositionActivity.COMPOSITION_RESPONSE);
+        CompositionResponse response = HttpUtils.getComposition(compositionResponse);
+        if (response != null) {
+            builder.addSounds(response.composition);
+        }
 
         deletedBtn.setOnClickListener(delBtnview -> deleteConfirmation(delBtnview.getContext()));
-
-        startDownload();
-    }
-
-
-    public void startDownload() {
-        if (!downloading && networkFragment != null) {
-            // Execute the async download.
-            networkFragment.startDownload();
-            downloading = true;
-        }
-    }
-
-    @Override
-    public void updateFromDownload(Object result) {
-        // Update your UI here based on result of download.
-        boolean test = true;
-    }
-
-    @Override
-    public NetworkInfo getActiveNetworkInfo() {
-        NetworkInfo networkInfo = connectivityManager.getActiveNetworkInfo();
-        return networkInfo;
-    }
-
-    @Override
-    public void onProgressUpdate(int progressCode, int percentComplete) {
-        switch(progressCode) {
-            // You can add UI behavior for progress updates here.
-            case DownloadCallback.Progress.ERROR:
-                //TODO
-                break;
-            case DownloadCallback.Progress.CONNECT_SUCCESS:
-                //TODO
-                break;
-            case DownloadCallback.Progress.GET_INPUT_STREAM_SUCCESS:
-                //TODO
-                break;
-            case DownloadCallback.Progress.PROCESS_INPUT_STREAM_IN_PROGRESS:
-                //TODO
-                break;
-            case DownloadCallback.Progress.PROCESS_INPUT_STREAM_SUCCESS:
-                //TODO
-                break;
-        }
-    }
-
-    @Override
-    public void finishDownloading() {
-        downloading = false;
-        if (networkFragment != null) {
-            networkFragment.cancelDownload();
-        }
     }
 
     private void deleteConfirmation(Context context) {
@@ -347,7 +251,7 @@ public class EditorActivity extends FragmentActivity implements DownloadCallback
                                             Log.d(TAG, "Max Amplitude Recieved -> " + max);
                                             soundView.invalidate();
                                             builder.getCompositionView().increaseScrollPosition(3);
-                                            builder.getCompositionView().increaseViewWatchPercentage(soundView.getTrack(), 0.17f);
+                                            builder.getCompositionView().increaseViewWatchPercentage(soundView.getTrackNumber(), 0.17f);
                                         }
 
                                     } catch (SoundWillBeOutOfCompositionException e) {
