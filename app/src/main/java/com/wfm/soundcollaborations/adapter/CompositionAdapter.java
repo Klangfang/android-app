@@ -16,40 +16,64 @@ import com.wfm.soundcollaborations.R;
 import java.util.ArrayList;
 
 /**
- * {@link CompositionAdapter} is an {@link ArrayAdapter} that can provide the layout for each list item
- * based on a data source, which is a list of {@link CompositionOverview} objects
+ * {@link CompositionAdapter} is an {@link ArrayAdapter} that can provide the layout for each 
+ * list item based on a data source, which is a list of {@link CompositionOverview} objects
+ * Class inserts content in XML file song_composition.xml
  **/
 public class CompositionAdapter extends ArrayAdapter<CompositionOverview> {
-
-    public CompositionAdapter(Activity context, ArrayList<CompositionOverview> compositions) {
-        super(context, 0, compositions);
+    // Link with Composition Overview
+    public CompositionAdapter(
+            Activity context, 
+            ArrayList<CompositionOverview> compositions) {
+        super(
+                context,
+                0, 
+                compositions);
     }
 
     /**
-     * The method override is used to extend the {@link ArrayAdapter} to be able to show more than one text view.
+     * Method override is used to extend the {@link ArrayAdapter} to be able to
+     * show more than one text view.
      **/
     @NonNull
     @Override
-    public View getView(int position, @Nullable View convertView, @NonNull ViewGroup parent) {
+    public View getView(
+            int position, 
+            @Nullable View convertView, 
+            @NonNull ViewGroup parent) {
+        
         View listItemView = convertView;
+
+        // Get song_composition XML component
         if (listItemView == null) {
             listItemView = LayoutInflater.from(getContext()).inflate(
-                    R.layout.song_composition, parent, false);
+                    R.layout.song_composition,
+                    parent, 
+                    false);
         }
-
+        
+        // Find current scrollPosition (Android magic)
         CompositionOverview currentComposition = getItem(position);
 
-        //Assign String values of {@link CompositionOverview} to the text views of song_composition.xml
-        TextView compositionTitleTextView = listItemView.findViewById(R.id.composition_title);
+        // If we really have scrolled to a song_composition component...
         assert currentComposition != null;
-        compositionTitleTextView.setText(currentComposition.getCompositionTitle());
 
-        TextView locationsTextView = listItemView.findViewById(R.id.locations_text_view);
-        locationsTextView.setText(currentComposition.getCompositionLocations());
+        // ...Create the possibility to set the title of the song_composition component:
+        // Assign string values of {@link CompositionOverview} to the text views of component
+        TextView titleTextView = listItemView.findViewById(R.id.composition_title);
 
-        TextView membersTextView = listItemView.findViewById(R.id.members_text_view);
-        membersTextView.setText(currentComposition.getNumberOfMembers());
+        // ...Create the possibility to set member amount of the song_composition component
+        TextView membersTextView = listItemView.findViewById(R.id.composition_members);
 
+        //... Set right title
+        titleTextView.setText(
+                currentComposition.getCompositionTitle());
+
+        //... Set right member amount
+        membersTextView.setText(
+                currentComposition.getNumberOfMembers());
+
+        // Return component
         return listItemView;
     }
 }

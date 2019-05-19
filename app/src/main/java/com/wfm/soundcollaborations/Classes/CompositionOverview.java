@@ -2,7 +2,10 @@ package com.wfm.soundcollaborations.Classes;
 
 /**
  *  {@link CompositionOverview} represents a composition that the user can listen to.
- *  It is the helper class to connect ComposeFragment.java and CompositionAdapter.java
+ *
+ *  It is the helper class to connect {@link com.wfm.soundcollaborations.fragments.ComposeFragment}
+ *  and {@link com.wfm.soundcollaborations.adapter.CompositionAdapter}
+ *
  *  It contains following meta data of the composition:
  *  - title (of the composition)
  *  - number of members (in the composition)

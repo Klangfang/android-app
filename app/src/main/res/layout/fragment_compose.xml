@@ -24,7 +24,7 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:scrollbars="none"
-        tools:context="com.example.android.soundcollabroations.ComposeFragment" />
+        tools:context="com.example.android.soundcollaborations.ComposeFragment" />
 
     <!-- TODO Use Recycler View instead of List View
     <android.support.v7.widget.RecyclerView

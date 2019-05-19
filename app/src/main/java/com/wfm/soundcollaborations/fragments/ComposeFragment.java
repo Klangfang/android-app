@@ -21,33 +21,58 @@ import java.util.Objects;
  * The Compose Fragment provides public compositions that the user can join and an option
  * to create a new composition.
  *
- * It loads and displays {@link CompositionOverview} objects.
- * */
+ * The class is connected with {@link CompositionOverview} and {@link CompositionAdapter}:
+ * It loads and displays the composition Overview objects.
+ **/
 public class ComposeFragment extends Fragment {
-
-    private View root;
+    private View root; // Needed when adding a Fragment, is returned below
 
     @Override
-    public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container,
-                             Bundle savedInstanceState) {
-        root = inflater.inflate(R.layout.fragment_compose, container, false);
+    public View onCreateView(
+            @NonNull LayoutInflater inflater,
+            ViewGroup container,
+            Bundle savedInstanceState) {
+        root = inflater.inflate(
+                R.layout.fragment_compose,
+                container,
+                false);
+
         initToolbar();
 
         //New array with test data for composition views
         ArrayList<CompositionOverview> compositions = new ArrayList<>();
-        compositions.add(new CompositionOverview("Uni Sounds", "Hamburg, München", "1/4 Mitglieder"));
-        compositions.add(new CompositionOverview("Quiet Fire", "Hamburg, München", "1/4 Mitglieder"));
-        compositions.add(new CompositionOverview("Baobab", "Hamburg, München", "1/4 Mitglieder"));
-        compositions.add(new CompositionOverview("Nom Nom Sounds", "Hamburg, München", "1/4 Mitglieder"));
-        compositions.add(new CompositionOverview("Blablabla", "Hamburg, München", "1/4 Mitglieder"));
 
-        CompositionAdapter compositionAdapter = new CompositionAdapter(Objects.requireNonNull(getActivity()), compositions);
+        // Add Dummy Content. TODO: Replace with real content
+        compositions.add(new CompositionOverview(
+                "title1",
+                "1/4 Mitglieder"));
+
+        compositions.add(new CompositionOverview(
+                "title2",
+                "1/4 Mitglieder"));
+
+        compositions.add(new CompositionOverview(
+                "title3",
+                "1/4 Mitglieder"));
+
+        compositions.add(new CompositionOverview(
+                "title4",
+                "1/4 Mitglieder"));
+
+        compositions.add(new CompositionOverview(
+                "title5",
+                "1/4 Mitglieder"));
+
+        CompositionAdapter compositionAdapter = new CompositionAdapter(
+                Objects.requireNonNull(getActivity()),
+                compositions);
 
         // TODO Use recycler view here instead of list view
         ListView listView = root.findViewById(R.id.public_compositions_list);
+
         listView.setAdapter(compositionAdapter);
 
-        return root;
+        return root; // Needed when adding a Fragment
     }
 
     /**
@@ -57,6 +82,7 @@ public class ComposeFragment extends Fragment {
     private void initToolbar() {
         MainActivity mainActivity = (MainActivity) getActivity();
         assert mainActivity != null;
+
         Toolbar toolbar = mainActivity.getToolbar();
         toolbar.setTitle(R.string.bnm_compose);
         toolbar.setBackgroundColor(getResources().getColor(R.color.navigation));
