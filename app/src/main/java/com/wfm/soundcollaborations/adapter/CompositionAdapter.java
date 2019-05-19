@@ -19,6 +19,7 @@ import java.util.ArrayList;
  * {@link CompositionAdapter} is an {@link ArrayAdapter} that can provide the layout for each 
  * list item based on a data source, which is a list of {@link CompositionOverview} objects
  * Class inserts content in XML file song_composition.xml
+ * Class in instanciated in {@link com.wfm.soundcollaborations.fragments.ComposeFragment}
  **/
 public class CompositionAdapter extends ArrayAdapter<CompositionOverview> {
     // Link with Composition Overview

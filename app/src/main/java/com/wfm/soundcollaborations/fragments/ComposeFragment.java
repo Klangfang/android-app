@@ -22,7 +22,7 @@ import java.util.Objects;
  * to create a new composition.
  *
  * The class is connected with {@link CompositionOverview} and {@link CompositionAdapter}:
- * It loads and displays the composition Overview objects.
+ * It loads and displays the composition Overview objects and creates an instance of the Adapter
  **/
 public class ComposeFragment extends Fragment {
     private View root; // Needed when adding a Fragment, is returned below
@@ -37,12 +37,12 @@ public class ComposeFragment extends Fragment {
                 container,
                 false);
 
-        initToolbar();
+        initToolbar(); // See function at bottom
 
-        //New array with test data for composition views
+        // New empty ArrayList for adding test data to composition views
         ArrayList<CompositionOverview> compositions = new ArrayList<>();
 
-        // Add Dummy Content. TODO: Replace with real content
+        // Add Dummy Content to ArrayList above. TODO: Replace with real content
         compositions.add(new CompositionOverview(
                 "title1",
                 "1/4 Mitglieder"));
@@ -63,22 +63,26 @@ public class ComposeFragment extends Fragment {
                 "title5",
                 "1/4 Mitglieder"));
 
+        /**
+         * Create Instance of CompositionAdapter
+         * See {@link CompositionAdapter}
+        **/
         CompositionAdapter compositionAdapter = new CompositionAdapter(
                 Objects.requireNonNull(getActivity()),
                 compositions);
 
+        // Create ListView
         // TODO Use recycler view here instead of list view
         ListView listView = root.findViewById(R.id.public_compositions_list);
 
         listView.setAdapter(compositionAdapter);
 
-        return root; // Needed when adding a Fragment
+        return root; // Needed when adding a Fragment (See top of Fragment)
     }
 
     /**
-     * This method initializes the top app bar and sets a custom
-     * title and background color.
-     * */
+     * Initialize top app bar and set custom title and background color.
+     **/
     private void initToolbar() {
         MainActivity mainActivity = (MainActivity) getActivity();
         assert mainActivity != null;

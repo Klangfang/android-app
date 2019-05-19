@@ -29,6 +29,6 @@ public class CompositionOverview {
         return mTitle; // Real title
     }
     public String getNumberOfMembers() {
-        return mNumberOfMembers; // Real Number
+        return mNumberOfMembers; // Real number
     }
 }
