@@ -18,11 +18,10 @@ import java.util.ArrayList;
 import java.util.Objects;
 
 /**
- * The Compose Fragment provides public compositions that the user can join and an option
- * to create a new composition.
- *
- * The class is connected with {@link CompositionOverview} and {@link CompositionAdapter}:
- * It loads and displays the composition Overview objects and creates an instance of the Adapter
+ * The {@link ComposeFragment} ...
+ *  - requests data for public compositions
+ *  - displays a list of {@link CompositionOverview} objects using {@link CompositionAdapter}
+ *  - provides the possibility to create new public compositions
  **/
 public class ComposeFragment extends Fragment {
     private View root; // Needed when adding a Fragment, is returned below
@@ -37,51 +36,55 @@ public class ComposeFragment extends Fragment {
                 container,
                 false);
 
-        initToolbar(); // See function at bottom
+        // Initialize the toolbar
+        initToolbar();
 
-        // New empty ArrayList for adding test data to composition views
+        // New empty ArrayList for adding data to CompositionOverview
         ArrayList<CompositionOverview> compositions = new ArrayList<>();
 
-        // Add Dummy Content to ArrayList above. TODO: Replace with real content
+        // Add Dummy Content to ArrayList above. TODO: Replace with JSON data
         compositions.add(new CompositionOverview(
                 "title1",
-                "1/4 Mitglieder"));
+                "1/4 Mitglieder",
+                "https://stereoninjamusic.weebly.com/uploads/4/5/7/5/45756923/the_midnight_ninja.ogg"));
 
         compositions.add(new CompositionOverview(
                 "title2",
-                "1/4 Mitglieder"));
+                "1/4 Mitglieder",
+                "https://stereoninjamusic.weebly.com/uploads/4/5/7/5/45756923/the_midnight_ninja.ogg"));
 
         compositions.add(new CompositionOverview(
                 "title3",
-                "1/4 Mitglieder"));
+                "1/4 Mitglieder",
+                "https://stereoninjamusic.weebly.com/uploads/4/5/7/5/45756923/the_midnight_ninja.ogg"));
 
         compositions.add(new CompositionOverview(
                 "title4",
-                "1/4 Mitglieder"));
+                "1/4 Mitglieder",
+                "https://stereoninjamusic.weebly.com/uploads/4/5/7/5/45756923/the_midnight_ninja.ogg"));
 
         compositions.add(new CompositionOverview(
                 "title5",
-                "1/4 Mitglieder"));
+                "1/4 Mitglieder",
+                "https://stereoninjamusic.weebly.com/uploads/4/5/7/5/45756923/the_midnight_ninja.ogg"));
 
-        /**
-         * Create Instance of CompositionAdapter
-         * See {@link CompositionAdapter}
-        **/
+        // Create new instance of CompositionAdapter
         CompositionAdapter compositionAdapter = new CompositionAdapter(
                 Objects.requireNonNull(getActivity()),
                 compositions);
 
-        // Create ListView
+        // Create new ListView
         // TODO Use recycler view here instead of list view
         ListView listView = root.findViewById(R.id.public_compositions_list);
 
+        // Provide the adapter for the listView
         listView.setAdapter(compositionAdapter);
 
         return root; // Needed when adding a Fragment (See top of Fragment)
     }
 
     /**
-     * Initialize top app bar and set custom title and background color.
+     * Initialize {@link Toolbar} and set custom title and background color.
      **/
     private void initToolbar() {
         MainActivity mainActivity = (MainActivity) getActivity();

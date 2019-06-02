@@ -51,19 +51,27 @@ public class AudioPlayer
 
     private void init()
     {
-        BandwidthMeter bandwidthMeter = new DefaultBandwidthMeter(null, null, Constants.BUFFER_SEGMENT_SIZE);
+        BandwidthMeter bandwidthMeter = new DefaultBandwidthMeter(
+                null,
+                null,
+                Constants.BUFFER_SEGMENT_SIZE);
+
+        /* Apparently this is not needed anymore
+
         DefaultLoadControl control = new DefaultLoadControl(
-                new DefaultAllocator(true, C.DEFAULT_BUFFER_SEGMENT_SIZE),
+                new DefaultAllocator(
+                        true,
+                        C.DEFAULT_BUFFER_SEGMENT_SIZE),
                 5 * 60 * 1000, // the size of chunk
                 10 * 60 * 1000,
                 DefaultLoadControl.DEFAULT_BUFFER_FOR_PLAYBACK_MS,
-                DefaultLoadControl.DEFAULT_BUFFER_FOR_PLAYBACK_AFTER_REBUFFER_MS);
+                DefaultLoadControl.DEFAULT_BUFFER_FOR_PLAYBACK_AFTER_REBUFFER_MS);*/
         TrackSelection.Factory audioTrackSelectionFactory =
                 new AdaptiveTrackSelection.Factory(bandwidthMeter);
         TrackSelector trackSelector =
                 new DefaultTrackSelector(audioTrackSelectionFactory);
         RenderersFactory factory = new DefaultRenderersFactory(context);
-        player = ExoPlayerFactory.newSimpleInstance(factory, trackSelector, control);
+        player = ExoPlayerFactory.newSimpleInstance(factory, trackSelector/*, control*/);
     }
 
     public void addSounds(String uris[])

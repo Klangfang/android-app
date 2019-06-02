@@ -6,29 +6,27 @@ package com.wfm.soundcollaborations.Classes;
  *  It is the helper class to connect {@link com.wfm.soundcollaborations.fragments.ComposeFragment}
  *  and {@link com.wfm.soundcollaborations.adapter.CompositionAdapter}
  *
- *  It contains following meta data of the composition:
- *  - title (of the composition)
- *  - number of members (in the composition)
- *  - an audio preview file //TODO @willi: Add Audio Preview
+ *  It contains following data of the composition:
+ *      - title (of the composition)
+ *      - number of members (in the composition)
+ *      - a sound URI (of the audio file that can be played)
  **/
 public class CompositionOverview {
-    // Placeholder
-    private String mTitle;
-    private String mNumberOfMembers;
+    // Member Variables of Composition Overview
+    public final String mTitle;
+    public final String mNumberOfMembers;
+    public final String mSoundUri;
 
-    // Helper class to replace placeholder with real content
-    // Title and numberOfMembers are loaded from ComposeFragment.java
-    public CompositionOverview(String title, String numberOfMembers) {
+    /**
+     * Creates new {@link CompositionOverview} objects.
+     *
+     * @param title is the title of the composition
+     * @param numberOfMembers is the quantity of users that are currently participating
+     * @param soundUri is the path of an audio file that can be played
+     */
+    public CompositionOverview(String title, String numberOfMembers, String soundUri) {
         mTitle = title;
         mNumberOfMembers = numberOfMembers;
-    }
-
-    // Return new replaced content
-    // Function is called in CompositionAdapter.java
-    public String getCompositionTitle() {
-        return mTitle; // Real title
-    }
-    public String getNumberOfMembers() {
-        return mNumberOfMembers; // Real number
+        mSoundUri = soundUri;
     }
 }
