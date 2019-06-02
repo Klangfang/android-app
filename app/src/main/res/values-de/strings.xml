@@ -36,4 +36,7 @@
     <string name="external_storage_permission_denied">Bitte erlaube den Zugriff auf deinen Speicher, um Aufnahmen machen zu können.</string>
     <string name="all_audio_permissions_denied">Bitte erlaube den Zugriff auf Mikrofon und Speicher, um Aufnahmen machen zu können.</string>
 
+    <string name="number_of_members"> /4 Mitglieder</string>
+
+
 </resources>

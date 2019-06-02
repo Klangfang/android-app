@@ -54,6 +54,9 @@
     <string name="all_audio_permissions_denied">Recording and storage permissions were denied. Cannot record audio.</string>
 
 
+    <string name="number_of_members"> /4 Members</string>
+
+
     <string name="sound_file_prefix" translatable="false">Sound</string>
 
 

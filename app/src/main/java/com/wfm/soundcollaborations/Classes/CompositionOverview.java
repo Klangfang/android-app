@@ -14,7 +14,7 @@ package com.wfm.soundcollaborations.Classes;
 public class CompositionOverview {
     // Member Variables of Composition Overview
     public final String mTitle;
-    public final String mNumberOfMembers;
+    public final int mNumberOfMembers;
     public final String mSoundUri;
 
     /**
@@ -24,7 +24,7 @@ public class CompositionOverview {
      * @param numberOfMembers is the quantity of users that are currently participating
      * @param soundUri is the path of an audio file that can be played
      */
-    public CompositionOverview(String title, String numberOfMembers, String soundUri) {
+    public CompositionOverview(String title, int numberOfMembers, String soundUri) {
         mTitle = title;
         mNumberOfMembers = numberOfMembers;
         mSoundUri = soundUri;

@@ -1,6 +1,7 @@
 package com.wfm.soundcollaborations.adapter;
 
 import android.app.Activity;
+import android.content.res.Resources;
 import android.net.Uri;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
@@ -86,9 +87,11 @@ public class CompositionAdapter extends ArrayAdapter<CompositionOverview> {
                 currentComposition.mTitle
         );
 
+
+
         // Set member amount of currently visible compositions
         membersTextView.setText(
-                currentComposition.mNumberOfMembers
+                currentComposition.mNumberOfMembers + "/4 Members" // TODO replace string with resource
         );
 
         // Create instance of PlayerControlView and assign it to the correct layout view

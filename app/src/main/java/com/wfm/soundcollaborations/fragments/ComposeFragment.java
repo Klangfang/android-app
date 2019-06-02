@@ -9,6 +9,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ListView;
 
+import com.google.android.exoplayer2.ExoPlayer;
 import com.wfm.soundcollaborations.Classes.CompositionOverview;
 import com.wfm.soundcollaborations.R;
 import com.wfm.soundcollaborations.activities.MainActivity;
@@ -27,14 +28,15 @@ public class ComposeFragment extends Fragment {
     private View root; // Needed when adding a Fragment, is returned below
 
     @Override
-    public View onCreateView(
-            @NonNull LayoutInflater inflater,
-            ViewGroup container,
-            Bundle savedInstanceState) {
+    public View onCreateView(@NonNull LayoutInflater inflater,
+                             ViewGroup container, Bundle savedInstanceState) {
+
+        // Assign the layout file to the fragment
         root = inflater.inflate(
                 R.layout.fragment_compose,
                 container,
-                false);
+                false
+        );
 
         // Initialize the toolbar
         initToolbar();
@@ -45,27 +47,27 @@ public class ComposeFragment extends Fragment {
         // Add Dummy Content to ArrayList above. TODO: Replace with JSON data
         compositions.add(new CompositionOverview(
                 "title1",
-                "1/4 Mitglieder",
+                1,
                 "https://stereoninjamusic.weebly.com/uploads/4/5/7/5/45756923/the_midnight_ninja.ogg"));
 
         compositions.add(new CompositionOverview(
                 "title2",
-                "1/4 Mitglieder",
+                2,
                 "https://stereoninjamusic.weebly.com/uploads/4/5/7/5/45756923/the_midnight_ninja.ogg"));
 
         compositions.add(new CompositionOverview(
                 "title3",
-                "1/4 Mitglieder",
+                3,
                 "https://stereoninjamusic.weebly.com/uploads/4/5/7/5/45756923/the_midnight_ninja.ogg"));
 
         compositions.add(new CompositionOverview(
                 "title4",
-                "1/4 Mitglieder",
+                2,
                 "https://stereoninjamusic.weebly.com/uploads/4/5/7/5/45756923/the_midnight_ninja.ogg"));
 
         compositions.add(new CompositionOverview(
                 "title5",
-                "1/4 Mitglieder",
+                1,
                 "https://stereoninjamusic.weebly.com/uploads/4/5/7/5/45756923/the_midnight_ninja.ogg"));
 
         // Create new instance of CompositionAdapter
