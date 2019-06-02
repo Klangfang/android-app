@@ -6,6 +6,8 @@ import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 
+import com.wfm.soundcollaborations.webservice.HttpUtils;
+
 /**
  * Implementation of headless Fragment that runs an AsyncTask to fetch data from the network.
  */
@@ -13,7 +15,8 @@ public class NetworkFragment extends Fragment {
 
     public static final String TAG = "NetworkFragment";
 
-    private static final String URL_KEY = "UrlKey";
+    private static final String URL_KEY = "normal";
+    private static final String URL_KEY_RELEASE = "release";
 
     private DownloadCallback<String> callback;
     private DownloadTask downloadTask;
@@ -35,6 +38,7 @@ public class NetworkFragment extends Fragment {
             networkFragment = new NetworkFragment();
             Bundle args = new Bundle();
             args.putString(URL_KEY, url);
+            args.putString(URL_KEY_RELEASE, HttpUtils.COMPOSITION_RELEASE_URL);
             networkFragment.setArguments(args);
             fragmentManager.beginTransaction().add(networkFragment, TAG).commit();
         }
@@ -44,7 +48,7 @@ public class NetworkFragment extends Fragment {
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        urlString = getArguments().getString(URL_KEY);
+        //urlString = getArguments().getString(URL_KEY);
         // Retain this Fragment across configuration changes in the host Activity.
         setRetainInstance(true);
     }
@@ -70,23 +74,28 @@ public class NetworkFragment extends Fragment {
 
     @Override
     public void onDestroy() {
+
         // Cancel task when Fragment is destroyed.
         cancelDownload();
+
+        startDownload(getContext(), getArguments().getString(URL_KEY_RELEASE));
+
         super.onDestroy();
     }
+
 
     /**
      * Start non-blocking execution of DownloadTask.
      */
-    public void startDownload(Context context) {
-        cancelDownload();
+    public void startDownload(Context context, String url) {
+
         downloadTask = new DownloadTask(callback);
         // Host Activity will handle callbacks from task.
         callback = (DownloadCallback<String>) context;
         //TODO Quick Solution:
         // set callback after get dettached
         downloadTask.setCallback(callback);
-        downloadTask.execute(urlString);
+        downloadTask.execute(url);
     }
 
     /**

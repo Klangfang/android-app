@@ -55,7 +55,7 @@ public class Sound {
         this.startPosition = startPosition;
         this.duration = duration;
         this.creatorName = creatorName;
-        this.filePath = COMPOSITION_FILES_URL + filePath;
+        this.filePath = COMPOSITION_FILES_URL + "/" + filePath;
     }
 
     public void prepare(Context context) {

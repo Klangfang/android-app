@@ -1,9 +1,6 @@
 package com.wfm.soundcollaborations.webservice;
 
-import android.util.JsonReader;
-import android.util.JsonWriter;
 
-import com.loopj.android.http.AsyncHttpClient;
 import com.loopj.android.http.AsyncHttpResponseHandler;
 import com.loopj.android.http.JsonHttpResponseHandler;
 import com.loopj.android.http.RequestParams;
@@ -21,7 +18,6 @@ import org.json.JSONObject;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Optional;
 import java.util.Set;
 
 /**
@@ -29,34 +25,13 @@ import java.util.Set;
  */
 public class HttpUtils {
 
-    //private static final String BASE_URL = "https://klangfang-service.herokuapp.com/compositions/compositionsOverview?page=0&size=5";
 
-    private static final String BASE_URL = "http://localhost/compositions/1/pick";
+    public static final String COMPOSITION_VIEW_URL = "https://klangfang-service.herokuapp.com/compositions/compositionsOverview?page=0&size=5";
+    public static final String COMPOSITION_PICK_URL = "https://klangfang-service.herokuapp.com/compositions/1/pick";
+    public static final String COMPOSITION_RELEASE_URL = "https://klangfang-service.herokuapp.com/compositions/1/release";
+
     private static SyncHttpClient client = new SyncHttpClient();
 
-    public static void get(JsonHttpResponseHandler responseHandler) {
-        client.get(BASE_URL, responseHandler);
-    }
-
-    public static void get(String url, RequestParams params, AsyncHttpResponseHandler responseHandler) {
-        client.get(getAbsoluteUrl(url), params, responseHandler);
-    }
-
-    public static void post(String url, RequestParams params, AsyncHttpResponseHandler responseHandler) {
-        client.post(getAbsoluteUrl(url), params, responseHandler);
-    }
-
-    public static void getByUrl(String url, RequestParams params, AsyncHttpResponseHandler responseHandler) {
-        client.get(url, params, responseHandler);
-    }
-
-    public static void postByUrl(String url, RequestParams params, AsyncHttpResponseHandler responseHandler) {
-        client.post(url, params, responseHandler);
-    }
-
-    private static String getAbsoluteUrl(String relativeUrl) {
-        return BASE_URL + relativeUrl;
-    }
 
     public static OverviewResponse getCompositionOverviews(String jsonResponse) {
         Set<CompositionOverview> compositionOverviews = new HashSet<>();
@@ -108,6 +83,23 @@ public class HttpUtils {
 
         } catch (JSONException e) {
             System.err.println(e.getMessage());
+            return null;
+        }
+    }
+
+    public static OverviewResponse getCompositionOverview(String jsonResponse) {
+
+        Set<CompositionOverview> compositionOverviews = new HashSet<>();
+        try {
+            JSONObject compositionOverview = new JSONObject(jsonResponse);
+            String title = compositionOverview.getString("title");
+            int numberOfParticipation = compositionOverview.getInt("numberOfMembers");
+            String snippetUrl = compositionOverview.getString("snippetUrl");
+            String pickUrl = compositionOverview.getString("pickUrl");
+            compositionOverviews.add(new CompositionOverview(title, numberOfParticipation, snippetUrl, pickUrl));
+
+            return new OverviewResponse(compositionOverviews, null);
+        } catch (JSONException e) {
             return null;
         }
     }
