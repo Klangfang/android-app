@@ -93,7 +93,7 @@ public class EditorActivity extends NetworkActivity {
         // create soundViews to be added to the corresponding sounds
         // let SoundDownloader update these views using listener
         // when a view finished downloading it add itself to the track
-        // when all sounds are loaded the Composition will be ready to play the sounds
+        // when all sounds are loaded the CompositionOverview will be ready to play the sounds
         builder = new CompositionBuilder(compositionView, 4);
         Intent intent = getIntent();
         String compositionResponse = intent.getStringExtra(CreateCompositionActivity.COMPOSITION_RESPONSE);

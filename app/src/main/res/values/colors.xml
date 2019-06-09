@@ -25,8 +25,8 @@
     <!-- Klangfang Base Colors -->
     <color name="black">#1B1B1B</color>
     <color name="grey_dark">#444444</color>
-    <color name="grey_middle">#E0E0E0</color>
-    <color name="grey_light">#BDBDBD</color>
+    <color name="grey_middle">#BDBDBD</color>
+    <color name="grey_light">#E0E0E0</color>
     <color name="white">#FAFAFA</color>
     <color name="red">#F05555</color>
     <color name="yellow_dark">#B09000</color>
