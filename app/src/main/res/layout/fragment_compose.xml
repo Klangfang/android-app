@@ -6,15 +6,25 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
+    <Space
+        android:background="@color/color_primary"
+        android:id="@+id/top_space"
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/xs"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
     <ListView
         android:id="@+id/public_compositions_list"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintRight_toRightOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/top_space"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        tools:context="com.example.android.soundcollabroations.ComposeFragment" />
+        android:scrollbars="none"
+        tools:context="com.example.android.soundcollaborations.ComposeFragment" />
 
     <!-- TODO Use Recycler View instead of List View
     <android.support.v7.widget.RecyclerView

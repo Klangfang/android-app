@@ -12,6 +12,7 @@ import android.widget.Button;
 import android.widget.TextView;
 
 import com.android.volley.Response;
+import com.google.android.exoplayer2.ui.PlayerControlView;
 import com.wfm.soundcollaborations.Editor.activities.EditorActivity;
 import com.wfm.soundcollaborations.Editor.model.composition.CompositionOverview;
 import com.wfm.soundcollaborations.R;
@@ -52,10 +53,10 @@ public class CompositionOverviewAdapter extends ArrayAdapter<CompositionOverview
         assert currentOverview != null;
         compositionTitleTextView.setText(currentOverview.title);
 
-        TextView locationsTextView = listItemView.findViewById(R.id.locations_text_view);
-        locationsTextView.setText(currentOverview.snippetUrl);
+        //TODO currentOverview.snippetUrl
+        PlayerControlView playerControlView = listItemView.findViewById(R.id.public_composition_player_view);
 
-        TextView membersTextView = listItemView.findViewById(R.id.members_text_view);
+        TextView membersTextView = listItemView.findViewById(R.id.composition_members);
         membersTextView.setText(String.valueOf(currentOverview.numberOfMembers));
 
         Button participateButton = listItemView.findViewById(R.id.join_button);
