@@ -3,10 +3,7 @@ package com.wfm.soundcollaborations.Editor.activities;
 import android.content.Intent;
 import android.os.Bundle;
 
-import com.android.volley.Response;
-
 import com.wfm.soundcollaborations.R;
-import com.wfm.soundcollaborations.webservice.CompositionServiceClient;
 
 import android.support.v7.app.AppCompatActivity;
 import android.view.Menu;
@@ -16,11 +13,6 @@ import android.widget.Button;
 
 public class CreateCompositionActivity extends AppCompatActivity {
 
-
-    public static final Long COMPOSITION_ID = 1L;
-    public static final String PICK_RESPONSE = "PICK";
-
-    private CompositionServiceClient client;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -32,7 +24,7 @@ public class CreateCompositionActivity extends AppCompatActivity {
         // When user taps confirm button
         // Capture button from layout to add functionality
         Button testButtonId = findViewById(R.id.testButtonId);
-        testButtonId.setOnClickListener(view -> doRequest(view));
+        testButtonId.setOnClickListener(view -> startEditorActivity(view));
 
     }
 
@@ -44,18 +36,9 @@ public class CreateCompositionActivity extends AppCompatActivity {
     }
 
 
-    private void doRequest(View view) {
-        if (client == null) {
-            client = new CompositionServiceClient(view.getContext());
-        }
-        Response.Listener<String> listener = response -> startEditorActivity(view, response);
-        //TODO client.pick(COMPOSITION_ID, listener);
-    }
-
-
-    private void startEditorActivity(View view, String response) {
+    private void startEditorActivity(View view) {
         Intent intent = new Intent(view.getContext(), EditorActivity.class);
-        intent.putExtra(PICK_RESPONSE, response);
+        //intent.putExtra(PICK_RESPONSE, response);
         view.getContext().startActivity(intent);
     }
 }

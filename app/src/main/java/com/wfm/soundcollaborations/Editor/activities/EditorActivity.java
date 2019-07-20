@@ -22,6 +22,7 @@ import android.widget.Toast;
 import com.ohoussein.playpause.PlayPauseView;
 import com.wfm.soundcollaborations.Editor.exceptions.RecordTimeOutExceededException;
 import com.wfm.soundcollaborations.Editor.exceptions.SoundRecordingTimeException;
+import com.wfm.soundcollaborations.fragments.ComposeFragment;
 import com.wfm.soundcollaborations.webservice.CompositionServiceClient;
 import com.wfm.soundcollaborations.webservice.PickResponse;
 import com.wfm.soundcollaborations.R;
@@ -33,6 +34,8 @@ import com.wfm.soundcollaborations.Editor.views.composition.CompositionView;
 import com.wfm.soundcollaborations.Editor.views.composition.SoundView;
 import com.wfm.soundcollaborations.common.NetworkActivity;
 import com.wfm.soundcollaborations.webservice.JsonUtil;
+
+import org.apache.commons.lang3.StringUtils;
 
 import java.util.Timer;
 import java.util.TimerTask;
@@ -99,10 +102,13 @@ public class EditorActivity extends AppCompatActivity {
         // when all sounds are loaded the CompositionOverview will be ready to play the sounds
         builder = new CompositionBuilder(compositionView, 4);
         Intent intent = getIntent();
-        String compositionJson = intent.getStringExtra(CreateCompositionActivity.PICK_RESPONSE);
-        response = JsonUtil.fromJson(compositionJson, PickResponse.class);
-        if (response != null) {
-            builder.addSounds(response.composition);
+        String compositionJson = intent.getStringExtra(ComposeFragment.PICK_RESPONSE);
+        // create new composition has no json response
+        if (StringUtils.isNoneBlank(compositionJson)) {
+            response = JsonUtil.fromJson(compositionJson, PickResponse.class);
+            if (response != null) {
+                builder.addSounds(response.composition);
+            }
         }
 
         deletedBtn.setOnClickListener(delBtnview -> deleteConfirmation(delBtnview.getContext()));
@@ -114,7 +120,9 @@ public class EditorActivity extends AppCompatActivity {
     @Override
     protected void onDestroy() {
 
-        client.release(response.composition.id);
+        if (response != null && response.composition != null) {
+            client.release(response.composition.id);
+        }
         super.onDestroy();
     }
 

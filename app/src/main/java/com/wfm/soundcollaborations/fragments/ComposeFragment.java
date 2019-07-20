@@ -1,7 +1,9 @@
 package com.wfm.soundcollaborations.fragments;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
+import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.Fragment;
 import android.support.v7.widget.Toolbar;
 import android.view.LayoutInflater;
@@ -10,6 +12,8 @@ import android.view.ViewGroup;
 import android.widget.ListView;
 
 import com.android.volley.Response;
+import com.wfm.soundcollaborations.Editor.activities.CreateCompositionActivity;
+import com.wfm.soundcollaborations.Editor.activities.EditorActivity;
 import com.wfm.soundcollaborations.Editor.model.composition.CompositionOverview;
 import com.wfm.soundcollaborations.webservice.CompositionServiceClient;
 import com.wfm.soundcollaborations.webservice.JsonUtil;
@@ -33,6 +37,7 @@ public class ComposeFragment extends Fragment {
 
 
     private CompositionServiceClient client;
+    public static final String PICK_RESPONSE = "PICK";
 
 
     @Override
@@ -49,6 +54,9 @@ public class ComposeFragment extends Fragment {
 
         // Initialize the toolbar
         initToolbar();
+
+        FloatingActionButton createCompositionButton = root.findViewById(R.id.new_composition_button);
+        createCompositionButton.setOnClickListener(view -> startCreateCompositionActivity(view));
 
 
         client = new CompositionServiceClient(root.getContext());
@@ -113,6 +121,12 @@ public class ComposeFragment extends Fragment {
             listView.setAdapter(adapter);
         }
 
+    }
+
+
+    private void startCreateCompositionActivity(View view) {
+        Intent intent = new Intent(view.getContext(), CreateCompositionActivity.class);
+        view.getContext().startActivity(intent);
     }
 
 
