@@ -1,4 +1,42 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <!-- General Strings -->
     <string name="app_name">Klangfang</string>
+    <string name="my_sounds">Meine Klänge</string>
+    <string name="finished_collages">Fertige Collagen</string>
+    <string name="record_button">Aufnehmen</string>
+    <string name="name_composition">Wie möchtest du deine Klangcollage nennen?</string>
+    <string name="number_of_members"> /4 Mitglieder</string>
+
+    <!-- Bottom Navigation Menu -->
+    <string name="bnm_explore">Entdecken</string>
+    <string name="bnm_compose">Komponieren</string>
+    <string name="bnm_record">Sammeln</string>
+
+    <!-- Menus -->
+    <string name="send">Senden</string>
+    <string name="done">Fertig</string>
+    <string name="settings">Einstellungen</string>
+    <string name="friends">Freunde</string>
+    <string name="sort">Sortieren</string>
+    <string name="filter">Filtern</string>
+    <string name="drawer_open">Öffnen</string>
+    <string name="drawer_close">Schließen</string>
+    <string name="sound_file_prefix" translatable="false">Klang</string>
+    <string name="history">Verlauf deiner Collagen</string>
+
+    <!-- Buttons -->
+    <string name="join_button">Mitmachen</string>
+    <string name="start_composition">Los geht\'s!</string>
+
+    <!-- Placeholders -->
+    <string name="title">Titel</string>
+
+    <!-- Image Content Descriptions -->
+    <string name="locations">Orte aller Collagen</string>
+
+    <!-- Messages to the user -->
+    <string name="record_audio_permission_denied">Bitte erlaube den Zugriff auf dein Mikrofon, um Aufnahmen machen zu können.</string>
+    <string name="external_storage_permission_denied">Bitte erlaube den Zugriff auf deinen Speicher, um Aufnahmen machen zu können.</string>
+    <string name="all_audio_permissions_denied">Bitte erlaube den Zugriff auf Mikrofon und Speicher, um Aufnahmen machen zu können.</string>
 </resources>

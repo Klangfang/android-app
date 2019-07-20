@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <item
+        android:id="@+id/btn_favorites"
+        android:icon="@drawable/discover_categories"
+        android:title="@string/filter"
+        app:showAsAction="ifRoom" />
+
+    <item
+        android:id="@+id/btn_search"
+        android:icon="@drawable/discover_sort"
+        android:title="@string/sort"
+        app:showAsAction="ifRoom" />
+</menu>

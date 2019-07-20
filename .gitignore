@@ -1,3 +1,4 @@
+.idea/*
 *.iml
 .gradle
 /local.properties
@@ -75,5 +76,8 @@ gradle-app.setting
 # Avoid ignoring Gradle wrapper jar file (.jar files are usually ignored)
 !gradle-wrapper.jar
 
+gradle/wrapper/gradle-wrapper.properties
 # Cache of project
 .gradletasknamecache
+
+sh.exe.stackdump

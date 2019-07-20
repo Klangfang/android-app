@@ -83,15 +83,13 @@ public class SongCompositionView extends CardView {
     private void init(Context context, AttributeSet attrs){
         View.inflate(getContext(), R.layout.song_composition, this);
 
-        tvTitle = (TextView) findViewById(R.id.tv_title);
+        tvTitle = findViewById(R.id.composition_title);
         //tvInfo = (TextView) findViewById(R.id.tv_info);
-        tvPlaces = (TextView) findViewById(R.id.tv_places);
-        llContribute = (LinearLayout) findViewById(R.id.ll_contribute);
-        ibMarkFavorite = (ImageButton) findViewById(R.id.ib_mark_favorite);
-        tvName = (TextView) findViewById(R.id.tv_name);
-        ibExtend = (ImageButton) findViewById(R.id.ib_extend);
-        llTeam = (LinearLayout) findViewById(R.id.team);
-        playerView = (CircularPlayerView) findViewById(R.id.circular_player);
+        tvPlaces = findViewById(R.id.tv_places);
+        //llContribute = findViewById(R.id.join_button);
+        ibMarkFavorite = findViewById(R.id.ib_mark_favorite);
+        tvName = findViewById(R.id.tv_name);
+        playerView = findViewById(R.id.circular_player);
 
         actions = new View[]{llTeam, ibMarkFavorite, tvName};
 

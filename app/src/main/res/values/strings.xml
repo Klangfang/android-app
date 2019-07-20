@@ -1,8 +1,15 @@
 <resources>
-    <string name="app_name">Sound Collaborations</string>
-    <string name="drawer_open">Öffnen</string>
-    <string name="drawer_close">Schließen</string>
+    <!-- General Strings -->
+    <string name="app_name">Klangfang</string>
+    <string name="drawer_open">Open</string>
+    <string name="drawer_close">Close</string>
+    <string name="record_button">Record</string>
+    <string name="number_of_members"> /4 Members</string>
+    <string name="name_composition">Please name your new composition:</string>
+    <string name="start_composition">Let\'s go!</string>
+    <string name="sound_file_prefix" translatable="false">Sound</string>
 
+    <!-- Menu -->
     <string-array name="drawer_items">
         <item>Record</item>
         <item>Sound News Feed</item>
@@ -10,6 +17,7 @@
         <item>Profil</item>
     </string-array>
 
+    <!-- Hashtags -->
     <string-array name="hashtags">
         <item>Natur</item>
         <item>Stadt</item>
@@ -21,4 +29,37 @@
         <item>Verkehrsmittel</item>
         <item>Wetter</item>
     </string-array>
+
+    <!-- Collect Fragment -->
+    <string name="my_sounds">My Sounds</string>
+    <string name="finished_collages">Finished Compositions</string>
+
+    <!-- Bottom Navigation Menu -->
+    <string name="bnm_explore">Explore</string>
+    <string name="bnm_compose">Compose</string>
+    <string name="bnm_record">Collect</string>
+
+    <!-- Menus -->
+    <string name="send">Send</string>
+    <string name="done">Done</string>
+    <string name="settings">Settings</string>
+    <string name="friends">Friends</string>
+    <string name="sort">Sort</string>
+    <string name="filter">Filter</string>
+    <string name="history">Composition History</string>
+
+    <!-- Buttons -->
+    <string name="join_button">Join</string>
+
+    <!-- Placeholders -->
+    <string name="title">Title</string>
+
+    <!-- Image Content Descriptions -->
+    <string name="locations">Composition Locations</string>
+
+    <!-- Messages to the user -->
+    <string name="MESSAGE_PRESS_AND_HOLD_TO_RECORD">Please press and hold to record a voice clip</string>
+    <string name="record_audio_permission_denied">Recording permission was denied. Cannot record audio.</string>
+    <string name="external_storage_permission_denied">Storage permission was denied. Cannot record audio.</string>
+    <string name="all_audio_permissions_denied">Recording and storage permissions were denied. Cannot record audio.</string>
 </resources>
