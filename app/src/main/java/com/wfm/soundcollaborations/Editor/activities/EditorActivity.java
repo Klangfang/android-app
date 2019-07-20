@@ -32,7 +32,6 @@ import com.wfm.soundcollaborations.Editor.exceptions.SoundWillOverlapException;
 import com.wfm.soundcollaborations.Editor.model.composition.CompositionBuilder;
 import com.wfm.soundcollaborations.Editor.views.composition.CompositionView;
 import com.wfm.soundcollaborations.Editor.views.composition.SoundView;
-import com.wfm.soundcollaborations.common.NetworkActivity;
 import com.wfm.soundcollaborations.webservice.JsonUtil;
 
 import org.apache.commons.lang3.StringUtils;
