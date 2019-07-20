@@ -6,11 +6,13 @@ package com.wfm.soundcollaborations.Classes;
  **/
 public class Composition {
 
+    public String pickUrl;
     private String mCompositionTitle;
     private String mLocations;
     private String mNumberOfMembers;
 
-    public Composition(String compositionTitle, String locations, String numberOfMembers) {
+    public Composition(String pickUrl, String compositionTitle, String locations, String numberOfMembers) {
+        this.pickUrl = pickUrl;
         mCompositionTitle = compositionTitle;
         mLocations = locations;
         mNumberOfMembers = numberOfMembers;

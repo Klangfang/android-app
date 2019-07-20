@@ -1,18 +1,27 @@
 package com.wfm.soundcollaborations.Editor.activities;
 
+import android.content.Intent;
 import android.os.Bundle;
 
-import com.wfm.soundcollaborations.R;
-import com.wfm.soundcollaborations.common.NetworkActivity;
-import com.wfm.soundcollaborations.webservice.HttpUtils;
+import com.android.volley.Response;
 
+import com.wfm.soundcollaborations.R;
+import com.wfm.soundcollaborations.webservice.CompositionServiceClient;
+
+import android.support.v7.app.AppCompatActivity;
 import android.view.Menu;
+import android.view.View;
 import android.widget.Button;
 
-public class CreateCompositionActivity extends NetworkActivity {
+
+public class CreateCompositionActivity extends AppCompatActivity {
 
 
-    // If Activity starts, following onCreate function will be executed.
+    public static final Long COMPOSITION_ID = 1L;
+    public static final String PICK_RESPONSE = "PICK";
+
+    private CompositionServiceClient client;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -20,12 +29,10 @@ public class CreateCompositionActivity extends NetworkActivity {
 
         setSupportActionBar(findViewById(R.id.create_composition_toolbar));
 
-        initNetworking(HttpUtils.COMPOSITION_PICK_URL);
-
         // When user taps confirm button
         // Capture button from layout to add functionality
         Button testButtonId = findViewById(R.id.testButtonId);
-        testButtonId.setOnClickListener(view -> startDownload(view));
+        testButtonId.setOnClickListener(view -> doRequest(view));
 
     }
 
@@ -34,5 +41,21 @@ public class CreateCompositionActivity extends NetworkActivity {
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.create_composition_menu, menu);
         return true;
+    }
+
+
+    private void doRequest(View view) {
+        if (client == null) {
+            client = new CompositionServiceClient(view.getContext());
+        }
+        Response.Listener<String> listener = response -> startEditorActivity(view, response);
+        //TODO client.pick(COMPOSITION_ID, listener);
+    }
+
+
+    private void startEditorActivity(View view, String response) {
+        Intent intent = new Intent(view.getContext(), EditorActivity.class);
+        intent.putExtra(PICK_RESPONSE, response);
+        view.getContext().startActivity(intent);
     }
 }

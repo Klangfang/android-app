@@ -2,25 +2,23 @@ package com.wfm.soundcollaborations.fragments;
 
 import android.os.Bundle;
 import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
-import android.support.v7.widget.LinearLayoutManager;
-import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Adapter;
-import android.widget.AdapterView;
-import android.widget.ArrayAdapter;
 import android.widget.ListView;
 
-import com.wfm.soundcollaborations.Classes.Composition;
+import com.android.volley.Response;
+import com.wfm.soundcollaborations.Editor.model.composition.CompositionOverview;
+import com.wfm.soundcollaborations.webservice.CompositionServiceClient;
+import com.wfm.soundcollaborations.webservice.JsonUtil;
+import com.wfm.soundcollaborations.webservice.OverviewResponse;
 import com.wfm.soundcollaborations.R;
 import com.wfm.soundcollaborations.activities.MainActivity;
-import com.wfm.soundcollaborations.adapter.CompositionAdapter;
+import com.wfm.soundcollaborations.adapter.CompositionOverviewAdapter;
 
-import java.util.ArrayList;
+import java.util.List;
 import java.util.Objects;
 
 public class ComposeFragment extends Fragment {
@@ -30,6 +28,10 @@ public class ComposeFragment extends Fragment {
     //private RecyclerView.LayoutManager layoutManager;
     private View root;
 
+
+    private CompositionServiceClient client;
+
+
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
@@ -37,21 +39,40 @@ public class ComposeFragment extends Fragment {
         initToolbar();
         //initRecyclerView();
 
+
+        client = new CompositionServiceClient(root.getContext());
+        Response.Listener<String> listener = response -> fillActivity(response);
+        client.getOverviews(listener);
+
+
         //New array with test data for composition views
-        ArrayList<Composition> compositions = new ArrayList<>();
-        compositions.add(new Composition("Uni Sounds", "Hamburg, München", "1/4 Mitglieder"));
-        compositions.add(new Composition("Quiet Fire", "Hamburg, München", "1/4 Mitglieder"));
-        compositions.add(new Composition("Baobab", "Hamburg, München", "1/4 Mitglieder"));
-        compositions.add(new Composition("Nom Nom Sounds", "Hamburg, München", "1/4 Mitglieder"));
-        compositions.add(new Composition("Blablabla", "Hamburg, München", "1/4 Mitglieder"));
+       // ArrayList<Composition> compositions = new ArrayList<>();
+        //compositions.add(new Composition("Uni Sounds", "Hamburg, München", "1/4 Mitglieder"));
+        //compositions.add(new Composition("Quiet Fire", "Hamburg, München", "1/4 Mitglieder"));
+        //compositions.add(new Composition("Baobab", "Hamburg, München", "1/4 Mitglieder"));
+        //compositions.add(new Composition("Nom Nom Sounds", "Hamburg, München", "1/4 Mitglieder"));
+        //compositions.add(new Composition("Blablabla", "Hamburg, München", "1/4 Mitglieder"));
 
-        CompositionAdapter compositionAdapter = new CompositionAdapter(Objects.requireNonNull(getActivity()), compositions);
 
-        ListView listView = root.findViewById(R.id.public_compositions_list);
-        listView.setAdapter(compositionAdapter);
 
         return root;
     }
+
+
+    private void fillActivity(String response) {
+
+        OverviewResponse overviewResponse = JsonUtil.fromJson(response, OverviewResponse.class);
+        if (overviewResponse != null) {
+            List<CompositionOverview> compositions = overviewResponse.overviews;
+
+            CompositionOverviewAdapter compositionOverviewAdapter = new CompositionOverviewAdapter(Objects.requireNonNull(getActivity()),
+                    compositions);
+            ListView listView = root.findViewById(R.id.public_compositions_list);
+            listView.setAdapter(compositionOverviewAdapter);
+        }
+
+    }
+
 
     /**
      * This method initializes the top app bar and sets a custom

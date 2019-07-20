@@ -29,7 +29,7 @@ public class NetworkActivity extends AppCompatActivity implements DownloadCallba
     private final String COMPOSITION_VIEW_URL = "https://klangfang-service.herokuapp.com/compositions/compositionsOverview?page=0&size=5";
     private final String COMPOSITION_PICK_URL = "https://klangfang-service.herokuapp.com/compositions/1/pick";
 
-    public static final String COMPOSITION_RESPONSE = "CompositionResponse";
+    public static final String COMPOSITION_RESPONSE = "PickResponse";
 
     public void initNetworking(String serviceUrl) {
 

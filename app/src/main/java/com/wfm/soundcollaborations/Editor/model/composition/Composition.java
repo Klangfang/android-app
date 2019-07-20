@@ -4,6 +4,8 @@ import java.util.List;
 
 public class Composition {
 
+    public Long id;
+
     public String title;
 
     public String creatorName;
@@ -16,13 +18,8 @@ public class Composition {
 
     public Integer numberOfMembers;
 
-    public Composition(String title, String creatorName, List<Sound> sounds,
-                       String creationDate, String status, Integer numberOfMembers) {
-        this.title = title;
-        this.creatorName = creatorName;
-        this.sounds = sounds;
-        this.creationDate = creationDate;
-        this.status = status;
-        this.numberOfMembers = numberOfMembers;
-    }
+    public Integer duration;
+
+    public String   snippet;
+
 }

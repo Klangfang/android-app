@@ -16,22 +16,28 @@ public class Sound {
 
     private static final String TAG = Sound.class.getSimpleName();
 
-    private Integer trackNumber;
+    public Long id;
 
-    private String title;
+    public Integer trackNumber;
 
-    private Integer startPosition;
-    private Integer duration;
+    public String title;
 
-    private String creatorName;
+    public Integer startPosition;
 
-    private String filePath;
-    
-    private AudioPlayer player;
+    public Integer duration;
+
+    public String creatorName;
+
+    public String filePath;
+
+    public AudioPlayer player;
 
     // TODO think about where to move
     private final String COMPOSITION_FILES_URL = "https://klangfang-service.herokuapp.com/compositions/1";
 
+    public Sound() {
+
+    }
 
     public Sound(Integer trackNumber, String title, Integer startPosition, Integer duration, String filePath) {
         this.trackNumber = trackNumber;

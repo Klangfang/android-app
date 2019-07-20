@@ -9,7 +9,6 @@ import android.os.Build;
 import android.os.Handler;
 import android.support.annotation.RequiresApi;
 import android.support.v4.app.ActivityCompat;
-import android.support.v4.app.FragmentActivity;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AlertDialog;
 import android.os.Bundle;
@@ -23,9 +22,8 @@ import android.widget.Toast;
 import com.ohoussein.playpause.PlayPauseView;
 import com.wfm.soundcollaborations.Editor.exceptions.RecordTimeOutExceededException;
 import com.wfm.soundcollaborations.Editor.exceptions.SoundRecordingTimeException;
-import com.wfm.soundcollaborations.Editor.model.composition.Composition;
-import com.wfm.soundcollaborations.Editor.model.composition.CompositionResponse;
-import com.wfm.soundcollaborations.Editor.model.composition.OverviewResponse;
+import com.wfm.soundcollaborations.webservice.CompositionServiceClient;
+import com.wfm.soundcollaborations.webservice.PickResponse;
 import com.wfm.soundcollaborations.R;
 import com.wfm.soundcollaborations.Editor.exceptions.NoActiveTrackException;
 import com.wfm.soundcollaborations.Editor.exceptions.SoundWillBeOutOfCompositionException;
@@ -34,7 +32,7 @@ import com.wfm.soundcollaborations.Editor.model.composition.CompositionBuilder;
 import com.wfm.soundcollaborations.Editor.views.composition.CompositionView;
 import com.wfm.soundcollaborations.Editor.views.composition.SoundView;
 import com.wfm.soundcollaborations.common.NetworkActivity;
-import com.wfm.soundcollaborations.webservice.HttpUtils;
+import com.wfm.soundcollaborations.webservice.JsonUtil;
 
 import java.util.Timer;
 import java.util.TimerTask;
@@ -46,7 +44,7 @@ import butterknife.OnClick;
 /**
  * Platzhalter für UI und Zusammenspiel mit der Compositionlogik.
  */
-public class EditorActivity extends NetworkActivity {
+public class EditorActivity extends AppCompatActivity {
 
     private static final String TAG = EditorActivity.class.getSimpleName();
     @BindView(R.id.composition)
@@ -83,6 +81,11 @@ public class EditorActivity extends NetworkActivity {
      */
     private final int RECORD_AUDIO_PERMISSIONS_DECISIONS = 1;
 
+
+    private PickResponse response;
+    private CompositionServiceClient client;
+
+
     @Override
     protected void onCreate(Bundle savedInstanceState)
     {
@@ -96,14 +99,25 @@ public class EditorActivity extends NetworkActivity {
         // when all sounds are loaded the Composition will be ready to play the sounds
         builder = new CompositionBuilder(compositionView, 4);
         Intent intent = getIntent();
-        String compositionResponse = intent.getStringExtra(CreateCompositionActivity.COMPOSITION_RESPONSE);
-        CompositionResponse response = HttpUtils.getComposition(compositionResponse);
+        String compositionJson = intent.getStringExtra(CreateCompositionActivity.PICK_RESPONSE);
+        response = JsonUtil.fromJson(compositionJson, PickResponse.class);
         if (response != null) {
             builder.addSounds(response.composition);
         }
 
         deletedBtn.setOnClickListener(delBtnview -> deleteConfirmation(delBtnview.getContext()));
+
+        client = new CompositionServiceClient(compositionView.getContext());
     }
+
+
+    @Override
+    protected void onDestroy() {
+
+        client.release(response.composition.id);
+        super.onDestroy();
+    }
+
 
     private void deleteConfirmation(Context context) {
         DialogInterface.OnClickListener dialogClickListener = (dialog, which) -> {
