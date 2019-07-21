@@ -10,10 +10,13 @@ import android.os.Handler;
 import android.support.annotation.RequiresApi;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
+import android.support.v7.app.ActionBar;
 import android.support.v7.app.AlertDialog;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 import android.widget.RelativeLayout;
@@ -83,17 +86,20 @@ public class EditorActivity extends AppCompatActivity {
      */
     private final int RECORD_AUDIO_PERMISSIONS_DECISIONS = 1;
 
-
     private PickResponse response;
     private CompositionServiceClient client;
 
 
     @Override
-    protected void onCreate(Bundle savedInstanceState)
-    {
+    protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_editor);
         ButterKnife.bind(this);
+
+        setSupportActionBar(findViewById(R.id.light_toolbar));
+        ActionBar actionBar = getSupportActionBar();
+        // Enable the Up button
+        actionBar.setDisplayHomeAsUpEnabled(true);
 
         // create soundViews to be added to the corresponding sounds
         // let SoundDownloader update these views using listener
@@ -115,6 +121,28 @@ public class EditorActivity extends AppCompatActivity {
         client = new CompositionServiceClient(compositionView.getContext());
     }
 
+    // Add Menu to Toolbar
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.editor_activity_menu, menu);
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+
+        // Check which items are being clicked by checking ID
+        int itemId = item.getItemId();
+        if (itemId == R.id.release_composition) {
+
+            // Code for releasing the composition comes here
+            Toast.makeText(this, "Release!!", Toast.LENGTH_LONG).show();
+            return true;
+
+        }
+        return super.onOptionsItemSelected(item);
+
+    }
 
     @Override
     protected void onDestroy() {
