@@ -2,18 +2,19 @@ package com.wfm.soundcollaborations.fragments;
 
 import android.content.Intent;
 import android.os.Bundle;
-import android.support.annotation.NonNull;
-import android.support.design.widget.FloatingActionButton;
-import android.support.v4.app.Fragment;
-import android.support.v7.widget.Toolbar;
+import androidx.annotation.NonNull;
+import androidx.fragment.app.Fragment;
+import androidx.appcompat.widget.Toolbar;
+import androidx.fragment.app.FragmentActivity;
+
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ListView;
 
 import com.android.volley.Response;
+import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.wfm.soundcollaborations.Editor.activities.CreateCompositionActivity;
-import com.wfm.soundcollaborations.Editor.activities.EditorActivity;
 import com.wfm.soundcollaborations.Editor.model.composition.CompositionOverview;
 import com.wfm.soundcollaborations.webservice.CompositionServiceClient;
 import com.wfm.soundcollaborations.webservice.JsonUtil;
@@ -21,6 +22,8 @@ import com.wfm.soundcollaborations.webservice.OverviewResponse;
 import com.wfm.soundcollaborations.R;
 import com.wfm.soundcollaborations.activities.MainActivity;
 import com.wfm.soundcollaborations.adapter.CompositionOverviewAdapter;
+
+import org.apache.commons.lang3.StringUtils;
 
 import java.util.List;
 import java.util.Objects;
@@ -109,16 +112,25 @@ public class ComposeFragment extends Fragment {
 
     private void fillActivity(String response) {
 
-        OverviewResponse overviewResponse = JsonUtil.fromJson(response, OverviewResponse.class);
-        if (overviewResponse != null) {
-            List<CompositionOverview> compositions = overviewResponse.overviews;
+        if (StringUtils.isNotBlank(response)) {
 
-            CompositionOverviewAdapter adapter = new CompositionOverviewAdapter(Objects.requireNonNull(getActivity()),
-                    compositions);
-            // TODO Use recycler view here instead of list view
-            ListView listView = root.findViewById(R.id.public_compositions_list);
-            // Provide the adapter for the listView
-            listView.setAdapter(adapter);
+            OverviewResponse overviewResponse = JsonUtil.fromJson(response, OverviewResponse.class);
+            if (overviewResponse != null) {
+                List<CompositionOverview> compositions = overviewResponse.overviews;
+
+                if (isAdded()) {
+
+                    FragmentActivity fragmentActivity = Objects.requireNonNull(getActivity());
+                    CompositionOverviewAdapter adapter = new CompositionOverviewAdapter(fragmentActivity,
+                            compositions);
+                    // TODO Use recycler view here instead of list view
+                    ListView listView = root.findViewById(R.id.public_compositions_list);
+                    // Provide the adapter for the listView
+                    listView.setAdapter(adapter);
+
+                }
+            }
+
         }
 
     }

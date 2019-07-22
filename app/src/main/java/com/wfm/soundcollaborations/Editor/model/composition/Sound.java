@@ -6,6 +6,8 @@ import android.util.Log;
 import com.wfm.soundcollaborations.Editor.model.audio.AudioPlayer;
 
 import java.time.LocalDate;
+import java.util.Arrays;
+import java.util.List;
 
 /**
  * Created by mohammed on 10/27/17.
@@ -32,20 +34,11 @@ public class Sound {
 
     public AudioPlayer player;
 
-    // TODO think about where to move
-    private final String COMPOSITION_FILES_URL = "https://klangfang-service.herokuapp.com/compositions/1";
 
     public Sound() {
 
     }
 
-    public Sound(Integer trackNumber, String title, Integer startPosition, Integer duration, String filePath) {
-        this.trackNumber = trackNumber;
-        this.title = title;
-        this.startPosition = startPosition;
-        this.duration = duration;
-        this.filePath = filePath;
-    }
 
     public Sound(Integer trackNumber, Integer startPosition, Integer duration, String filePath) {
         this.trackNumber = trackNumber;
@@ -54,19 +47,10 @@ public class Sound {
         this.filePath = filePath;
     }
 
-    public Sound(Integer trackNumber, String title, Integer startPosition, Integer duration,
-                 String creatorName, String filePath) {
-        this.trackNumber = trackNumber;
-        this.title = title;
-        this.startPosition = startPosition;
-        this.duration = duration;
-        this.creatorName = creatorName;
-        this.filePath = COMPOSITION_FILES_URL + "/" + filePath;
-    }
 
     public void prepare(Context context) {
         player = new AudioPlayer(context);
-        player.addSounds(new String[]{filePath});
+        player.addSounds(Arrays.asList(filePath));
     }
 
     public void play(int trackNumber, int positionInMillis) {

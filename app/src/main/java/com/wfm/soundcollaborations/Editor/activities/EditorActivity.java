@@ -7,12 +7,12 @@ import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.os.Build;
 import android.os.Handler;
-import android.support.annotation.RequiresApi;
-import android.support.v4.app.ActivityCompat;
-import android.support.v4.content.ContextCompat;
-import android.support.v7.app.AlertDialog;
+import androidx.annotation.RequiresApi;
+import androidx.core.app.ActivityCompat;
+import androidx.core.content.ContextCompat;
+import androidx.appcompat.app.AlertDialog;
 import android.os.Bundle;
-import android.support.v7.app.AppCompatActivity;
+import androidx.appcompat.app.AppCompatActivity;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
@@ -88,6 +88,13 @@ public class EditorActivity extends AppCompatActivity {
     private CompositionServiceClient client;
 
 
+    /**
+     * create soundViews to be added to the corresponding sounds
+     * let SoundDownloader update these views using listener
+     * when a view finished downloading it add itself to the track
+     * when all sounds are loaded the CompositionOverview will be ready to play the sounds
+     * @param savedInstanceState
+     */
     @Override
     protected void onCreate(Bundle savedInstanceState)
     {
@@ -95,15 +102,11 @@ public class EditorActivity extends AppCompatActivity {
         setContentView(R.layout.activity_editor);
         ButterKnife.bind(this);
 
-        // create soundViews to be added to the corresponding sounds
-        // let SoundDownloader update these views using listener
-        // when a view finished downloading it add itself to the track
-        // when all sounds are loaded the CompositionOverview will be ready to play the sounds
         builder = new CompositionBuilder(compositionView, 4);
         Intent intent = getIntent();
         String compositionJson = intent.getStringExtra(ComposeFragment.PICK_RESPONSE);
         // create new composition has no json response
-        if (StringUtils.isNoneBlank(compositionJson)) {
+        if (StringUtils.isNotBlank(compositionJson)) {
             response = JsonUtil.fromJson(compositionJson, PickResponse.class);
             if (response != null) {
                 builder.addSounds(response.composition);

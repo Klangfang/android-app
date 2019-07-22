@@ -9,7 +9,7 @@
     android:background="@color/black"
     tools:context="com.wfm.soundcollaborations.Editor.activities.EditorActivity">
 
-    <android.support.v7.widget.Toolbar
+    <androidx.appcompat.widget.Toolbar
         android:layout_width="match_parent"
         android:layout_height="?android:attr/actionBarSize"
         android:background="@color/grey_dark"/>
@@ -21,7 +21,7 @@
         android:paddingTop="20dp">
     </com.wfm.soundcollaborations.Editor.views.composition.CompositionView>
 
-    <android.support.constraint.ConstraintLayout
+    <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_weight="1">
@@ -70,6 +70,6 @@
             app:layout_constraintTop_toTopOf="@+id/btn_record"
             app:pause_bg="@color/black"
             app:play_bg="@color/black" />
-    </android.support.constraint.ConstraintLayout>
+    </androidx.constraintlayout.widget.ConstraintLayout>
 
 </LinearLayout>

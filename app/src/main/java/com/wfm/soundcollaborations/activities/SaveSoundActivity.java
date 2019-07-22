@@ -1,30 +1,23 @@
 package com.wfm.soundcollaborations.activities;
 
-import android.content.SharedPreferences;
-import android.net.Uri;
 import android.os.Bundle;
-import android.support.v7.app.ActionBar;
-import android.support.v7.widget.Toolbar;
-import android.util.Log;
+import androidx.appcompat.app.ActionBar;
+import androidx.appcompat.widget.Toolbar;
+
 import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.RelativeLayout;
-import android.support.v7.widget.SwitchCompat;
+import androidx.appcompat.widget.SwitchCompat;
 import android.widget.TextView;
 
 import com.wfm.soundcollaborations.R;
 import com.wfm.soundcollaborations.database.SoundEntity;
-import com.wfm.soundcollaborations.database.TagEntity;
 import com.wfm.soundcollaborations.fragments.interfaces.FragmentObserver;
-import com.wfm.soundcollaborations.helper.Utility;
 import com.wfm.soundcollaborations.views.PlayerLargeView;
 
-import java.sql.SQLException;
-import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Date;
 import java.util.List;
 import java.util.Set;
 

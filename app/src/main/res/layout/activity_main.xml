@@ -6,7 +6,7 @@
     android:orientation="vertical"
     >
     
-    <android.support.v7.widget.Toolbar
+    <androidx.appcompat.widget.Toolbar
         android:id="@+id/toolbar_main"
         android:layout_width="match_parent"
         android:layout_height="?attr/actionBarSize"
@@ -22,7 +22,7 @@
         android:layout_weight="1"
         />
 
-    <android.support.design.widget.BottomNavigationView
+    <com.google.android.material.bottomnavigation.BottomNavigationView
         android:id="@+id/bnv_bottom_navigation"
         android:layout_width="match_parent"
         android:layout_height="?attr/actionBarSize"

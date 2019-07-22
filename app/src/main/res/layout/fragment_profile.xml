@@ -13,7 +13,7 @@
             android:layout_weight="3"
             />
 
-        <android.support.design.widget.TabLayout
+        <com.google.android.material.tabs.TabLayout
             android:id="@+id/tl_sounds"
             android:layout_width="match_parent"
             android:layout_height="?attr/actionBarSize"
@@ -23,7 +23,7 @@
             app:tabIndicatorColor="@color/yellow_light"
             app:tabGravity="fill"/>
 
-        <android.support.v4.view.ViewPager
+        <androidx.viewpager.widget.ViewPager
             android:id="@+id/vp_sounds"
             android:layout_width="match_parent"
             android:layout_height="0dp"
