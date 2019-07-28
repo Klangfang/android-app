@@ -1,8 +1,13 @@
 package com.wfm.soundcollaborations.webservice;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.wfm.soundcollaborations.Editor.model.composition.Sound;
+
+import org.json.JSONArray;
 
 import java.io.IOException;
+import java.util.List;
 
 public final class JsonUtil {
 
@@ -18,5 +23,19 @@ public final class JsonUtil {
         }
 
         return value;
+    }
+
+
+    public static <T> String toJson(T object) {
+
+        String jsonValue = "";
+        try {
+            jsonValue = OBJECT_MAPPER.writeValueAsString(object);
+        } catch (JsonProcessingException e) {
+            System.err.println(e);
+        }
+
+        return jsonValue;
+
     }
 }

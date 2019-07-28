@@ -6,8 +6,18 @@ import android.content.Context;
 import com.android.volley.Request;
 import com.android.volley.RequestQueue;
 import com.android.volley.Response;
+import com.android.volley.toolbox.JsonArrayRequest;
+import com.android.volley.toolbox.JsonObjectRequest;
 import com.android.volley.toolbox.StringRequest;
 import com.android.volley.toolbox.Volley;
+import com.wfm.soundcollaborations.Editor.model.composition.Composition;
+import com.wfm.soundcollaborations.Editor.model.composition.Sound;
+
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import java.util.List;
 
 public class CompositionServiceClient {
 
@@ -66,4 +76,35 @@ public class CompositionServiceClient {
         queue.add(stringRequest);
 
     }
+
+
+    public void release(Long compositionId, List<Sound> recordedSounds, Response.Listener<JSONArray> listener) {
+
+        try {
+            String url = BASE_URL + compositionId + RELEASE_URL;
+            String json = JsonUtil.toJson(recordedSounds);
+            JSONArray jsonArray = new JSONArray(json);
+            JsonArrayRequest jsonArrayRequest = new JsonArrayRequest(PUT, url, jsonArray, listener, error -> {});
+            queue.add(jsonArrayRequest);
+        } catch (JSONException e) {
+            System.err.println(e);
+        }
+
+
+    }
+
+
+    public void create(Composition composition, Response.Listener<JSONObject> listener) {
+
+        try {
+            String url = BASE_URL;
+            String json = JsonUtil.toJson(composition);
+            JSONObject jsonObject = new JSONObject(json);
+            JsonObjectRequest jsonObjectRequest = new JsonObjectRequest(POST, url, jsonObject, listener, error -> {});
+            queue.add(jsonObjectRequest);
+        } catch (JSONException e) {
+            System.err.println(e);
+        }
+    }
+
 }

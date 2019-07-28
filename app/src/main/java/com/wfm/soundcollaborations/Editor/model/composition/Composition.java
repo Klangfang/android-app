@@ -20,6 +20,6 @@ public class Composition {
 
     public Integer duration;
 
-    public String   snippet;
+    public String snippet;
 
 }

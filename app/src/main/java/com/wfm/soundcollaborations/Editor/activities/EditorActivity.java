@@ -8,12 +8,15 @@ import android.content.pm.PackageManager;
 import android.os.Build;
 import android.os.Handler;
 import androidx.annotation.RequiresApi;
+import androidx.appcompat.app.ActionBar;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 import androidx.appcompat.app.AlertDialog;
 import android.os.Bundle;
 import androidx.appcompat.app.AppCompatActivity;
 import android.util.Log;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 import android.widget.RelativeLayout;
@@ -83,10 +86,10 @@ public class EditorActivity extends AppCompatActivity {
      */
     private final int RECORD_AUDIO_PERMISSIONS_DECISIONS = 1;
 
-
     private PickResponse response;
     private CompositionServiceClient client;
 
+    private boolean create;
 
     /**
      * create soundViews to be added to the corresponding sounds
@@ -96,21 +99,37 @@ public class EditorActivity extends AppCompatActivity {
      * @param savedInstanceState
      */
     @Override
-    protected void onCreate(Bundle savedInstanceState)
-    {
+    protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_editor);
         ButterKnife.bind(this);
 
+        setSupportActionBar(findViewById(R.id.light_toolbar));
+        ActionBar actionBar = getSupportActionBar();
+        // Enable the Up button
+        actionBar.setDisplayHomeAsUpEnabled(true);
+
+        // create soundViews to be added to the corresponding sounds
+        // let SoundDownloader update these views using listener
+        // when a view finished downloading it add itself to the track
+        // when all sounds are loaded the CompositionOverview will be ready to play the sounds
         builder = new CompositionBuilder(compositionView, 4);
         Intent intent = getIntent();
         String compositionJson = intent.getStringExtra(ComposeFragment.PICK_RESPONSE);
         // create new composition has no json response
         if (StringUtils.isNotBlank(compositionJson)) {
+
+            create = false;
             response = JsonUtil.fromJson(compositionJson, PickResponse.class);
             if (response != null) {
                 builder.addSounds(response.composition);
             }
+
+        } else {
+
+            create = true;
+            builder.build();
+
         }
 
         deletedBtn.setOnClickListener(delBtnview -> deleteConfirmation(delBtnview.getContext()));
@@ -118,6 +137,39 @@ public class EditorActivity extends AppCompatActivity {
         client = new CompositionServiceClient(compositionView.getContext());
     }
 
+    // Add Menu to Toolbar
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.editor_activity_menu, menu);
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+
+        // Check which items are being clicked by checking ID
+        int itemId = item.getItemId();
+        if (itemId == R.id.release_composition) {
+
+            if (create) {
+
+                builder.create();
+                return true;
+
+            } else {
+
+                // Code for releasing the composition comes here
+                builder.release();
+                //Toast.makeText(this, "Release!!", Toast.LENGTH_LONG).show();
+                return true;
+
+            }
+
+        }
+
+        return super.onOptionsItemSelected(item);
+
+    }
 
     @Override
     protected void onDestroy() {

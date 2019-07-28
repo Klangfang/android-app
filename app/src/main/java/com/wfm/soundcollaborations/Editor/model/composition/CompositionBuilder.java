@@ -6,7 +6,9 @@ import android.os.AsyncTask;
 import android.util.Log;
 import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
+import android.widget.Toast;
 
+import com.android.volley.Response;
 import com.liulishuo.filedownloader.BaseDownloadTask;
 import com.liulishuo.filedownloader.FileDownloadListener;
 import com.wfm.soundcollaborations.Editor.exceptions.NoActiveTrackException;
@@ -22,6 +24,10 @@ import com.wfm.soundcollaborations.Editor.views.composition.TrackView;
 import com.wfm.soundcollaborations.Editor.views.composition.TrackWatchView;
 import com.wfm.soundcollaborations.Editor.views.composition.listeners.TrackViewOnClickListener;
 import com.wfm.soundcollaborations.Editor.views.composition.listeners.TrackWatchViewOnClickListener;
+import com.wfm.soundcollaborations.webservice.CompositionServiceClient;
+
+import org.json.JSONArray;
+import org.json.JSONObject;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -47,11 +53,16 @@ public class CompositionBuilder
 
     private int numberOfDownloadedSounds = 0;
     private ArrayList<Track> tracks;
+    private List<Sound> recordedSounds = new ArrayList<>();
 
     private TracksTimer mTracksTimer;
     private boolean playing = false;
 
     private List<SoundView> soundsToDelete = new ArrayList<>();
+
+    private CompositionServiceClient client;
+
+    private Composition composition;
 
     public CompositionBuilder(CompositionView compositionView, int tracks)
     {
@@ -62,6 +73,7 @@ public class CompositionBuilder
         this.tracks = new ArrayList<>();
         initTracksViews(tracks);
         initTracks(tracks);
+        client = new CompositionServiceClient(getCompositionView().getContext());
     }
 
     private void initTracksViews(int tracks)
@@ -97,6 +109,8 @@ public class CompositionBuilder
             downloadedTrackViews.get(sound.getTrackNumber()).addSoundView(soundView);
 
             downloadedSounds.add(sound);
+
+            this.composition = composition;
         }
         // we will add everything to the composition view
         build();
@@ -120,7 +134,7 @@ public class CompositionBuilder
         return positionInMs;
     }
 
-    private void build()
+    public void build()
     {
         for(int i = 0; i< downloadedTrackViews.size(); i++)
         {
@@ -321,6 +335,10 @@ public class CompositionBuilder
         tracks.add(trackNumber, track);
 
         mTracksTimer.updateTrack(trackNumber, track); //TODO noch brauchbar??!
+
+        sound.trackNumber = trackNumber;
+        recordedSounds.add(sound);
+
     }
 
 
@@ -383,4 +401,31 @@ public class CompositionBuilder
             addRecordedSound(sound, trackNumber);
         }
     }
+
+
+    public void release() {
+
+        Response.Listener<JSONArray> listener = response -> showInfo(response);
+        client.release(composition.id, recordedSounds, listener);
+
+    }
+
+
+    public void create() {
+
+        Composition composition = new Composition();
+        composition.sounds = recordedSounds;
+        composition.creatorName = "Klangfang";
+        composition.title = "GET_TITLE";
+        Response.Listener<JSONObject> listener = response -> showInfo(response);
+        client.create(composition, listener);
+
+    }
+
+
+    private <T> void showInfo(T response) {
+        Toast.makeText(getCompositionView().getContext(), "Composition is released!", Toast.LENGTH_LONG).show();
+    }
+
+
 }
