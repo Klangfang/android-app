@@ -9,7 +9,7 @@
     android:background="@color/black"
     tools:context="com.wfm.soundcollaborations.Editor.activities.EditorActivity">
 
-    <include layout="@layout/toolbar_light"/>
+    <include layout="@layout/toolbar_base" />
 
     <com.wfm.soundcollaborations.Editor.views.composition.CompositionView
         android:id="@+id/composition"
