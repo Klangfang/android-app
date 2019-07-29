@@ -8,6 +8,8 @@
         <item name="titleTextColor">@color/toolbar_title</item>
         <item name="actionMenuTextColor">@color/toolbar_title</item>
         <item name="android:textColor">@color/text_color</item>
+        <item name="colorControlNormal">@color/toolbar_title</item>
+        <item name="colorControlHighlight">@color/highlight</item>
         <item name="android:windowBackground">@color/window_background</item>
     </style>
 
@@ -18,6 +20,8 @@
         <item name="colorAccent">@color/color_primary</item>
         <item name="titleTextColor">@color/toolbar_title_dark</item>
         <item name="actionMenuTextColor">@color/toolbar_title_dark</item>
+        <item name="colorControlNormal">@color/toolbar_title_dark</item>
+        <item name="colorControlHighlight">@color/highlight</item>
         <item name="android:textColor">@color/text_color_dark</item>
         <item name="android:windowBackground">@color/window_background_dark</item>
     </style>

@@ -54,6 +54,7 @@
     <color name="status_bar">#111111</color>
     <color name="window_background">@color/grey_light</color>
     <color name="text_color">@color/black</color>
+    <color name="highlight">@color/grey_light</color>
 
     <!-- Neutral Colors for Dark Theme -->
     <color name="toolbar_title_dark">@color/white</color>
