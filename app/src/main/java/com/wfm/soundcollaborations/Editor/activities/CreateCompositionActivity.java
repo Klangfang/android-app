@@ -19,7 +19,7 @@ public class CreateCompositionActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_create_composition);
 
-        setSupportActionBar(findViewById(R.id.create_composition_toolbar));
+        setSupportActionBar(findViewById(R.id.base_toolbar));
 
         // When user taps confirm button
         // Capture button from layout to add functionality

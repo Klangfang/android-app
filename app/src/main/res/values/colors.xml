@@ -47,10 +47,23 @@
     <color name="color_warning">@color/yellow_dark</color>
     <color name="color_error">@color/red</color>
 
-    <!-- Neutral Colors TODO Define neutral colors, such as text and background -->
+    <!-- TODO Define neutral colors, such as text and background -->
+    <!-- Neutral Colors for App Theme -->
     <color name="toolbar_title">@color/white</color>
-    <color name="navigation">@color/black</color>
-    <color name="content_bg">@color/grey_dark</color>
+    <color name="bars">@color/black</color>
+    <color name="status_bar">#111111</color>
+    <color name="window_background">@color/grey_light</color>
+    <color name="text_color">@color/black</color>
+    <color name="highlight">@color/grey_light</color>
+
+    <!-- Neutral Colors for Dark Theme -->
+    <color name="toolbar_title_dark">@color/white</color>
+    <color name="bars_dark">@color/grey_dark</color>
+    <color name="status_bar_dark">#333333</color>
+    <color name="window_background_dark">@color/black</color>
+    <color name="text_color_dark">@color/white</color>
+
+    <!-- Profile Colors -->
     <color name="toolbar_profile_title">@color/black</color>
 
     <!-- Sound-Visualization Colors -->

@@ -5,15 +5,8 @@
     android:layout_height="match_parent"
     android:orientation="vertical"
     >
-    
-    <androidx.appcompat.widget.Toolbar
-        android:id="@+id/toolbar_main"
-        android:layout_width="match_parent"
-        android:layout_height="?attr/actionBarSize"
-        android:background="?attr/colorPrimary"
-        android:theme="@style/ThemeOverlay.AppCompat.ActionBar"
-        app:popupTheme="@style/ThemeOverlay.AppCompat.Light"
-        />
+
+    <include layout="@layout/toolbar_base"/>
 
     <FrameLayout
         android:id="@+id/fl_content"
@@ -26,7 +19,7 @@
         android:id="@+id/bnv_bottom_navigation"
         android:layout_width="match_parent"
         android:layout_height="?attr/actionBarSize"
-        app:itemBackground="@color/navigation"
+        app:itemBackground="@color/bars"
         app:itemIconTint="@drawable/navigation_selector"
         app:itemTextColor="@drawable/navigation_selector"
         app:menu="@menu/bottom_navigation" />

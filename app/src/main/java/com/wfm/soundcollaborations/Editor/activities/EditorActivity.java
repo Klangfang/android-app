@@ -104,9 +104,10 @@ public class EditorActivity extends AppCompatActivity {
         setContentView(R.layout.activity_editor);
         ButterKnife.bind(this);
 
-        setSupportActionBar(findViewById(R.id.light_toolbar));
+        setSupportActionBar(findViewById(R.id.base_toolbar));
         ActionBar actionBar = getSupportActionBar();
         // Enable the Up button
+        assert actionBar != null;
         actionBar.setDisplayHomeAsUpEnabled(true);
 
         // create soundViews to be added to the corresponding sounds

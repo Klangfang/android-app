@@ -23,8 +23,8 @@ public class MainActivity extends AppCompatActivity
 {
     private final static String TAG = MainActivity.class.getSimpleName();
 
-    @BindView(R.id.toolbar_main)
-    Toolbar main_toolbar;
+    @BindView(R.id.base_toolbar)
+    Toolbar base_toolbar;
     @BindView(R.id.bnv_bottom_navigation)
     BottomNavigationView bottomNavigationView;
 
@@ -42,7 +42,7 @@ public class MainActivity extends AppCompatActivity
 
     private void initToolbar()
     {
-        setSupportActionBar(main_toolbar);
+        setSupportActionBar(base_toolbar);
     }
 
     private void initBottomNavigationView()
@@ -100,6 +100,6 @@ public class MainActivity extends AppCompatActivity
 
     public Toolbar getToolbar()
     {
-        return main_toolbar;
+        return base_toolbar;
     }
 }
