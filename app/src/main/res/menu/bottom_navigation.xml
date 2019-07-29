@@ -1,15 +1,15 @@
 <?xml version="1.0" encoding="utf-8"?>
 <menu xmlns:android="http://schemas.android.com/apk/res/android">
     <item android:id="@+id/bnm_explore"
-        android:icon="@drawable/ic_explore_black_24dp"
+        android:icon="@drawable/ic_explore_24dp"
         android:title="@string/bnm_explore" />
 
     <item android:id="@+id/bnm_compose"
-        android:icon="@drawable/composition"
+        android:icon="@drawable/ic_compose_24dp"
         android:title="@string/bnm_compose" />
 
     <item
         android:id="@+id/bnm_record"
-        android:icon="@drawable/ic_keyboard_voice_black_24dp"
+        android:icon="@drawable/ic_mic_black_24dp"
         android:title="@string/bnm_record" />
 </menu>

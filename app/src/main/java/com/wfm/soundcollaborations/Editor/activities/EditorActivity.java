@@ -19,9 +19,11 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
+import android.widget.ImageButton;
 import android.widget.RelativeLayout;
 import android.widget.Toast;
 
+import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.ohoussein.playpause.PlayPauseView;
 import com.wfm.soundcollaborations.Editor.exceptions.RecordTimeOutExceededException;
 import com.wfm.soundcollaborations.Editor.exceptions.SoundRecordingTimeException;
@@ -69,10 +71,10 @@ public class EditorActivity extends AppCompatActivity {
     private Timer recordTimer = new Timer();
 
     @BindView(R.id.btn_delete)
-    Button deletedBtn;
+    ImageButton deletedBtn;
 
     @BindView(R.id.btn_record)
-    Button recordBtn;
+    FloatingActionButton recordBtn;
 
     @BindView(R.id.btn_play)
     PlayPauseView playBtn;

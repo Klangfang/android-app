@@ -29,13 +29,15 @@
             android:id="@+id/btn_record"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:src="@drawable/red_circle"
+            android:layout_marginEnd="@dimen/m"
+            android:layout_marginBottom="@dimen/m"
             android:clickable="true"
-            app:backgroundTint="#f0f0f0"
+            android:focusable="true"
+            android:src="@drawable/ic_mic_black_24dp"
+            android:tint="@color/color_primary"
+            app:backgroundTint="@color/white"
             android:layout_alignParentBottom="true"
-            android:layout_alignParentRight="true"
-            android:layout_marginRight="16dp"
-            android:layout_marginBottom="16dp"
+            android:layout_alignParentEnd="true"
             />
     </RelativeLayout>
 </LinearLayout>

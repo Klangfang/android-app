@@ -22,32 +22,36 @@
         android:layout_height="0dp"
         android:layout_weight="1">
 
-        <Button
+        <!-- TODO Set Button to disabled (mit clickable?)
+             TODO Correct Ripple Effetc
+             TODO Set Disabled States
+        -->
+        <androidx.appcompat.widget.AppCompatImageButton
             android:id="@+id/btn_delete"
             android:layout_width="wrap_content"
-            android:layout_height="48dp"
-            android:layout_marginStart="8dp"
-            android:layout_marginLeft="8dp"
-            android:layout_marginEnd="8dp"
-            android:layout_marginRight="8dp"
-            android:enabled="false"
-            android:text="del"
+            android:layout_height="wrap_content"
+            android:padding="@dimen/s"
+            android:background="@color/window_background_dark"
+            android:clickable="true"
+            android:contentDescription="Delete selected sound"
+            android:focusable="true"
+            android:foreground="?selectableItemBackground"
+            android:src="@drawable/ic_delete_24dp"
+            android:tint="@color/white"
             app:layout_constraintBottom_toBottomOf="@+id/btn_record"
             app:layout_constraintEnd_toStartOf="@+id/btn_record"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="@+id/btn_record" />
 
-        <Button
+        <com.google.android.material.floatingactionbutton.FloatingActionButton
             android:id="@+id/btn_record"
             android:layout_width="wrap_content"
-            android:layout_height="48dp"
-            android:layout_marginStart="8dp"
-            android:layout_marginLeft="8dp"
-            android:layout_marginEnd="8dp"
-            android:layout_marginRight="8dp"
+            android:layout_height="wrap_content"
             android:layout_marginBottom="32dp"
             android:onClick="requestRecordingPermissions"
+            android:src="@drawable/ic_mic_black_24dp"
             android:text="@string/record_button"
+            android:tint="@color/white"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent" />
