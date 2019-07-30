@@ -22,16 +22,12 @@
         android:layout_height="0dp"
         android:layout_weight="1">
 
-        <!-- TODO Correct Ripple Effetc
-             TODO Set Disabled States of all Buttons
-        -->
         <androidx.appcompat.widget.AppCompatImageButton
             android:id="@+id/btn_delete"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:background="@color/window_background_dark"
+            android:background="?selectableItemBackgroundBorderless"
             android:contentDescription="Delete selected sound"
-            android:foreground="?selectableItemBackground"
             android:padding="@dimen/s"
             android:src="@drawable/selector_delete"
             app:layout_constraintBottom_toBottomOf="@+id/btn_record"
@@ -41,9 +37,9 @@
 
         <com.google.android.material.floatingactionbutton.FloatingActionButton
             android:id="@+id/btn_record"
+            style="@style/Widget.MaterialComponents.FloatingActionButton"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            style="@style/Widget.MaterialComponents.FloatingActionButton"
             android:layout_marginBottom="32dp"
             android:onClick="requestRecordingPermissions"
             android:src="@drawable/ic_mic_black_24dp"
@@ -57,16 +53,17 @@
             android:id="@+id/btn_play"
             android:layout_width="wrap_content"
             android:layout_height="48dp"
+            android:background="?selectableItemBackgroundBorderless"
             android:clickable="true"
             android:focusable="true"
-            android:foreground="?android:selectableItemBackground"
             app:fill_color="@color/white"
             app:layout_constraintBottom_toBottomOf="@+id/btn_record"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toEndOf="@+id/btn_record"
             app:layout_constraintTop_toTopOf="@+id/btn_record"
-            app:pause_bg="@color/black"
-            app:play_bg="@color/black" />
+            app:pause_bg="#00ffffff"
+            app:play_bg="#00ffffff" />
+
     </androidx.constraintlayout.widget.ConstraintLayout>
 
 </LinearLayout>

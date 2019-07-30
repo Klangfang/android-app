@@ -221,6 +221,7 @@ public class EditorActivity extends AppCompatActivity {
         updateStatusOnPlay();
         ((PlayPauseView) view).toggle();
 
+        // Toggle enabled and disabled state for recordBtn
         boolean isPlaying = builder.getPlayStatus();
         if (isPlaying) {
             recordBtn.setBackgroundTintList(ColorStateList.valueOf(getResources().
