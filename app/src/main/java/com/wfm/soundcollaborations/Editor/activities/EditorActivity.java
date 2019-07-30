@@ -5,6 +5,8 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.content.res.ColorStateList;
+import android.graphics.Color;
 import android.os.Build;
 import android.os.Handler;
 import androidx.annotation.RequiresApi;
@@ -135,6 +137,8 @@ public class EditorActivity extends AppCompatActivity {
 
         }
 
+        // ImageButton has to be set to disabled first because this can't be done in xml
+        deletedBtn.setEnabled(false);
         deletedBtn.setOnClickListener(delBtnview -> deleteConfirmation(delBtnview.getContext()));
 
         client = new CompositionServiceClient(compositionView.getContext());
@@ -216,6 +220,20 @@ public class EditorActivity extends AppCompatActivity {
         builder.play();
         updateStatusOnPlay();
         ((PlayPauseView) view).toggle();
+
+        boolean isPlaying = builder.getPlayStatus();
+        if (isPlaying) {
+            recordBtn.setBackgroundTintList(ColorStateList.valueOf(getResources().
+                    getColor(R.color.grey_dark)));
+            recordBtn.setImageTintList(ColorStateList.valueOf(getResources().
+                    getColor(R.color.grey_middle)));
+        } else {
+            recordBtn.setBackgroundTintList(ColorStateList.valueOf(getResources().
+                    getColor(R.color.color_primary)));
+            recordBtn.setImageTintList(ColorStateList.valueOf(getResources().
+                    getColor(R.color.white)));
+        }
+
     }
 
     /**
@@ -406,6 +424,7 @@ public class EditorActivity extends AppCompatActivity {
     private void updateStatusOnPlay() {
 
         recordBtn.setEnabled(!builder.getPlayStatus());
+
     }
 
     private void resetEditorValues() {
