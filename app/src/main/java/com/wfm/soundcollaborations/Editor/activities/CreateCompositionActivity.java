@@ -5,6 +5,7 @@ import android.os.Bundle;
 
 import com.wfm.soundcollaborations.R;
 
+import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AppCompatActivity;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -20,6 +21,10 @@ public class CreateCompositionActivity extends AppCompatActivity {
         setContentView(R.layout.activity_create_composition);
 
         setSupportActionBar(findViewById(R.id.base_toolbar));
+        ActionBar toolbar = getSupportActionBar();
+        toolbar.setTitle(R.string.new_composition);
+        // TODO: Implement back-button logic
+        toolbar.setDisplayHomeAsUpEnabled(true);
 
         /*
         When user taps confirm button, start empty Editor Activity
