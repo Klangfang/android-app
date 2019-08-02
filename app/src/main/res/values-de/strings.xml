@@ -24,6 +24,7 @@
     <string name="drawer_close">Schließen</string>
     <string name="sound_file_prefix" translatable="false">Klang</string>
     <string name="history">Verlauf deiner Collagen</string>
+    <string name="new_composition">Neue Klangcollage</string>
 
     <!-- Buttons -->
     <string name="join_button">Mitmachen</string>

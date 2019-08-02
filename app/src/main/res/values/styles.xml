@@ -72,4 +72,19 @@
         <item name="android:textColor">@color/grey_dark</item>
     </style>
 
+    <style name="primary_button">
+       <item name="android:layout_width">wrap_content</item>
+       <item name="android:layout_height">@dimen/xl</item>
+       <item name="android:textSize">14sp</item>
+       <item name="android:background">@color/color_primary</item>
+       <item name="android:textColor">@color/white</item>
+       <item name="android:paddingLeft">@dimen/s</item>
+       <item name="android:paddingRight">@dimen/s</item>
+       <item name="android:paddingTop">@dimen/xs</item>
+       <item name="android:paddingBottom">@dimen/xs</item>
+    </style>
+
+    <style name="counter_color">
+        <item name="android:textColor">@color/grey_middle</item>
+    </style>
 </resources>

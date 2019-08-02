@@ -21,11 +21,13 @@ public class CreateCompositionActivity extends AppCompatActivity {
 
         setSupportActionBar(findViewById(R.id.base_toolbar));
 
-        // When user taps confirm button
-        // Capture button from layout to add functionality
-        Button testButtonId = findViewById(R.id.testButtonId);
-        testButtonId.setOnClickListener(view -> startEditorActivity(view));
-
+        /*
+        When user taps confirm button, start empty Editor Activity
+        TODO: this logic has to be applied to menu button.
+        When menu button is ready, delete this code.
+          */
+        Button confirm = findViewById(R.id.confirm);
+        confirm.setOnClickListener(view -> startEditorActivity(view));
     }
 
     // Add Menu to Activity
