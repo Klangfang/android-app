@@ -47,6 +47,7 @@
     <string name="sort">Sort</string>
     <string name="filter">Filter</string>
     <string name="history">Composition History</string>
+    <string name="new_composition">New composition</string>
 
     <!-- Buttons -->
     <string name="join_button">Join</string>
