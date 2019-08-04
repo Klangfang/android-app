@@ -151,7 +151,7 @@ public class ComposeFragment extends Fragment {
 
         Toolbar toolbar = mainActivity.getToolbar();
         toolbar.setTitle(R.string.bnm_compose);
-        toolbar.setBackgroundColor(getResources().getColor(R.color.navigation));
+        toolbar.setBackgroundColor(getResources().getColor(R.color.bars));
         toolbar.setTitleTextColor(getResources().getColor(R.color.toolbar_title));
     }
 }

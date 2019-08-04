@@ -1,25 +1,20 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    android:background="@color/black"
     tools:context="com.wfm.soundcollaborations.Editor.activities.EditorActivity">
 
-    <androidx.appcompat.widget.Toolbar
-        android:layout_width="match_parent"
-        android:layout_height="?android:attr/actionBarSize"
-        android:background="@color/grey_dark"/>
-    <include layout="@layout/toolbar_light"/>
+    <include layout="@layout/toolbar_base" />
 
     <com.wfm.soundcollaborations.Editor.views.composition.CompositionView
         android:id="@+id/composition"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:paddingTop="20dp">
+
     </com.wfm.soundcollaborations.Editor.views.composition.CompositionView>
 
     <androidx.constraintlayout.widget.ConstraintLayout
@@ -27,32 +22,29 @@
         android:layout_height="0dp"
         android:layout_weight="1">
 
-        <Button
+        <androidx.appcompat.widget.AppCompatImageButton
             android:id="@+id/btn_delete"
             android:layout_width="wrap_content"
-            android:layout_height="48dp"
-            android:layout_marginEnd="8dp"
-            android:layout_marginLeft="8dp"
-            android:layout_marginRight="8dp"
-            android:layout_marginStart="8dp"
-            android:enabled="false"
-            android:text="del"
+            android:layout_height="wrap_content"
+            android:background="?selectableItemBackgroundBorderless"
+            android:contentDescription="Delete selected sound"
+            android:padding="@dimen/s"
+            android:src="@drawable/selector_delete"
             app:layout_constraintBottom_toBottomOf="@+id/btn_record"
             app:layout_constraintEnd_toStartOf="@+id/btn_record"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="@+id/btn_record" />
 
-        <Button
-            android:onClick="requestRecordingPermissions"
+        <com.google.android.material.floatingactionbutton.FloatingActionButton
             android:id="@+id/btn_record"
+            style="@style/Widget.MaterialComponents.FloatingActionButton"
             android:layout_width="wrap_content"
-            android:layout_height="48dp"
+            android:layout_height="wrap_content"
             android:layout_marginBottom="32dp"
-            android:layout_marginEnd="8dp"
-            android:layout_marginLeft="8dp"
-            android:layout_marginRight="8dp"
-            android:layout_marginStart="8dp"
+            android:onClick="requestRecordingPermissions"
+            android:src="@drawable/ic_mic_black_24dp"
             android:text="@string/record_button"
+            android:tint="@color/white"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent" />
@@ -61,16 +53,17 @@
             android:id="@+id/btn_play"
             android:layout_width="wrap_content"
             android:layout_height="48dp"
+            android:background="?selectableItemBackgroundBorderless"
             android:clickable="true"
             android:focusable="true"
-            android:foreground="?android:selectableItemBackground"
             app:fill_color="@color/white"
             app:layout_constraintBottom_toBottomOf="@+id/btn_record"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toEndOf="@+id/btn_record"
             app:layout_constraintTop_toTopOf="@+id/btn_record"
-            app:pause_bg="@color/black"
-            app:play_bg="@color/black" />
+            app:pause_bg="#00ffffff"
+            app:play_bg="#00ffffff" />
+
     </androidx.constraintlayout.widget.ConstraintLayout>
 
 </LinearLayout>

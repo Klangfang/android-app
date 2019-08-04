@@ -4,15 +4,15 @@
     android:orientation="vertical"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/navigation">
+    android:background="@color/bars">
 
     <androidx.appcompat.widget.Toolbar
         android:id="@+id/toolbar"
+        style="@style/AppTheme"
         android:layout_width="match_parent"
         android:layout_height="48dp"
         app:title="Kategorien"
-        app:elevation="2dp"
-        app:theme="@style/ToolbarThemeLight"/>
+        />
 
     <Space
         android:layout_width="0dp"

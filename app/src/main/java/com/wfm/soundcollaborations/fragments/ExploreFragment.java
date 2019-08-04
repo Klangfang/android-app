@@ -38,7 +38,7 @@ public class ExploreFragment extends Fragment
         if(toolbar != null)
         {
             toolbar.setTitle(R.string.app_name);
-            toolbar.setBackgroundColor(getResources().getColor(R.color.navigation));
+            toolbar.setBackgroundColor(getResources().getColor(R.color.bars));
             toolbar.setTitleTextColor(getResources().getColor(R.color.toolbar_title));
             setHasOptionsMenu(true);
         }
