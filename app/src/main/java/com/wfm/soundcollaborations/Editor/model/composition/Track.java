@@ -10,12 +10,9 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-/**
- * Created by mohammed on 10/27/17.
- */
 
-public class Track
-{
+public class Track {
+
     private List<Sound> sounds = new ArrayList<>();
     private AudioRecorder recorder;
     private int recorderTime;
@@ -24,8 +21,10 @@ public class Track
     public Track(){ recorder = new AudioRecorder(); }
 
     public void addSound(Sound sound) {
+
         recorderTime = recorderTime + sound.getDuration();
         sounds.add(sound);
+
     }
 
     public void addSounds(List<Sound> sounds) {
@@ -34,7 +33,7 @@ public class Track
 
     public void prepare(Context context) throws NullPointerException {
         for (Sound sound : sounds) {
-            sound.prepare(context);
+            sound.preparePlayer(context);
         }
 
     }
@@ -62,7 +61,7 @@ public class Track
     {
         addSound(sound);
 
-        sound.prepare(context);
+        sound.preparePlayer(context);
 
         //Sorting sounds:
         Collections.sort(sounds, (Sound s1, Sound s2) -> Long.valueOf(s1.getStartPosition()).compareTo(Long.valueOf(s2.getStartPosition())));
@@ -105,4 +104,5 @@ public class Track
     public Integer getDuration() {
         return recorder.getDuration();
     }
+
 }

@@ -26,7 +26,6 @@ import com.wfm.soundcollaborations.Editor.views.composition.listeners.TrackViewO
 import com.wfm.soundcollaborations.Editor.views.composition.listeners.TrackWatchViewOnClickListener;
 import com.wfm.soundcollaborations.webservice.CompositionServiceClient;
 
-import org.json.JSONArray;
 import org.json.JSONObject;
 
 import java.util.ArrayList;
@@ -220,8 +219,9 @@ public class CompositionBuilder
 
                     }
                 });
-        for(int i = 0; i< downloadedSounds.size(); i++)
+        for(int i = 0; i< downloadedSounds.size(); i++) {
             this.downloader.addSoundUrl(downloadedSounds.get(i).getFilePath(), i);
+        }
 
         this.downloader.download();
     }
@@ -390,22 +390,23 @@ public class CompositionBuilder
     }
 
     public void prepareRecordedSound(SoundView soundView, Integer soundLengthInWidth, Integer startPositionInWidth) {
+
         stopTrackRecorder();
         Track activeTrack = getActiveTrack();
         String filePath = activeTrack.getFilePath();
         Integer trackNumber = soundView.getTrackNumber();
         if (filePath != null && soundLengthInWidth!=null && startPositionInWidth != null) {
-            // prepare new sound
             Sound sound = new Sound(trackNumber, getPositionInMs(startPositionInWidth), activeTrack.getDuration(), filePath);
             soundView.setSound(sound);
             addRecordedSound(sound, trackNumber);
         }
+
     }
 
 
     public void release() {
 
-        Response.Listener<JSONArray> listener = response -> showInfo(response);
+        Response.Listener<String> listener = response -> showInfo(response);
         client.release(composition.id, recordedSounds, listener);
 
     }
@@ -417,6 +418,7 @@ public class CompositionBuilder
         composition.sounds = recordedSounds;
         composition.creatorName = "Klangfang";
         composition.title = "GET_TITLE";
+        composition.sounds = recordedSounds;
         Response.Listener<JSONObject> listener = response -> showInfo(response);
         client.create(composition, listener);
 

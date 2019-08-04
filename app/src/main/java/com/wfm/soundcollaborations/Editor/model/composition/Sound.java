@@ -18,11 +18,13 @@ public class Sound {
 
     private static final String TAG = Sound.class.getSimpleName();
 
+    //BACKEND BEIM LADEN
     public Long id;
 
     public Integer trackNumber;
 
-    public String title;
+    //BACKEND BEIM LADEN
+    public String title; // unique for saving files | has to be set dynamically
 
     public Integer startPosition;
 
@@ -45,13 +47,15 @@ public class Sound {
         this.startPosition = startPosition;
         this.duration = duration;
         this.filePath = filePath;
+        this.creatorName = "talal"; // TODO it has to be set dynamically
     }
 
 
-    public void prepare(Context context) {
+    public void preparePlayer(Context context) {
         player = new AudioPlayer(context);
         player.addSounds(Arrays.asList(filePath));
     }
+
 
     public void play(int trackNumber, int positionInMillis) {
         // Den Player starten, wenn an der Stelle einen Sound vorhanden ist.
@@ -108,9 +112,9 @@ public class Sound {
         return trackNumber;
     }
 
-    public String getTitle() {
-        return title;
-    }
+    //public String getTitle() {
+      //  return title;
+    //}
 
     public Integer getStartPosition() {
         return startPosition;

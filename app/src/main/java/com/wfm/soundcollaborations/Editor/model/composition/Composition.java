@@ -12,14 +12,19 @@ public class Composition {
 
     public List<Sound> sounds;
 
+    //BACKEND BEIM LADEN
     public String creationDate;
 
+    //BACKEND BEIM LADEN
     public String status;
 
+    //BACKEND BEIM LADEN
     public Integer numberOfMembers;
 
+    //BACKEND BEIM LADEN
     public Integer duration;
 
+    //BACKEND BEIM LADEN
     public String snippet;
 
 }

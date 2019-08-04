@@ -6,20 +6,33 @@ import android.content.Context;
 import com.android.volley.Request;
 import com.android.volley.RequestQueue;
 import com.android.volley.Response;
-import com.android.volley.toolbox.JsonArrayRequest;
-import com.android.volley.toolbox.JsonObjectRequest;
+
 import com.android.volley.toolbox.StringRequest;
 import com.android.volley.toolbox.Volley;
 import com.wfm.soundcollaborations.Editor.model.composition.Composition;
+import com.wfm.soundcollaborations.Editor.model.composition.CompositionOverview;
 import com.wfm.soundcollaborations.Editor.model.composition.Sound;
 
-import org.json.JSONArray;
-import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.File;
+
 import java.util.List;
+import java.util.stream.Collectors;
+
+import okhttp3.MediaType;
+import okhttp3.MultipartBody;
+import okhttp3.OkHttpClient;
+import okhttp3.RequestBody;
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Retrofit;
+import retrofit2.converter.gson.GsonConverterFactory;
 
 public class CompositionServiceClient {
+
+    public static final MediaType JSON
+            = MediaType.get("multipart/mixed");
 
     private RequestQueue queue;
 
@@ -78,17 +91,8 @@ public class CompositionServiceClient {
     }
 
 
-    public void release(Long compositionId, List<Sound> recordedSounds, Response.Listener<JSONArray> listener) {
+    public void release(Long compositionId, List<Sound> recordedSounds, Response.Listener<String> listener) {
 
-        try {
-            String url = BASE_URL + compositionId + RELEASE_URL;
-            String json = JsonUtil.toJson(recordedSounds);
-            JSONArray jsonArray = new JSONArray(json);
-            JsonArrayRequest jsonArrayRequest = new JsonArrayRequest(PUT, url, jsonArray, listener, error -> {});
-            queue.add(jsonArrayRequest);
-        } catch (JSONException e) {
-            System.err.println(e);
-        }
 
 
     }
@@ -96,15 +100,43 @@ public class CompositionServiceClient {
 
     public void create(Composition composition, Response.Listener<JSONObject> listener) {
 
-        try {
-            String url = BASE_URL;
-            String json = JsonUtil.toJson(composition);
-            JSONObject jsonObject = new JSONObject(json);
-            JsonObjectRequest jsonObjectRequest = new JsonObjectRequest(POST, url, jsonObject, listener, error -> {});
-            queue.add(jsonObjectRequest);
-        } catch (JSONException e) {
-            System.err.println(e);
-        }
+
+        List<File> compositionJsonFiles = JsonUtil.toJsonFile("composition", composition);
+        File compositionJsonFile = compositionJsonFiles.get(0);
+        MultipartBody.Part compositionBody = MultipartBody.Part.createFormData("composition", compositionJsonFile.getName(), RequestBody.create(compositionJsonFile, MediaType.get("application/json")));
+        List<MultipartBody.Part> filesBodies = composition.sounds.stream()
+                .map(sound -> {
+
+                        File file = new File(sound.filePath);
+                        return MultipartBody.Part.createFormData("files[]", file.getName(), RequestBody.create(file, MediaType.parse("audio/*")));
+                })
+                .collect(Collectors.toList());
+
+        OkHttpClient client = new OkHttpClient();
+
+
+        Retrofit retrofit = new Retrofit.Builder()
+                .baseUrl("https://klangfang-service.herokuapp.com")
+                .addConverterFactory(GsonConverterFactory.create())
+                .client(client)
+                .build();
+
+        CompositionService service = retrofit.create(CompositionService.class);
+        Call<CompositionOverview> compositionOverviewCall = service.createComposition(compositionBody, filesBodies.toArray(new MultipartBody.Part[filesBodies.size()]));
+        compositionOverviewCall.enqueue(new Callback<CompositionOverview>() {
+            @Override
+            public void onResponse(Call<CompositionOverview> call, retrofit2.Response<CompositionOverview> response) {
+
+                CompositionOverview compositionOverview = response.body();
+
+            }
+
+            @Override
+            public void onFailure(Call<CompositionOverview> call, Throwable t) {
+                //Handle failure
+            }
+        });
+
     }
 
 }

@@ -6,7 +6,9 @@ import com.wfm.soundcollaborations.Editor.model.composition.Sound;
 
 import org.json.JSONArray;
 
+import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 
 public final class JsonUtil {
@@ -36,6 +38,22 @@ public final class JsonUtil {
         }
 
         return jsonValue;
+
+    }
+
+
+    public static <T> List<File> toJsonFile(String filename, T object) {
+
+        List<File> tmpFiles = new ArrayList<>();
+        try {
+            File tempFile = File.createTempFile(filename + "-", ".json");
+            OBJECT_MAPPER.writeValue(tempFile, object);
+            tmpFiles.add(tempFile);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        return tmpFiles;
 
     }
 }

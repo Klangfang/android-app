@@ -64,7 +64,7 @@ public class AudioRecorder implements MediaRecorder.OnInfoListener
             try {
                 mMediaRecorder.prepare();
             } catch (IOException e) {
-                Log.e(TAG, "prepare() failed");
+                Log.e(TAG, "preparePlayer() failed");
             }
 
             mMediaRecorder.start();
@@ -88,7 +88,7 @@ public class AudioRecorder implements MediaRecorder.OnInfoListener
                 mMediaRecorder.stop();
                 mMediaRecorder.release();
                 mMediaRecorder = null;
-                this.filePath = null;
+                //TODO this is bad this.filePath = null;
                 if (status.equals(AudioRecorderStatus.RECORDING)) {
                     status = AudioRecorderStatus.EMPTY;
                 }
@@ -128,7 +128,7 @@ public class AudioRecorder implements MediaRecorder.OnInfoListener
     }
 
     public Integer getDuration() {
-        return duration - startTime;
+        return duration;
 }
 
     @Override
