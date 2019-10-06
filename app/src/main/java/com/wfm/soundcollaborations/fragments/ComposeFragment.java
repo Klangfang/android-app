@@ -6,6 +6,7 @@ import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
 import androidx.appcompat.widget.Toolbar;
 import androidx.fragment.app.FragmentActivity;
+import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import android.view.LayoutInflater;
@@ -124,10 +125,11 @@ public class ComposeFragment extends Fragment {
                     FragmentActivity fragmentActivity = Objects.requireNonNull(getActivity());
                     CompositionOverviewAdapter adapter = new CompositionOverviewAdapter(fragmentActivity,
                             compositions);
-                    // TODO Use recycler view here instead of list view
                     RecyclerView recyclerView = root.findViewById(R.id.public_compositions_list);
                     // Provide the adapter for the recyclerView
-                    //recyclerView.setAdapter(adapter);
+                    recyclerView.setAdapter(adapter);
+                    // Set LayoutManager to define the List Layout of RecyclerView
+                    recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
 
                 }
             }
