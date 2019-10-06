@@ -125,9 +125,9 @@ public class ComposeFragment extends Fragment {
                     CompositionOverviewAdapter adapter = new CompositionOverviewAdapter(fragmentActivity,
                             compositions);
                     // TODO Use recycler view here instead of list view
-                    ListView recyclerView = root.findViewById(R.id.public_compositions_list);
+                    RecyclerView recyclerView = root.findViewById(R.id.public_compositions_list);
                     // Provide the adapter for the recyclerView
-                    recyclerView.setAdapter(adapter);
+                    //recyclerView.setAdapter(adapter);
 
                 }
             }
