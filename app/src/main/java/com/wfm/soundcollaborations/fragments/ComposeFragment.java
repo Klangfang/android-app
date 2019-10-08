@@ -7,7 +7,9 @@ import androidx.fragment.app.Fragment;
 import androidx.appcompat.widget.Toolbar;
 import androidx.fragment.app.FragmentActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.LinearSnapHelper;
 import androidx.recyclerview.widget.RecyclerView;
+import androidx.recyclerview.widget.SnapHelper;
 
 import android.view.LayoutInflater;
 import android.view.View;
@@ -129,7 +131,12 @@ public class ComposeFragment extends Fragment {
                     // Provide the adapter for the recyclerView
                     recyclerView.setAdapter(adapter);
                     // Set LayoutManager to define the List Layout of RecyclerView
-                    recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
+                    recyclerView.setLayoutManager(new LinearLayoutManager(getContext(),
+                            LinearLayoutManager.HORIZONTAL, false));
+
+                    // Enable Snapping when scrolling compositions horizontally
+                    final SnapHelper snapHelper = new LinearSnapHelper();
+                    snapHelper.attachToRecyclerView(recyclerView);
 
                 }
             }
