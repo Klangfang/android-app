@@ -3,13 +3,10 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     style="@style/card_view"
-    android:layout_marginHorizontal="@dimen/xs"
     android:layout_marginLeft="@dimen/xs"
-    android:layout_marginRight="@dimen/xs"
-    android:layout_marginVertical="@dimen/xs"
     android:layout_marginTop="@dimen/xs"
-    android:layout_marginBottom="@dimen/xs"
-    >
+    android:layout_marginRight="@dimen/xs"
+    android:layout_marginBottom="@dimen/xs">
 
     <LinearLayout
         android:layout_width="match_parent"
