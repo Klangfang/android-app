@@ -8,6 +8,10 @@ import com.liulishuo.filedownloader.FileDownloadQueueSet;
 import com.liulishuo.filedownloader.FileDownloader;
 import com.wfm.soundcollaborations.Editor.utils.FileUtils;
 
+import org.apache.commons.io.FilenameUtils;
+
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -31,17 +35,20 @@ public class SoundDownloader
         return downloader;
     }
 
-    private SoundDownloader(Context context, FileDownloadListener listener)
+    public SoundDownloader(Context context, FileDownloadListener listener)
     {
         FileDownloader.setup(context);
         mFileDownloadQueueSet = new FileDownloadQueueSet(listener);
     }
 
-    public void addSoundUrl(String url, int index)
-    {
-        String name = url.split("/")[url.split("/").length - 1];
-        name = name.replace("?compositionId=1", "");
-        downloadTasks.add(FileDownloader.getImpl().create(url).setPath(FileUtils.getKlangfangCacheDirectory()+"/"+name).setTag(index));
+    public void addSoundUrl(String urlText, int index, long compositionId) {
+        try {
+            URL url = new URL(urlText);
+            String name = (FilenameUtils.getName(url.getPath()));
+            downloadTasks.add(FileDownloader.getImpl().create(urlText).setPath(FileUtils.getKlangfangCacheDirectory()+"/"+name).setTag(index));
+        } catch (MalformedURLException e) {
+            e.printStackTrace();
+        }
     }
 
     public void download()

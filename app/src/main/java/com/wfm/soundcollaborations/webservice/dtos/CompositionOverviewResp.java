@@ -1,4 +1,4 @@
-package com.wfm.soundcollaborations.Editor.model.composition;
+package com.wfm.soundcollaborations.webservice.dtos;
 
 /**
  *  {@link com.wfm.soundcollaborations.Classes.CompositionOverview} represents a composition that the user can listen to.
@@ -11,7 +11,7 @@ package com.wfm.soundcollaborations.Editor.model.composition;
  *      - number of members (in the composition)
  *      - a sound URI (of the audio file that can be played)
  **/
-public class CompositionOverview {
+public class CompositionOverviewResp {
 
     public String title;
     public Integer numberOfMembers;

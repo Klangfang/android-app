@@ -15,10 +15,10 @@ import android.widget.ListView;
 import com.android.volley.Response;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.wfm.soundcollaborations.Editor.activities.CreateCompositionActivity;
-import com.wfm.soundcollaborations.Editor.model.composition.CompositionOverview;
+import com.wfm.soundcollaborations.webservice.dtos.CompositionOverviewResp;
 import com.wfm.soundcollaborations.webservice.CompositionServiceClient;
 import com.wfm.soundcollaborations.webservice.JsonUtil;
-import com.wfm.soundcollaborations.webservice.OverviewResponse;
+import com.wfm.soundcollaborations.webservice.dtos.OverviewResponse;
 import com.wfm.soundcollaborations.R;
 import com.wfm.soundcollaborations.activities.MainActivity;
 import com.wfm.soundcollaborations.adapter.CompositionOverviewAdapter;
@@ -31,7 +31,7 @@ import java.util.Objects;
 /**
  * The {@link ComposeFragment} ...
  *  - requests data for public compositions
- *  - displays a list of {@link CompositionOverview} objects using {@link CompositionOverviewAdapter}
+ *  - displays a list of {@link CompositionOverviewResp} objects using {@link CompositionOverviewAdapter}
  *  - provides the possibility to create new public compositions
  **/
 public class ComposeFragment extends Fragment {
@@ -68,37 +68,37 @@ public class ComposeFragment extends Fragment {
 
 
         //New array with test data for composition views
-       // ArrayList<Composition> compositions = new ArrayList<>();
-        //compositions.add(new Composition("Uni Sounds", "Hamburg, München", "1/4 Mitglieder"));
-        //compositions.add(new Composition("Quiet Fire", "Hamburg, München", "1/4 Mitglieder"));
-        //compositions.add(new Composition("Baobab", "Hamburg, München", "1/4 Mitglieder"));
-        //compositions.add(new Composition("Nom Nom Sounds", "Hamburg, München", "1/4 Mitglieder"));
-        //compositions.add(new Composition("Blablabla", "Hamburg, München", "1/4 Mitglieder"));
-        // New empty ArrayList for adding data to CompositionOverview
-        //ArrayList<CompositionOverview> compositions = new ArrayList<>();
+       // ArrayList<CompositionRequest> compositions = new ArrayList<>();
+        //compositions.add(new CompositionRequest("Uni Sounds", "Hamburg, München", "1/4 Mitglieder"));
+        //compositions.add(new CompositionRequest("Quiet Fire", "Hamburg, München", "1/4 Mitglieder"));
+        //compositions.add(new CompositionRequest("Baobab", "Hamburg, München", "1/4 Mitglieder"));
+        //compositions.add(new CompositionRequest("Nom Nom Sounds", "Hamburg, München", "1/4 Mitglieder"));
+        //compositions.add(new CompositionRequest("Blablabla", "Hamburg, München", "1/4 Mitglieder"));
+        // New empty ArrayList for adding data to CompositionOverviewResp
+        //ArrayList<CompositionOverviewResp> compositions = new ArrayList<>();
 
         // Add Dummy Content to ArrayList above. TODO: Replace with JSON data
-        /*compositions.add(new CompositionOverview(
+        /*compositions.add(new CompositionOverviewResp(
                 "title1",
                 1,
                 "https://stereoninjamusic.weebly.com/uploads/4/5/7/5/45756923/the_midnight_ninja.ogg"));
 
-        compositions.add(new CompositionOverview(
+        compositions.add(new CompositionOverviewResp(
                 "title2",
                 2,
                 "https://stereoninjamusic.weebly.com/uploads/4/5/7/5/45756923/the_midnight_ninja.ogg"));
 
-        compositions.add(new CompositionOverview(
+        compositions.add(new CompositionOverviewResp(
                 "title3",
                 3,
                 "https://stereoninjamusic.weebly.com/uploads/4/5/7/5/45756923/the_midnight_ninja.ogg"));
 
-        compositions.add(new CompositionOverview(
+        compositions.add(new CompositionOverviewResp(
                 "title4",
                 2,
                 "https://stereoninjamusic.weebly.com/uploads/4/5/7/5/45756923/the_midnight_ninja.ogg"));
 
-        compositions.add(new CompositionOverview(
+        compositions.add(new CompositionOverviewResp(
                 "title5",
                 1,
                 "https://stereoninjamusic.weebly.com/uploads/4/5/7/5/45756923/the_midnight_ninja.ogg"));
@@ -116,7 +116,7 @@ public class ComposeFragment extends Fragment {
 
             OverviewResponse overviewResponse = JsonUtil.fromJson(response, OverviewResponse.class);
             if (overviewResponse != null) {
-                List<CompositionOverview> compositions = overviewResponse.overviews;
+                List<CompositionOverviewResp> compositions = overviewResponse.overviews;
 
                 if (isAdded()) {
 

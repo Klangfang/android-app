@@ -1,7 +1,7 @@
 package com.wfm.soundcollaborations.Classes;
 
 /**
- *  {@link Composition} represents a Composition that the user can listen to.
+ *  {@link Composition} represents a CompositionRequest that the user can listen to.
  *  It contains the meta data, such as title, number of participants and a audio preview file.
  **/
 public class Composition {

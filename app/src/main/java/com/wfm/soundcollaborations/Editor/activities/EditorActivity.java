@@ -6,7 +6,6 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.content.res.ColorStateList;
-import android.graphics.Color;
 import android.os.Build;
 import android.os.Handler;
 import androidx.annotation.RequiresApi;
@@ -20,7 +19,6 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.RelativeLayout;
 import android.widget.Toast;
@@ -29,9 +27,10 @@ import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.ohoussein.playpause.PlayPauseView;
 import com.wfm.soundcollaborations.Editor.exceptions.RecordTimeOutExceededException;
 import com.wfm.soundcollaborations.Editor.exceptions.SoundRecordingTimeException;
+import com.wfm.soundcollaborations.activities.MainActivity;
 import com.wfm.soundcollaborations.fragments.ComposeFragment;
 import com.wfm.soundcollaborations.webservice.CompositionServiceClient;
-import com.wfm.soundcollaborations.webservice.PickResponse;
+import com.wfm.soundcollaborations.webservice.dtos.PickResponse;
 import com.wfm.soundcollaborations.R;
 import com.wfm.soundcollaborations.Editor.exceptions.NoActiveTrackException;
 import com.wfm.soundcollaborations.Editor.exceptions.SoundWillBeOutOfCompositionException;
@@ -99,7 +98,7 @@ public class EditorActivity extends AppCompatActivity {
      * create soundViews to be added to the corresponding sounds
      * let SoundDownloader update these views using listener
      * when a view finished downloading it add itself to the track
-     * when all sounds are loaded the CompositionOverview will be ready to play the sounds
+     * when all sounds are loaded the CompositionOverviewResp will be ready to play the sounds
      * @param savedInstanceState
      */
     @Override
@@ -117,7 +116,7 @@ public class EditorActivity extends AppCompatActivity {
         // create soundViews to be added to the corresponding sounds
         // let SoundDownloader update these views using listener
         // when a view finished downloading it add itself to the track
-        // when all sounds are loaded the CompositionOverview will be ready to play the sounds
+        // when all sounds are loaded the CompositionOverviewResp will be ready to play the sounds
         builder = new CompositionBuilder(compositionView, 4);
         Intent intent = getIntent();
         String compositionJson = intent.getStringExtra(ComposeFragment.PICK_RESPONSE);
@@ -161,13 +160,20 @@ public class EditorActivity extends AppCompatActivity {
             if (create) {
 
                 builder.create();
+                Toast.makeText(this, "Congratulations! Your composition has been released!", Toast.LENGTH_LONG).show();
+                //TODO later with callback producer to handle errors...
+                Intent intent = new Intent(compositionView.getContext(), MainActivity.class);
+                compositionView.getContext().startActivity(intent);
                 return true;
 
             } else {
 
                 // Code for releasing the composition comes here
                 builder.release();
-                //Toast.makeText(this, "Release!!", Toast.LENGTH_LONG).show();
+                Toast.makeText(this, "Congratulations! Your composition collaboration has been released!", Toast.LENGTH_LONG).show();
+                //TODO later with callback producer to handle errors...
+                Intent intent = new Intent(compositionView.getContext(), MainActivity.class);
+                compositionView.getContext().startActivity(intent);
                 return true;
 
             }

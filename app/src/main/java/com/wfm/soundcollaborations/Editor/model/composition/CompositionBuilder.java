@@ -25,14 +25,19 @@ import com.wfm.soundcollaborations.Editor.views.composition.TrackWatchView;
 import com.wfm.soundcollaborations.Editor.views.composition.listeners.TrackViewOnClickListener;
 import com.wfm.soundcollaborations.Editor.views.composition.listeners.TrackWatchViewOnClickListener;
 import com.wfm.soundcollaborations.webservice.CompositionServiceClient;
+import com.wfm.soundcollaborations.webservice.dtos.CompositionRequest;
+import com.wfm.soundcollaborations.webservice.dtos.CompositionResponse;
+import com.wfm.soundcollaborations.webservice.dtos.SoundRequest;
+import com.wfm.soundcollaborations.webservice.dtos.SoundResponse;
 
 import org.json.JSONObject;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
- * Implementiert die Businesslogik des CompositionOverview Builders (Wird in der EditorActivity verwendet)
+ * Implementiert die Businesslogik des CompositionOverviewResp Builders (Wird in der EditorActivity verwendet)
  */
 
 public class CompositionBuilder
@@ -61,7 +66,7 @@ public class CompositionBuilder
 
     private CompositionServiceClient client;
 
-    private Composition composition;
+    private CompositionResponse compositionResponse;
 
     public CompositionBuilder(CompositionView compositionView, int tracks)
     {
@@ -94,26 +99,29 @@ public class CompositionBuilder
         mTracksTimer = new TracksTimer(this.tracks, this.compositionView);
     }
 
-    public void addSounds(Composition composition) {
-        for (Sound sound : composition.sounds) {
+    public void addSounds(CompositionResponse compositionResponse) {
+
+        for (SoundResponse sndResp : compositionResponse.sounds) {
             SoundView soundView = new SoundView(this.compositionView.getContext());
             RelativeLayout.LayoutParams soundParams =
-                    new RelativeLayout.LayoutParams(getValueInDP(sound.getDuration()), TRACK_HEIGHT);
-            soundParams.setMargins(getValueInDP(sound.getStartPosition()), 0, 0, 0);
+                    new RelativeLayout.LayoutParams(getValueInDP(sndResp.duration), TRACK_HEIGHT);
+            soundParams.setMargins(getValueInDP(sndResp.startPosition), 0, 0, 0);
             soundView.setLayoutParams(soundParams);
-            soundView.setTrackNumber(sound.getTrackNumber());
+            soundView.setTrackNumber(sndResp.trackNumber);
             // add soundView to the list
             downloadedSoundViews.add(soundView);
             // add sound view to the track
-            downloadedTrackViews.get(sound.getTrackNumber()).addSoundView(soundView);
+            downloadedTrackViews.get(sndResp.trackNumber).addSoundView(soundView);
 
-            downloadedSounds.add(sound);
+            Sound snd = new Sound(sndResp.trackNumber, sndResp.startPosition, sndResp.duration, sndResp.filePath);
+            downloadedSounds.add(snd);
 
-            this.composition = composition;
+            this.compositionResponse = compositionResponse;
         }
         // we will add everything to the composition view
         build();
-        downloadSounds();
+        downloadSounds(compositionResponse.id);
+
     }
 
     public int getValueInDP(long valueInMs)
@@ -175,8 +183,9 @@ public class CompositionBuilder
     /*
         Downloading Sounds
      */
-    private void downloadSounds()
-    {
+    private void downloadSounds(Long compositionId) {
+
+
         prepareTracks();// Initialisierung von AudioPlayer!
         this.downloader = SoundDownloader.getSoundDownloader(this.compositionView.getContext(),
                 new FileDownloadListener() {
@@ -220,7 +229,7 @@ public class CompositionBuilder
                     }
                 });
         for(int i = 0; i< downloadedSounds.size(); i++) {
-            this.downloader.addSoundUrl(downloadedSounds.get(i).getFilePath(), i);
+            this.downloader.addSoundUrl(downloadedSounds.get(i).getFilePath(), i, compositionId);
         }
 
         this.downloader.download();
@@ -406,27 +415,38 @@ public class CompositionBuilder
 
     public void release() {
 
+        List<SoundRequest> soundReqs = new ArrayList<>();
+        for (Sound snd : recordedSounds) {
+            SoundRequest soundReq = new SoundRequest(snd.trackNumber, snd.startPosition, snd.duration);
+            soundReqs.add(soundReq);
+        }
+
         Response.Listener<String> listener = response -> showInfo(response);
-        client.release(composition.id, recordedSounds, listener);
+        client.release(compositionResponse.id, soundReqs,  recordedSounds, listener);
 
     }
 
 
     public void create() {
 
-        Composition composition = new Composition();
-        composition.sounds = recordedSounds;
-        composition.creatorName = "Klangfang";
-        composition.title = "GET_TITLE";
-        composition.sounds = recordedSounds;
+        String TITLE = "GET_TITLE";
+        String CREATOR_NAME = "KLANGFANG";
+        List<SoundRequest> soundsToUpload = new ArrayList<>(recordedSounds.size());
+        List<String> soundPaths = new ArrayList<>();
+        for (Sound snd : recordedSounds) {
+            soundsToUpload.add(new SoundRequest(snd.trackNumber, snd.startPosition, snd.duration));
+            soundPaths.add(snd.filePath);
+        }
+        CompositionRequest compReq = new CompositionRequest(TITLE, CREATOR_NAME, soundsToUpload);
+
         Response.Listener<JSONObject> listener = response -> showInfo(response);
-        client.create(composition, listener);
+        client.create(compReq, soundPaths, listener);
 
     }
 
 
     private <T> void showInfo(T response) {
-        Toast.makeText(getCompositionView().getContext(), "Composition is released!", Toast.LENGTH_LONG).show();
+        Toast.makeText(getCompositionView().getContext(), "CompositionRequest is released!", Toast.LENGTH_LONG).show();
     }
 
 
