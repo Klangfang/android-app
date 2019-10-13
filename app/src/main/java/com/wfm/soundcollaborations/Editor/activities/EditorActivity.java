@@ -16,6 +16,8 @@ import androidx.core.content.ContextCompat;
 import androidx.appcompat.app.AlertDialog;
 import android.os.Bundle;
 import androidx.appcompat.app.AppCompatActivity;
+
+import android.text.Editable;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -110,9 +112,10 @@ public class EditorActivity extends AppCompatActivity {
 
         setSupportActionBar(findViewById(R.id.base_toolbar));
         ActionBar actionBar = getSupportActionBar();
-        // Enable the Up button
+        // TODO: Up button doesn't work yet
         assert actionBar != null;
         actionBar.setDisplayHomeAsUpEnabled(true);
+        actionBar.setTitle(CreateCompositionActivity.compositionTitleInput);
 
         // create soundViews to be added to the corresponding sounds
         // let SoundDownloader update these views using listener
