@@ -35,6 +35,17 @@
         <item name="android:elevation">4dp</item>
     </style>
 
+    <!-- Text Styles -->
+    <style name="headline1" parent="TextAppearance.AppCompat.Headline">
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:maxLines">2</item>
+        <item name="android:textSize">20sp</item>
+        <item name="android:layout_marginEnd">@dimen/m</item>
+        <item name="android:layout_marginStart">@dimen/m</item>
+        <item name="android:layout_marginTop">@dimen/xl</item>
+    </style>
+
     <!-- Card View Styling -->
     <style name="card_view" parent="CardView">
         <item name="android:layout_width">296dp</item>

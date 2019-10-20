@@ -6,6 +6,7 @@
     <string name="record_button">Record</string>
     <string name="number_of_members"> /4 Members</string>
     <string name="name_composition">Please name your new composition:</string>
+    <string name="choose_composition">Choose a composition you would like to join</string>
     <string name="start_composition">Let\'s go!</string>
     <string name="sound_file_prefix" translatable="false">Sound</string>
 

@@ -6,6 +6,7 @@
     <string name="finished_collages">Fertige Collagen</string>
     <string name="record_button">Aufnehmen</string>
     <string name="name_composition">Wie möchtest du deine Klangcollage nennen?</string>
+    <string name="choose_composition">Wähle eine Klangcollage bei der du mitmachen möchtest</string>
     <string name="number_of_members"> /4 Mitglieder</string>
 
     <!-- Bottom Navigation Menu -->

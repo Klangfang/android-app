@@ -7,7 +7,6 @@ import androidx.fragment.app.Fragment;
 import androidx.appcompat.widget.Toolbar;
 import androidx.fragment.app.FragmentActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
-import androidx.recyclerview.widget.LinearSnapHelper;
 import androidx.recyclerview.widget.PagerSnapHelper;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.recyclerview.widget.SnapHelper;
@@ -15,12 +14,10 @@ import androidx.recyclerview.widget.SnapHelper;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ListView;
 
 import com.android.volley.Response;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.wfm.soundcollaborations.Editor.activities.CreateCompositionActivity;
-import com.wfm.soundcollaborations.Editor.model.composition.Composition;
 import com.wfm.soundcollaborations.Editor.model.composition.CompositionOverview;
 import com.wfm.soundcollaborations.webservice.CompositionServiceClient;
 import com.wfm.soundcollaborations.webservice.JsonUtil;
@@ -73,37 +70,6 @@ public class ComposeFragment extends Fragment {
         Response.Listener<String> listener = response -> fillActivity(response);
         client.getOverviews(listener);
 
-        // New empty ArrayList for adding data to CompositionOverview
-        //ArrayList<CompositionOverview> compositions = new ArrayList<>();
-
-        // Add Dummy Content to ArrayList above.
-        /*compositions.add(new CompositionOverview(
-                "title1",
-                1,
-                "https://stereoninjamusic.weebly.com/uploads/4/5/7/5/45756923/the_midnight_ninja.ogg"));
-
-        compositions.add(new CompositionOverview(
-                "title2",
-                2,
-                "https://stereoninjamusic.weebly.com/uploads/4/5/7/5/45756923/the_midnight_ninja.ogg"));
-
-        compositions.add(new CompositionOverview(
-                "title3",
-                3,
-                "https://stereoninjamusic.weebly.com/uploads/4/5/7/5/45756923/the_midnight_ninja.ogg"));
-
-        compositions.add(new CompositionOverview(
-                "title4",
-                2,
-                "https://stereoninjamusic.weebly.com/uploads/4/5/7/5/45756923/the_midnight_ninja.ogg"));
-
-        compositions.add(new CompositionOverview(
-                "title5",
-                1,
-                "https://stereoninjamusic.weebly.com/uploads/4/5/7/5/45756923/the_midnight_ninja.ogg"));
-                */
-
-
         return root; // Needed when adding a Fragment (See top of Fragment)
     }
 
@@ -112,29 +78,9 @@ public class ComposeFragment extends Fragment {
 
         if (StringUtils.isNotBlank(response)) {
 
-            //OverviewResponse overviewResponse = JsonUtil.fromJson(response, OverviewResponse.class);
-            // Test Composition Data
-            OverviewResponse overviewResponse = new OverviewResponse();
+            // Get CompositionOverviews from Server JSON
+            OverviewResponse overviewResponse = JsonUtil.fromJson(response, OverviewResponse.class);
 
-            CompositionOverview c1 = new CompositionOverview();
-            c1.numberOfMembers = 2;
-            c1.pickUrl = "https://freesound.org/people/Soughtaftersounds/sounds/145426/";
-            c1.snippetUrl = "https://freesound.org/people/Soughtaftersounds/sounds/145426/";
-            c1.title = "Titel 1";
-
-            CompositionOverview c2 = new CompositionOverview();
-            c2.title = "Titel 2";
-            c2.pickUrl = "https://freesound.org/people/Soughtaftersounds/sounds/145426/";
-            c2.snippetUrl = "https://freesound.org/people/Soughtaftersounds/sounds/145426/";
-            c2.numberOfMembers = 1;
-
-            CompositionOverview c3 = new CompositionOverview();
-            c3.title = "Titel 3";
-            c3.pickUrl = "https://freesound.org/people/Soughtaftersounds/sounds/145426/";
-            c3.snippetUrl = "https://freesound.org/people/Soughtaftersounds/sounds/145426/";
-            c3.numberOfMembers = 3;
-
-            overviewResponse.overviews = Arrays.asList(c1, c2, c3);
             if (overviewResponse != null) {
                 List<CompositionOverview> compositions = overviewResponse.overviews;
 
@@ -143,10 +89,10 @@ public class ComposeFragment extends Fragment {
                     FragmentActivity fragmentActivity = Objects.requireNonNull(getActivity());
                     CompositionOverviewAdapter adapter = new CompositionOverviewAdapter(fragmentActivity,
                             compositions);
+
                     RecyclerView recyclerView = root.findViewById(R.id.public_compositions_list);
-                    // Provide the adapter for the recyclerView
                     recyclerView.setAdapter(adapter);
-                    // Set LayoutManager to define the List Layout of RecyclerView
+                    // Set horizontal scrolling
                     recyclerView.setLayoutManager(new LinearLayoutManager(getContext(),
                             LinearLayoutManager.HORIZONTAL, false));
 
@@ -156,17 +102,13 @@ public class ComposeFragment extends Fragment {
 
                 }
             }
-
         }
-
     }
-
 
     private void startCreateCompositionActivity(View view) {
         Intent intent = new Intent(view.getContext(), CreateCompositionActivity.class);
         view.getContext().startActivity(intent);
     }
-
 
     /**
      * Initialize {@link Toolbar} and set custom title and background color.
