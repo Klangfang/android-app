@@ -14,6 +14,7 @@ import androidx.recyclerview.widget.SnapHelper;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ProgressBar;
 
 import com.android.volley.Response;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
@@ -28,7 +29,6 @@ import com.wfm.soundcollaborations.adapter.CompositionOverviewAdapter;
 
 import org.apache.commons.lang3.StringUtils;
 
-import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 
@@ -76,6 +76,9 @@ public class ComposeFragment extends Fragment {
 
     private void fillActivity(String response) {
 
+        final ProgressBar progressBar = root.findViewById(R.id.circular_progress_bar);
+        progressBar.setVisibility(View.VISIBLE);
+
         if (StringUtils.isNotBlank(response)) {
 
             // Get CompositionOverviews from Server JSON
@@ -85,6 +88,8 @@ public class ComposeFragment extends Fragment {
                 List<CompositionOverview> compositions = overviewResponse.overviews;
 
                 if (isAdded()) {
+
+                    progressBar.setVisibility(View.GONE);
 
                     FragmentActivity fragmentActivity = Objects.requireNonNull(getActivity());
                     CompositionOverviewAdapter adapter = new CompositionOverviewAdapter(fragmentActivity,
