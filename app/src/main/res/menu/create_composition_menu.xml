@@ -5,6 +5,5 @@
         android:id="@+id/set_composition_title"
         android:icon="@drawable/ic_check_24dp"
         android:title="@string/send"
-        app:showAsAction="always"
-        />
+        app:showAsAction="always" />
 </menu>
