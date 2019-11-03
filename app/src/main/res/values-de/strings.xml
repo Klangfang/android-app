@@ -32,7 +32,7 @@
     <string name="start_composition">Los geht\'s!</string>
 
     <!-- Placeholders -->
-    <string name="title">Titel</string>
+    <string name="title">Meine Collage</string>
 
     <!-- Image Content Descriptions -->
     <string name="locations">Orte aller Collagen</string>
@@ -41,4 +41,5 @@
     <string name="record_audio_permission_denied">Bitte erlaube den Zugriff auf dein Mikrofon, um Aufnahmen machen zu können.</string>
     <string name="external_storage_permission_denied">Bitte erlaube den Zugriff auf deinen Speicher, um Aufnahmen machen zu können.</string>
     <string name="all_audio_permissions_denied">Bitte erlaube den Zugriff auf Mikrofon und Speicher, um Aufnahmen machen zu können.</string>
+    <string name="min_text_input">Bitte gib deiner Collage einen Namen ♪</string>
 </resources>

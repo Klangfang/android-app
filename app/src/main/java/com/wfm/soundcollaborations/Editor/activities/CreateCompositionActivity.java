@@ -47,10 +47,18 @@ public class CreateCompositionActivity extends AppCompatActivity {
     // See https://developer.android.com/training/basics/firstapp/starting-activity#java
     private void startEditorActivity(View view) {
         Intent intent = new Intent(view.getContext(), EditorActivity.class);
-        startActivity(intent);
 
+        /*
+        Read user input and check if text length is at least 1 character,
+        Otherwise show warning
+        */
         getCompositionTitleInput();
-    }
+        if (compositionTitleInput.length() < 1) {
+            Toast.makeText(this, getString(R.string.min_text_input), Toast.LENGTH_LONG).show();
+        } else {
+            startActivity(intent);
+        }
+}
 
     public String getCompositionTitleInput() {
         // Get specific User Input data by looking inside the TextInputEditText Object
