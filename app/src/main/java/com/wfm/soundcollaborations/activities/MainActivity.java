@@ -95,7 +95,7 @@ public class MainActivity extends AppCompatActivity
 
     private void showDefaultFragment()
     {
-        startExploreFragment();
+        startComposeFragment();
     }
 
     public Toolbar getToolbar()
