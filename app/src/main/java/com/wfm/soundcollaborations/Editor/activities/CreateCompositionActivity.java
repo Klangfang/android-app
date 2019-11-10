@@ -60,6 +60,7 @@ public class CreateCompositionActivity extends AppCompatActivity {
     private void startEditorActivity(View view) {
         Intent intent = new Intent(view.getContext(), EditorActivity.class);
         //intent.putExtra(PICK_RESPONSE, response);
-        view.getContext().startActivity(intent);
+        finish();
+        startActivity(intent);
     }
 }

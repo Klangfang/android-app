@@ -6,7 +6,7 @@ public class SoundResponse {
 
     public Integer trackNumber;
 
-    public String filePath;
+    public String url;
 
     public String title;
 

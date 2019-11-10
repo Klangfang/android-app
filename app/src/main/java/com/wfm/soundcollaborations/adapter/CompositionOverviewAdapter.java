@@ -18,10 +18,14 @@ import com.google.android.exoplayer2.Player;
 import com.google.android.exoplayer2.ui.PlayerControlView;
 import com.wfm.soundcollaborations.Editor.activities.EditorActivity;
 import com.wfm.soundcollaborations.Editor.model.audio.ExoPlayerFactory;
+import com.wfm.soundcollaborations.webservice.JsonUtil;
 import com.wfm.soundcollaborations.webservice.dtos.CompositionOverviewResp;
 import com.wfm.soundcollaborations.R;
 import com.wfm.soundcollaborations.webservice.CompositionServiceClient;
+import com.wfm.soundcollaborations.webservice.dtos.CompositionResponse;
+import com.wfm.soundcollaborations.webservice.dtos.CompositionUpdateRequest;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -73,7 +77,7 @@ public class CompositionOverviewAdapter extends ArrayAdapter<CompositionOverview
         membersTextView.setText(currentOverview.numberOfMembers + "/4 Members"); // TODO replace string with resource
 
         Button participateButton = listItemView.findViewById(R.id.join_button);
-        participateButton.setOnClickListener(view -> doRequest(currentOverview.pickUrl, view));
+        participateButton.setOnClickListener(view -> doRequest(currentOverview.id, view));
 
         // Create instance of PlayerControlView and assign it to the correct layout view
         PlayerControlView playerControlView = listItemView.findViewById(R.id.public_composition_player_view);
@@ -98,15 +102,20 @@ public class CompositionOverviewAdapter extends ArrayAdapter<CompositionOverview
 
     }
 
-    private void doRequest(String url, View view) {
-        Response.Listener<String> listener = response -> startEditorActivity(view, response);
-        client.pick(url, listener);
+    private void doRequest(Long compositionId, View view) {
+
+        Response.Listener<CompositionResponse> listener = response -> startEditorActivity(view, response);
+        client.update(compositionId, new CompositionUpdateRequest(), listener);
+
     }
 
 
-    private void startEditorActivity(View view, String response) {
+    private void startEditorActivity(View view, CompositionResponse response) {
+
         Intent intent = new Intent(view.getContext(), EditorActivity.class);
-        intent.putExtra(PICK_RESPONSE, response);
+        intent.putExtra(PICK_RESPONSE, JsonUtil.toJson(response));
         view.getContext().startActivity(intent);
+
     }
+
 }

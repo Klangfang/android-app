@@ -45,17 +45,19 @@ dependencies {
 
     // HTTP Client
     implementation 'com.android.volley:volley:1.1.1'
+    // retrofit2
+    implementation 'com.squareup.retrofit2:retrofit:2.6.1'
+    // Used for deserialization in retrofit
+    implementation 'com.squareup.retrofit2:converter-gson:2.6.1'
+
     // Object mapper (Serialize and Deserialize Json)
     implementation 'com.fasterxml.jackson.core:jackson-databind:2.10.0.pr1'
-    // Used for deserialization in retrofit
-    implementation group: 'com.squareup.retrofit2', name: 'converter-gson', version: '2.6.1'
 
     // Apache commons lang
     implementation group: 'org.apache.commons', name: 'commons-lang3', version: '3.9'
 
     // mime support
     implementation group: 'com.squareup.okhttp3', name: 'okhttp', version: '4.0.1'
-    implementation group: 'com.squareup.retrofit2', name: 'retrofit', version: '2.6.1'
 
     implementation group: 'commons-io', name: 'commons-io', version: '2.6'
 

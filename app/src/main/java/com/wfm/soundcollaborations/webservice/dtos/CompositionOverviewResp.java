@@ -13,9 +13,9 @@ package com.wfm.soundcollaborations.webservice.dtos;
  **/
 public class CompositionOverviewResp {
 
+    public Long id;
     public String title;
     public Integer numberOfMembers;
     public String snippetUrl;
-    public String pickUrl;
 
 }

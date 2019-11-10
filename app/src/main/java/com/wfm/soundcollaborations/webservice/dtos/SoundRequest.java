@@ -10,11 +10,14 @@ public class SoundRequest {
 
     public String creatorName = "TALAL";
 
-    public SoundRequest(Integer trackNumber, Integer startPosition, Integer duration) {
+    public byte[] soundBytes;
+
+    public SoundRequest(Integer trackNumber, Integer startPosition, Integer duration, byte[] soundBytes) {
 
         this.trackNumber = trackNumber;
         this.startPosition = startPosition;
         this.duration = duration;
+        this.soundBytes = soundBytes;
 
     }
 
