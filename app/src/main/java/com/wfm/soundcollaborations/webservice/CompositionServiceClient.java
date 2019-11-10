@@ -93,7 +93,7 @@ public class CompositionServiceClient {
 
     public void update(Long compositionId, CompositionUpdateRequest compositionUpdateRequest, Response.Listener<CompositionResponse> listener) {
 
-        Call<CompositionResponse> compositionOverviewCall = service.updateComposition(compositionId, new CompositionUpdateRequest(new ArrayList<>()));
+        Call<CompositionResponse> compositionOverviewCall = service.updateComposition(compositionId, compositionUpdateRequest   );
         compositionOverviewCall.enqueue(new Callback<CompositionResponse>() {
             @Override
             public void onResponse(Call<CompositionResponse> call, retrofit2.Response<CompositionResponse> response) {
