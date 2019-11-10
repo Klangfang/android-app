@@ -1,6 +1,5 @@
 package com.wfm.soundcollaborations.webservice.dtos;
 
-import com.wfm.soundcollaborations.Editor.model.composition.Sound;
 
 import java.util.List;
 

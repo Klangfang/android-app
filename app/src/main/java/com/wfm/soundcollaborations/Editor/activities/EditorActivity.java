@@ -32,7 +32,6 @@ import com.wfm.soundcollaborations.Editor.exceptions.SoundRecordingTimeException
 import com.wfm.soundcollaborations.activities.MainActivity;
 import com.wfm.soundcollaborations.fragments.ComposeFragment;
 import com.wfm.soundcollaborations.webservice.CompositionServiceClient;
-import com.wfm.soundcollaborations.webservice.dtos.PickResponse;
 import com.wfm.soundcollaborations.R;
 import com.wfm.soundcollaborations.Editor.exceptions.NoActiveTrackException;
 import com.wfm.soundcollaborations.Editor.exceptions.SoundWillBeOutOfCompositionException;
@@ -41,6 +40,7 @@ import com.wfm.soundcollaborations.Editor.model.composition.CompositionBuilder;
 import com.wfm.soundcollaborations.Editor.views.composition.CompositionView;
 import com.wfm.soundcollaborations.Editor.views.composition.SoundView;
 import com.wfm.soundcollaborations.webservice.JsonUtil;
+import com.wfm.soundcollaborations.webservice.dtos.CompositionResponse;
 
 import org.apache.commons.lang3.StringUtils;
 
@@ -91,7 +91,7 @@ public class EditorActivity extends AppCompatActivity {
      */
     private final int RECORD_AUDIO_PERMISSIONS_DECISIONS = 1;
 
-    private PickResponse response;
+    private CompositionResponse compositionResponse;
     private CompositionServiceClient client;
 
     private boolean create;
@@ -127,9 +127,9 @@ public class EditorActivity extends AppCompatActivity {
         if (StringUtils.isNotBlank(compositionJson)) {
 
             create = false;
-            response = JsonUtil.fromJson(compositionJson, PickResponse.class);
-            if (response != null) {
-                builder.addSounds(response.composition);
+            compositionResponse = JsonUtil.fromJson(compositionJson, CompositionResponse.class);
+            if (compositionResponse != null) {
+                builder.addSounds(compositionResponse);
             }
 
         } else {
@@ -164,22 +164,20 @@ public class EditorActivity extends AppCompatActivity {
 
                 builder.create();
                 Toast.makeText(this, "Congratulations! Your composition has been released!", Toast.LENGTH_LONG).show();
-                //TODO later with callback producer to handle errors...
-                Intent intent = new Intent(compositionView.getContext(), MainActivity.class);
-                compositionView.getContext().startActivity(intent);
-                return true;
+
 
             } else {
 
                 // Code for releasing the composition comes here
                 builder.release();
                 Toast.makeText(this, "Congratulations! Your composition collaboration has been released!", Toast.LENGTH_LONG).show();
-                //TODO later with callback producer to handle errors...
-                Intent intent = new Intent(compositionView.getContext(), MainActivity.class);
-                compositionView.getContext().startActivity(intent);
-                return true;
 
             }
+
+            //TODO later with callback producer to handle errors...
+            Intent intent = new Intent(compositionView.getContext(), MainActivity.class);
+            finish();
+            startActivity(intent);
 
         }
 
@@ -190,10 +188,8 @@ public class EditorActivity extends AppCompatActivity {
     @Override
     protected void onDestroy() {
 
-        if (response != null && response.composition != null) {
-            client.release(response.composition.id);
-        }
         super.onDestroy();
+
     }
 
 

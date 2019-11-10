@@ -12,6 +12,8 @@ import com.android.volley.toolbox.Volley;
 import com.wfm.soundcollaborations.webservice.dtos.CompositionOverviewResp;
 import com.wfm.soundcollaborations.webservice.dtos.CompositionRequest;
 import com.wfm.soundcollaborations.Editor.model.composition.Sound;
+import com.wfm.soundcollaborations.webservice.dtos.CompositionResponse;
+import com.wfm.soundcollaborations.webservice.dtos.CompositionUpdateRequest;
 import com.wfm.soundcollaborations.webservice.dtos.SoundRequest;
 
 import org.json.JSONObject;
@@ -38,9 +40,9 @@ public class CompositionServiceClient {
 
     private RequestQueue queue;
 
+    private CompositionService service;
+
     private static String BASE_URL = HttpUtils.COMPOSITION_SERVICE_BASE_URL;
-    private static String PICK_URL = HttpUtils.COMPOSITION_PICK_URL;
-    private static String RELEASE_URL = HttpUtils.COMPOSITION_RELEASE_URL;
     private static String VIEW_URL = HttpUtils.COMPOSITION_VIEW_URL;
 
     private static final int POST = Request.Method.POST;
@@ -53,28 +55,59 @@ public class CompositionServiceClient {
         // Instantiate the RequestQueue.
         this.queue = Volley.newRequestQueue(context);
 
+        Retrofit retrofit = new Retrofit.Builder()
+                .baseUrl("https://klangfang-service.herokuapp.com")
+                .addConverterFactory(GsonConverterFactory.create())
+                .build();
+
+        // Instantiate CompositionService
+        service = new Retrofit.Builder()
+                .baseUrl("https://klangfang-service.herokuapp.com")
+                .addConverterFactory(GsonConverterFactory.create())
+                .build()
+                .create(CompositionService.class);
+
+
     }
 
 
-    public void pick(String url, Response.Listener<String> listener) {
+    public void create(CompositionRequest compositionRequest, Response.Listener<JSONObject> listener) {
 
-        // Request a string response from the provided URL.
-        StringRequest stringRequest = new StringRequest(PUT, url,
-                listener, error -> {
-            //"That didn't work!"
+        Call<CompositionOverviewResp> compositionOverviewCall = service.createComposition(compositionRequest);
+        compositionOverviewCall.enqueue(new Callback<CompositionOverviewResp>() {
+            @Override
+            public void onResponse(Call<CompositionOverviewResp> call, retrofit2.Response<CompositionOverviewResp> response) {
+
+                CompositionOverviewResp compositionOverviewResp = response.body();
+
+            }
+
+            @Override
+            public void onFailure(Call<CompositionOverviewResp> call, Throwable t) {
+                //Handle failure
+            }
         });
 
-        // Add the request to the RequestQueue.
-        queue.add(stringRequest);
-
     }
 
 
-    public void release(Long id) {
+    public void update(Long compositionId, CompositionUpdateRequest compositionUpdateRequest, Response.Listener<CompositionResponse> listener) {
 
-        String url = BASE_URL + id + RELEASE_URL;
-        StringRequest stringRequest = new StringRequest(PUT, url, null, error -> {});
-        queue.add(stringRequest);
+        Call<CompositionResponse> compositionOverviewCall = service.updateComposition(compositionId, new CompositionUpdateRequest(new ArrayList<>()));
+        compositionOverviewCall.enqueue(new Callback<CompositionResponse>() {
+            @Override
+            public void onResponse(Call<CompositionResponse> call, retrofit2.Response<CompositionResponse> response) {
+
+                CompositionResponse compositionResponse = response.body();
+                listener.onResponse(compositionResponse);
+
+            }
+
+            @Override
+            public void onFailure(Call<CompositionResponse> call, Throwable t) {
+                //Handle failure
+            }
+        });
 
     }
 
@@ -89,91 +122,6 @@ public class CompositionServiceClient {
 
         // Add the request to the RequestQueue.
         queue.add(stringRequest);
-
-    }
-
-
-    public void release(Long compositionId, List<SoundRequest> soundRequests, List<Sound> sounds, Response.Listener<String> listener) {
-
-        List<File> soundsJsonFiles = JsonUtil.toJsonFile("sounds", soundRequests);
-        File soundsJsonFile = soundsJsonFiles.get(0);
-        MultipartBody.Part soundsBody = MultipartBody.Part.createFormData("sounds", soundsJsonFile.getName(), RequestBody.create(soundsJsonFile, MediaType.get("application/json")));
-        List<MultipartBody.Part> filesBodies = new ArrayList<>();
-        for (Sound sound : sounds) {
-            File file = new File(sound.filePath);
-            RequestBody requestBody = RequestBody.create(file, MediaType.parse("audio/*"));
-            MultipartBody.Part formData = MultipartBody.Part.createFormData("files[]", file.getName(), requestBody);
-            filesBodies.add(formData);
-
-        }
-
-        OkHttpClient client = new OkHttpClient();
-
-
-        Retrofit retrofit = new Retrofit.Builder()
-                .baseUrl("https://klangfang-service.herokuapp.com")
-                .addConverterFactory(GsonConverterFactory.create())
-                .client(client)
-                .build();
-
-        CompositionService service = retrofit.create(CompositionService.class);
-        Call<CompositionOverviewResp> compositionOverviewCall = service.updateComposition(compositionId, soundsBody, filesBodies.toArray(new MultipartBody.Part[filesBodies.size()]));
-        compositionOverviewCall.enqueue(new Callback<CompositionOverviewResp>() {
-            @Override
-            public void onResponse(Call<CompositionOverviewResp> call, retrofit2.Response<CompositionOverviewResp> response) {
-
-                CompositionOverviewResp compositionOverviewResp = response.body();
-
-            }
-
-            @Override
-            public void onFailure(Call<CompositionOverviewResp> call, Throwable t) {
-                //Handle failure
-            }
-        });
-
-    }
-
-
-    public void create(CompositionRequest compositionRequest, List<String> soundPaths, Response.Listener<JSONObject> listener) {
-
-
-        List<File> compositionJsonFiles = JsonUtil.toJsonFile("composition", compositionRequest);
-        File compositionJsonFile = compositionJsonFiles.get(0);
-        MultipartBody.Part compositionBody = MultipartBody.Part.createFormData("composition", compositionJsonFile.getName(), RequestBody.create(compositionJsonFile, MediaType.get("application/json")));
-        List<MultipartBody.Part> filesBodies = new ArrayList<>();
-        for (String soundPath : soundPaths) {
-            File file = new File(soundPath);
-            RequestBody requestBody = RequestBody.create(file, MediaType.parse("audio/*"));
-            MultipartBody.Part formData = MultipartBody.Part.createFormData("files", file.getName(), requestBody);
-            filesBodies.add(formData);
-
-        }
-
-        OkHttpClient client = new OkHttpClient();
-
-
-        Retrofit retrofit = new Retrofit.Builder()
-                .baseUrl("https://klangfang-service.herokuapp.com")
-                .addConverterFactory(GsonConverterFactory.create())
-                .client(client)
-                .build();
-
-        CompositionService service = retrofit.create(CompositionService.class);
-        Call<CompositionOverviewResp> compositionOverviewCall = service.createComposition(compositionBody, filesBodies.toArray(new MultipartBody.Part[filesBodies.size()]));
-        compositionOverviewCall.enqueue(new Callback<CompositionOverviewResp>() {
-            @Override
-            public void onResponse(Call<CompositionOverviewResp> call, retrofit2.Response<CompositionOverviewResp> response) {
-
-                CompositionOverviewResp compositionOverviewResp = response.body();
-
-            }
-
-            @Override
-            public void onFailure(Call<CompositionOverviewResp> call, Throwable t) {
-                //Handle failure
-            }
-        });
 
     }
 

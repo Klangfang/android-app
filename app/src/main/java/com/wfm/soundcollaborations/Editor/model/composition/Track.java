@@ -20,10 +20,18 @@ public class Track {
 
     public Track(){ recorder = new AudioRecorder(); }
 
-    public void addSound(Sound sound) {
+    public void addRecordedSound(Sound sound) {
 
         recorderTime = recorderTime + sound.getDuration();
         sounds.add(sound);
+
+    }
+
+    public void addSound(Sound sound, Context context) {
+
+        sound.preparePlayer(context);
+        sounds.add(sound);
+
 
     }
 
@@ -59,7 +67,7 @@ public class Track {
     // after adding a new sound to the list of sounds, we sort our list of sounds again and create a new player with this.
     public void prepareSound(Sound sound, Context context)
     {
-        addSound(sound);
+        addRecordedSound(sound);
 
         sound.preparePlayer(context);
 

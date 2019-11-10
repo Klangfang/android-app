@@ -27,14 +27,20 @@ import com.wfm.soundcollaborations.Editor.views.composition.listeners.TrackWatch
 import com.wfm.soundcollaborations.webservice.CompositionServiceClient;
 import com.wfm.soundcollaborations.webservice.dtos.CompositionRequest;
 import com.wfm.soundcollaborations.webservice.dtos.CompositionResponse;
+import com.wfm.soundcollaborations.webservice.dtos.CompositionUpdateRequest;
 import com.wfm.soundcollaborations.webservice.dtos.SoundRequest;
 import com.wfm.soundcollaborations.webservice.dtos.SoundResponse;
 
 import org.json.JSONObject;
 
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
 
 /**
  * Implementiert die Businesslogik des CompositionOverviewResp Builders (Wird in der EditorActivity verwendet)
@@ -52,7 +58,7 @@ public class CompositionBuilder
     private ArrayList<TrackView> downloadedTrackViews;
     private ArrayList<SoundView> downloadedSoundViews;
 
-    private ArrayList<Sound> downloadedSounds;
+    private ArrayList<Sound> downloadedSoundsData;
     private SoundDownloader downloader;
 
     private int numberOfDownloadedSounds = 0;
@@ -73,7 +79,7 @@ public class CompositionBuilder
         this.compositionView = compositionView;
         downloadedTrackViews = new ArrayList<>();
         downloadedSoundViews = new ArrayList<>();
-        downloadedSounds = new ArrayList<>();
+        downloadedSoundsData = new ArrayList<>();
         this.tracks = new ArrayList<>();
         initTracksViews(tracks);
         initTracks(tracks);
@@ -113,14 +119,14 @@ public class CompositionBuilder
             // add sound view to the track
             downloadedTrackViews.get(sndResp.trackNumber).addSoundView(soundView);
 
-            Sound snd = new Sound(sndResp.trackNumber, sndResp.startPosition, sndResp.duration, sndResp.filePath);
-            downloadedSounds.add(snd);
+            Sound snd = new Sound(sndResp.trackNumber, sndResp.startPosition, sndResp.duration, sndResp.url);
+            downloadedSoundsData.add(snd);
 
             this.compositionResponse = compositionResponse;
         }
         // we will add everything to the composition view
-        build();
         downloadSounds(compositionResponse.id);
+        build();
 
     }
 
@@ -186,7 +192,7 @@ public class CompositionBuilder
     private void downloadSounds(Long compositionId) {
 
 
-        prepareTracks();// Initialisierung von AudioPlayer!
+        prepareTracks();
         this.downloader = SoundDownloader.getSoundDownloader(this.compositionView.getContext(),
                 new FileDownloadListener() {
                     @Override
@@ -204,13 +210,12 @@ public class CompositionBuilder
                     {
                         task.reuse();
                         int index = (int) task.getTag();
-                        VisualizeSoundTask soundTask = new VisualizeSoundTask(downloadedSoundViews.get(index), downloadedSounds.get(index));
+                        Sound soundData = downloadedSoundsData.get(index);
+                        VisualizeSoundTask soundTask = new VisualizeSoundTask(downloadedSoundViews.get(index), soundData);
                         soundTask.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
-                        tracks.get(downloadedSounds.get(index).getTrackNumber()).addSound(downloadedSounds.get(index));
-                        numberOfDownloadedSounds++;
-                        if(numberOfDownloadedSounds == downloadedSounds.size()) {
-                            prepareTracks();
-                        }
+                        Track track = tracks.get(soundData.getTrackNumber());
+                        track.addSound(soundData, compositionView.getContext());
+                        track.prepare(compositionView.getContext());
                     }
 
                     @Override
@@ -228,8 +233,8 @@ public class CompositionBuilder
 
                     }
                 });
-        for(int i = 0; i< downloadedSounds.size(); i++) {
-            this.downloader.addSoundUrl(downloadedSounds.get(i).getFilePath(), i, compositionId);
+        for(int i = 0; i< downloadedSoundsData.size(); i++) {
+            this.downloader.addSoundUrl(downloadedSoundsData.get(i).getFilePath(), i, compositionId);
         }
 
         this.downloader.download();
@@ -415,32 +420,56 @@ public class CompositionBuilder
 
     public void release() {
 
-        List<SoundRequest> soundReqs = new ArrayList<>();
-        for (Sound snd : recordedSounds) {
-            SoundRequest soundReq = new SoundRequest(snd.trackNumber, snd.startPosition, snd.duration);
-            soundReqs.add(soundReq);
-        }
+        try {
 
-        Response.Listener<String> listener = response -> showInfo(response);
-        client.release(compositionResponse.id, soundReqs,  recordedSounds, listener);
+            //TODO when using java > 8, refactor code
+            List<SoundRequest> soundReqs = new ArrayList<>();
+            for (Sound snd : recordedSounds) {
+
+                byte[] soundBytes = Files.readAllBytes(Paths.get(snd.filePath));
+
+                SoundRequest soundReq = new SoundRequest(snd.trackNumber, snd.startPosition, snd.duration, soundBytes);
+                soundReqs.add(soundReq);
+
+            }
+
+            Response.Listener<CompositionResponse> listener = response -> showInfo(response);
+            client.update(compositionResponse.id, new CompositionUpdateRequest(soundReqs), listener);
+
+        }
+        catch (IOException e) {
+            System.err.println(e); //TODO android logging bzw. pop up
+        }
 
     }
 
 
     public void create() {
 
-        String TITLE = "GET_TITLE";
-        String CREATOR_NAME = "KLANGFANG";
-        List<SoundRequest> soundsToUpload = new ArrayList<>(recordedSounds.size());
-        List<String> soundPaths = new ArrayList<>();
-        for (Sound snd : recordedSounds) {
-            soundsToUpload.add(new SoundRequest(snd.trackNumber, snd.startPosition, snd.duration));
-            soundPaths.add(snd.filePath);
-        }
-        CompositionRequest compReq = new CompositionRequest(TITLE, CREATOR_NAME, soundsToUpload);
+        try {
+            String TITLE = "GET_TITLE";
+            String CREATOR_NAME = "KLANGFANG";
 
-        Response.Listener<JSONObject> listener = response -> showInfo(response);
-        client.create(compReq, soundPaths, listener);
+            //TODO when using java > 8, refactor code
+            List<SoundRequest> soundReqs = new ArrayList<>();
+            for (Sound snd : recordedSounds) {
+
+                byte[] soundBytes = Files.readAllBytes(Paths.get(snd.filePath));
+
+                SoundRequest soundReq = new SoundRequest(snd.trackNumber, snd.startPosition, snd.duration, soundBytes);
+                soundReqs.add(soundReq);
+
+            }
+
+            CompositionRequest compReq = new CompositionRequest(TITLE, CREATOR_NAME, soundReqs);
+
+            Response.Listener<JSONObject> listener = response -> showInfo(response);
+            client.create(compReq, listener);
+
+        }
+        catch (IOException e) {
+            System.err.println(e); //TODO android logging bzw. pop up
+        }
 
     }
 
