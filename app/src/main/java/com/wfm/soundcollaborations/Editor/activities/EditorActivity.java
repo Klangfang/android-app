@@ -49,6 +49,8 @@ import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
 
+import static android.content.Intent.FLAG_ACTIVITY_NEW_TASK;
+
 /**
  * Platzhalter für UI und Zusammenspiel mit der Compositionlogik.
  */
@@ -173,8 +175,10 @@ public class EditorActivity extends AppCompatActivity {
 
             //TODO later with callback producer to handle errors...
             Intent intent = new Intent(compositionView.getContext(), MainActivity.class);
-            finish();
+            intent.setFlags(FLAG_ACTIVITY_NEW_TASK);
             startActivity(intent);
+            //finish();
+            //startActivity(intent);
 
         }
 

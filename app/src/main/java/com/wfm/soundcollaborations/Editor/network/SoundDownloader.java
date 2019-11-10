@@ -41,7 +41,7 @@ public class SoundDownloader
         mFileDownloadQueueSet = new FileDownloadQueueSet(listener);
     }
 
-    public void addSoundUrl(String urlText, int index, long compositionId) {
+    public void addSoundUrl(String urlText, int index) {
         try {
             URL url = new URL(urlText);
             String name = (FilenameUtils.getName(url.getPath()));
@@ -55,7 +55,7 @@ public class SoundDownloader
     {
         mFileDownloadQueueSet.disableCallbackProgressTimes();
         mFileDownloadQueueSet.setAutoRetryTimes(5);
-        mFileDownloadQueueSet.downloadSequentially(this.downloadTasks);
+        mFileDownloadQueueSet.downloadTogether(this.downloadTasks);
         mFileDownloadQueueSet.start();
     }
 }

@@ -2,6 +2,7 @@ package com.wfm.soundcollaborations.Editor.model.composition;
 
 
 import android.content.Context;
+import android.content.Intent;
 import android.os.AsyncTask;
 import android.util.Log;
 import android.widget.LinearLayout;
@@ -11,6 +12,7 @@ import android.widget.Toast;
 import com.android.volley.Response;
 import com.liulishuo.filedownloader.BaseDownloadTask;
 import com.liulishuo.filedownloader.FileDownloadListener;
+import com.wfm.soundcollaborations.Editor.activities.EditorActivity;
 import com.wfm.soundcollaborations.Editor.exceptions.NoActiveTrackException;
 import com.wfm.soundcollaborations.Editor.exceptions.SoundRecordingTimeException;
 import com.wfm.soundcollaborations.Editor.exceptions.SoundWillBeOutOfCompositionException;
@@ -24,6 +26,7 @@ import com.wfm.soundcollaborations.Editor.views.composition.TrackView;
 import com.wfm.soundcollaborations.Editor.views.composition.TrackWatchView;
 import com.wfm.soundcollaborations.Editor.views.composition.listeners.TrackViewOnClickListener;
 import com.wfm.soundcollaborations.Editor.views.composition.listeners.TrackWatchViewOnClickListener;
+import com.wfm.soundcollaborations.activities.MainActivity;
 import com.wfm.soundcollaborations.webservice.CompositionServiceClient;
 import com.wfm.soundcollaborations.webservice.dtos.CompositionRequest;
 import com.wfm.soundcollaborations.webservice.dtos.CompositionResponse;
@@ -41,6 +44,8 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
+
+import static android.content.Intent.FLAG_ACTIVITY_NEW_TASK;
 
 /**
  * Implementiert die Businesslogik des CompositionOverviewResp Builders (Wird in der EditorActivity verwendet)
@@ -125,8 +130,8 @@ public class CompositionBuilder
             this.compositionResponse = compositionResponse;
         }
         // we will add everything to the composition view
-        downloadSounds(compositionResponse.id);
         build();
+        downloadSounds(compositionResponse.id);
 
     }
 
@@ -191,9 +196,8 @@ public class CompositionBuilder
      */
     private void downloadSounds(Long compositionId) {
 
-
         prepareTracks();
-        this.downloader = SoundDownloader.getSoundDownloader(this.compositionView.getContext(),
+        this.downloader = SoundDownloader.getSoundDownloader(compositionView.getContext(),
                 new FileDownloadListener() {
                     @Override
                     protected void pending(BaseDownloadTask task, int soFarBytes, int totalBytes) {
@@ -208,15 +212,15 @@ public class CompositionBuilder
                     @Override
                     protected void completed(BaseDownloadTask task)
                     {
-                        //TODO MULTITHREADING PROBLEM
+                        //TODO FIX MULTITHREADING PROBLEM
                         task.reuse();
                         int index = (int) task.getTag();
-                        Sound soundData = downloadedSoundsData.get(index);
-                        VisualizeSoundTask soundTask = new VisualizeSoundTask(downloadedSoundViews.get(index), soundData);
-                        soundTask.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
-                        Track track = tracks.get(soundData.getTrackNumber());
-                        track.addSound(soundData, compositionView.getContext());
-                        track.prepare(compositionView.getContext());
+                          Sound soundData = downloadedSoundsData.get(index);
+                          VisualizeSoundTask soundTask = new VisualizeSoundTask(downloadedSoundViews.get(index), soundData);
+                           soundTask.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+                           Track track = tracks.get(soundData.getTrackNumber());
+                           track.addSound(soundData, compositionView.getContext());
+                           track.prepare(compositionView.getContext());
                     }
 
                     @Override
@@ -234,8 +238,16 @@ public class CompositionBuilder
 
                     }
                 });
+
         for(int i = 0; i< downloadedSoundsData.size(); i++) {
-            this.downloader.addSoundUrl(downloadedSoundsData.get(i).getFilePath(), i, compositionId);
+            this.downloader.addSoundUrl(downloadedSoundsData.get(i).getFilePath(), i);
+
+            Sound soundData = downloadedSoundsData.get(i);
+            VisualizeSoundTask soundTask = new VisualizeSoundTask(downloadedSoundViews.get(i), soundData);
+            soundTask.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+            Track track = tracks.get(soundData.getTrackNumber());
+            track.addSound(soundData, compositionView.getContext());
+            track.prepare(compositionView.getContext());
         }
 
         this.downloader.download();
@@ -434,7 +446,7 @@ public class CompositionBuilder
 
             }
 
-            Response.Listener<CompositionResponse> listener = response -> showInfo(response);
+            Response.Listener<CompositionResponse> listener = response -> showInfoAndStartNewTask(response);
             client.update(compositionResponse.id, new CompositionUpdateRequest(soundReqs), listener);
 
         }
@@ -464,7 +476,7 @@ public class CompositionBuilder
 
             CompositionRequest compReq = new CompositionRequest(TITLE, CREATOR_NAME, soundReqs);
 
-            Response.Listener<JSONObject> listener = response -> showInfo(response);
+            Response.Listener<JSONObject> listener = response -> showInfoAndStartNewTask(response);
             client.create(compReq, listener);
 
         }
@@ -475,8 +487,13 @@ public class CompositionBuilder
     }
 
 
-    private <T> void showInfo(T response) {
+    private <T> void showInfoAndStartNewTask(T response) {
+
+        Intent intent = new Intent(getCompositionView().getContext(), MainActivity.class);
+        intent.setFlags(FLAG_ACTIVITY_NEW_TASK);
+        getCompositionView().getContext().startActivity(intent);
         Toast.makeText(getCompositionView().getContext(), "CompositionRequest is released!", Toast.LENGTH_LONG).show();
+
     }
 
 
