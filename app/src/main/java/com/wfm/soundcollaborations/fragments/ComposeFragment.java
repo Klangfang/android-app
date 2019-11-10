@@ -18,13 +18,13 @@ import android.view.ViewGroup;
 import com.android.volley.Response;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.wfm.soundcollaborations.Editor.activities.CreateCompositionActivity;
-import com.wfm.soundcollaborations.Editor.model.composition.CompositionOverview;
 import com.wfm.soundcollaborations.webservice.CompositionServiceClient;
 import com.wfm.soundcollaborations.webservice.JsonUtil;
-import com.wfm.soundcollaborations.webservice.OverviewResponse;
 import com.wfm.soundcollaborations.R;
 import com.wfm.soundcollaborations.activities.MainActivity;
 import com.wfm.soundcollaborations.adapter.CompositionOverviewAdapter;
+import com.wfm.soundcollaborations.webservice.dtos.CompositionOverviewResp;
+import com.wfm.soundcollaborations.webservice.dtos.OverviewResponse;
 
 import org.apache.commons.lang3.StringUtils;
 
@@ -35,7 +35,7 @@ import java.util.Objects;
 /**
  * The {@link ComposeFragment} ...
  *  - requests data for public compositions
- *  - displays a list of {@link CompositionOverview} objects using {@link CompositionOverviewAdapter}
+ *  - displays a list of {@link com.wfm.soundcollaborations.webservice.dtos.CompositionOverviewResp} objects using {@link CompositionOverviewAdapter}
  *  - provides the possibility to create new public compositions
  **/
 public class ComposeFragment extends Fragment {
@@ -82,7 +82,7 @@ public class ComposeFragment extends Fragment {
             OverviewResponse overviewResponse = JsonUtil.fromJson(response, OverviewResponse.class);
 
             if (overviewResponse != null) {
-                List<CompositionOverview> compositions = overviewResponse.overviews;
+                List<CompositionOverviewResp> compositions = overviewResponse.overviews;
 
                 if (isAdded()) {
 

@@ -2,7 +2,7 @@ package com.wfm.soundcollaborations.Classes;
 
 
 public class CompositionOverview {
-    // Member Variables of Composition Overview
+    // Member Variables of CompositionRequest Overview
     public final String mTitle;
     public final int mNumberOfMembers;
     public final String mSoundUri;

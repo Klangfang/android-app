@@ -20,9 +20,9 @@ import com.google.android.exoplayer2.Player;
 import com.google.android.exoplayer2.ui.PlayerControlView;
 import com.wfm.soundcollaborations.Editor.activities.EditorActivity;
 import com.wfm.soundcollaborations.Editor.model.audio.ExoPlayerFactory;
-import com.wfm.soundcollaborations.Editor.model.composition.CompositionOverview;
 import com.wfm.soundcollaborations.R;
 import com.wfm.soundcollaborations.webservice.CompositionServiceClient;
+import com.wfm.soundcollaborations.webservice.dtos.CompositionOverviewResp;
 
 import java.util.Arrays;
 import java.util.List;
@@ -30,18 +30,18 @@ import java.util.List;
 /**
  * The CompositionOverviewAdapter helps to render out a list of data.
  * It is an extended {@link ArrayAdapter} that can provide the layout for each list item.
- * The rendered list consists of {@link CompositionOverview} objects.
+ * The rendered list consists of {@link CompositionOverviewResp} objects.
  **/
 public class CompositionOverviewAdapter extends RecyclerView.Adapter<CompositionOverviewAdapter.ViewHolder> {
 
-    private List<CompositionOverview> compositionOverviews;
+    private List<CompositionOverviewResp> compositionOverviews;
     public static final String PICK_RESPONSE = "PICK";
     private CompositionServiceClient client;
     private ExoPlayerFactory exoPlayerFactory;
     private Context context;
 
 
-    public CompositionOverviewAdapter(Activity context, List<CompositionOverview> compositionOverviews) {
+    public CompositionOverviewAdapter(Activity context, List<CompositionOverviewResp> compositionOverviews) {
         this.context = context;
         this.compositionOverviews = compositionOverviews;
         client = new CompositionServiceClient(context.getApplicationContext());
@@ -66,7 +66,7 @@ public class CompositionOverviewAdapter extends RecyclerView.Adapter<Composition
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
 
         // Check which compositions are being displayed in the viewport (Android magic)
-        CompositionOverview currentOverview = compositionOverviews.get(position);
+        CompositionOverviewResp currentOverview = compositionOverviews.get(position);
 
         // Assign string values of {@link CompositionOverview} to the text views of layout
         holder.mCompositionTitleTextView.setText(currentOverview.title);
