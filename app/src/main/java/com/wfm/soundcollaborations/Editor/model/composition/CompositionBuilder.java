@@ -208,6 +208,7 @@ public class CompositionBuilder
                     @Override
                     protected void completed(BaseDownloadTask task)
                     {
+                        //TODO MULTITHREADING PROBLEM
                         task.reuse();
                         int index = (int) task.getTag();
                         Sound soundData = downloadedSoundsData.get(index);

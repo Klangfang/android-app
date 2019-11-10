@@ -5,6 +5,8 @@ import android.content.Intent;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+
+import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -28,6 +30,8 @@ import com.wfm.soundcollaborations.webservice.dtos.CompositionUpdateRequest;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+
+import static android.content.Intent.FLAG_ACTIVITY_NEW_TASK;
 
 /**
  * {@link CompositionOverviewAdapter} is an {@link ArrayAdapter} that can provide the layout for each list item
@@ -113,6 +117,7 @@ public class CompositionOverviewAdapter extends ArrayAdapter<CompositionOverview
     private void startEditorActivity(View view, CompositionResponse response) {
 
         Intent intent = new Intent(view.getContext(), EditorActivity.class);
+        intent.setFlags(FLAG_ACTIVITY_NEW_TASK);
         intent.putExtra(PICK_RESPONSE, JsonUtil.toJson(response));
         view.getContext().startActivity(intent);
 
