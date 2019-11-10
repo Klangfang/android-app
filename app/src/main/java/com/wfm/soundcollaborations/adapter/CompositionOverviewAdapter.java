@@ -22,10 +22,16 @@ import com.wfm.soundcollaborations.Editor.activities.EditorActivity;
 import com.wfm.soundcollaborations.Editor.model.audio.ExoPlayerFactory;
 import com.wfm.soundcollaborations.R;
 import com.wfm.soundcollaborations.webservice.CompositionServiceClient;
+import com.wfm.soundcollaborations.webservice.JsonUtil;
 import com.wfm.soundcollaborations.webservice.dtos.CompositionOverviewResp;
+import com.wfm.soundcollaborations.webservice.dtos.CompositionResponse;
+import com.wfm.soundcollaborations.webservice.dtos.CompositionUpdateRequest;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+
+import static android.content.Intent.FLAG_ACTIVITY_NEW_TASK;
 
 /**
  * The CompositionOverviewAdapter helps to render out a list of data.
@@ -72,7 +78,7 @@ public class CompositionOverviewAdapter extends RecyclerView.Adapter<Composition
         holder.mCompositionTitleTextView.setText(currentOverview.title);
         holder.mMembersTextView.setText(currentOverview.numberOfMembers + "/4 Members"); //TODO replace string with resource
         holder.mPlayerControlView.setPlayer(getAudioPlayer(currentOverview.snippetUrl));
-        holder.mJoinButton.setOnClickListener(view -> doRequest(currentOverview.pickUrl, view));
+        holder.mJoinButton.setOnClickListener(view -> doRequest(currentOverview.id, view));
 
     }
 
@@ -115,18 +121,19 @@ public class CompositionOverviewAdapter extends RecyclerView.Adapter<Composition
 
     }
 
-    private void doRequest(String url, View view) {
+    private void doRequest(Long id, View view) {
 
-        Response.Listener<String> listener = response -> startEditorActivity(view, response);
-        client.pick(url, listener);
+        Response.Listener<CompositionResponse> listener = response -> startEditorActivity(view, response);
+        client.update(id, new CompositionUpdateRequest(new ArrayList<>()), listener);
 
     }
 
 
-    private void startEditorActivity(View view, String response) {
+    private void startEditorActivity(View view, CompositionResponse response) {
 
         Intent intent = new Intent(view.getContext(), EditorActivity.class);
-        intent.putExtra(PICK_RESPONSE, response);
+        intent.setFlags(FLAG_ACTIVITY_NEW_TASK);
+        intent.putExtra(PICK_RESPONSE, JsonUtil.toJson(response));
         view.getContext().startActivity(intent);
 
     }
