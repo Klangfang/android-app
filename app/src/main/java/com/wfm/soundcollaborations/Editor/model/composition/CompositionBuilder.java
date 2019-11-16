@@ -12,7 +12,6 @@ import android.widget.Toast;
 import com.android.volley.Response;
 import com.liulishuo.filedownloader.BaseDownloadTask;
 import com.liulishuo.filedownloader.FileDownloadListener;
-import com.wfm.soundcollaborations.Editor.activities.EditorActivity;
 import com.wfm.soundcollaborations.Editor.exceptions.NoActiveTrackException;
 import com.wfm.soundcollaborations.Editor.exceptions.SoundRecordingTimeException;
 import com.wfm.soundcollaborations.Editor.exceptions.SoundWillBeOutOfCompositionException;
@@ -28,19 +27,15 @@ import com.wfm.soundcollaborations.Editor.views.composition.listeners.TrackViewO
 import com.wfm.soundcollaborations.Editor.views.composition.listeners.TrackWatchViewOnClickListener;
 import com.wfm.soundcollaborations.activities.MainActivity;
 import com.wfm.soundcollaborations.webservice.CompositionServiceClient;
+import com.wfm.soundcollaborations.webservice.dtos.CompositionOverviewResp;
 import com.wfm.soundcollaborations.webservice.dtos.CompositionRequest;
 import com.wfm.soundcollaborations.webservice.dtos.CompositionResponse;
 import com.wfm.soundcollaborations.webservice.dtos.CompositionUpdateRequest;
 import com.wfm.soundcollaborations.webservice.dtos.SoundRequest;
 import com.wfm.soundcollaborations.webservice.dtos.SoundResponse;
 
-import org.json.JSONObject;
-
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.nio.file.Files;
-import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
@@ -67,7 +62,7 @@ public class CompositionBuilder
     private SoundDownloader downloader;
 
     private int numberOfDownloadedSounds = 0;
-    private ArrayList<Track> tracks;
+    private List<Track> tracks;
     private List<Sound> recordedSounds = new ArrayList<>();
 
     private TracksTimer mTracksTimer;
@@ -79,15 +74,18 @@ public class CompositionBuilder
 
     private CompositionResponse compositionResponse;
 
-    public CompositionBuilder(CompositionView compositionView, int tracks)
+    private String compositionTitle;
+
+    public CompositionBuilder(CompositionView compositionView, int numberOfTracks, String compositionTitle)
     {
         this.compositionView = compositionView;
         downloadedTrackViews = new ArrayList<>();
         downloadedSoundViews = new ArrayList<>();
         downloadedSoundsData = new ArrayList<>();
-        this.tracks = new ArrayList<>();
-        initTracksViews(tracks);
-        initTracks(tracks);
+        tracks = new ArrayList<>();
+        initTracksViews(numberOfTracks);
+        initTracks(numberOfTracks);
+        this.compositionTitle = compositionTitle;
         client = new CompositionServiceClient(getCompositionView().getContext());
     }
 
@@ -215,12 +213,14 @@ public class CompositionBuilder
                         //TODO FIX MULTITHREADING PROBLEM
                         task.reuse();
                         int index = (int) task.getTag();
-                          Sound soundData = downloadedSoundsData.get(index);
-                          VisualizeSoundTask soundTask = new VisualizeSoundTask(downloadedSoundViews.get(index), soundData);
-                           soundTask.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
-                           Track track = tracks.get(soundData.getTrackNumber());
-                           track.addSound(soundData, compositionView.getContext());
-                           track.prepare(compositionView.getContext());
+                        if (index < downloadedSoundsData.size() && index < downloadedSoundViews.size()) {
+                            Sound soundData = downloadedSoundsData.get(index);
+                            VisualizeSoundTask soundTask = new VisualizeSoundTask(downloadedSoundViews.get(index), soundData);
+                            soundTask.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+                            Track track = tracks.get(soundData.getTrackNumber());
+                            track.addSound(soundData, compositionView.getContext());
+                            track.prepare(compositionView.getContext());
+                        }
                     }
 
                     @Override
@@ -241,13 +241,6 @@ public class CompositionBuilder
 
         for(int i = 0; i< downloadedSoundsData.size(); i++) {
             this.downloader.addSoundUrl(downloadedSoundsData.get(i).getFilePath(), i);
-
-            Sound soundData = downloadedSoundsData.get(i);
-            VisualizeSoundTask soundTask = new VisualizeSoundTask(downloadedSoundViews.get(i), soundData);
-            soundTask.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
-            Track track = tracks.get(soundData.getTrackNumber());
-            track.addSound(soundData, compositionView.getContext());
-            track.prepare(compositionView.getContext());
         }
 
         this.downloader.download();
@@ -451,7 +444,7 @@ public class CompositionBuilder
 
         }
         catch (IOException e) {
-            System.err.println(e); //TODO android logging bzw. pop up
+            System.err.println("----> Can not read files" + e); //TODO android logging bzw. pop up
         }
 
     }
@@ -460,7 +453,6 @@ public class CompositionBuilder
     public void create() {
 
         try {
-            String TITLE = "GET_TITLE";
             String CREATOR_NAME = "KLANGFANG";
 
             //TODO when using java > 8, refactor code
@@ -474,9 +466,9 @@ public class CompositionBuilder
 
             }
 
-            CompositionRequest compReq = new CompositionRequest(TITLE, CREATOR_NAME, soundReqs);
+            CompositionRequest compReq = new CompositionRequest(compositionTitle, CREATOR_NAME, soundReqs);
 
-            Response.Listener<JSONObject> listener = response -> showInfoAndStartNewTask(response);
+            Response.Listener<CompositionOverviewResp> listener = response -> showInfoAndStartNewTask(response);
             client.create(compReq, listener);
 
         }

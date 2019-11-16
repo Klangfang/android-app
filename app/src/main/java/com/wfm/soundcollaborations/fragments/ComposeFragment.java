@@ -2,33 +2,29 @@ package com.wfm.soundcollaborations.fragments;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.view.ViewGroup;
+
 import androidx.annotation.NonNull;
-import androidx.fragment.app.Fragment;
 import androidx.appcompat.widget.Toolbar;
+import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.PagerSnapHelper;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.recyclerview.widget.SnapHelper;
 
-import android.view.LayoutInflater;
-import android.view.View;
-import android.view.ViewGroup;
-
 import com.android.volley.Response;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.wfm.soundcollaborations.Editor.activities.CreateCompositionActivity;
-import com.wfm.soundcollaborations.webservice.CompositionServiceClient;
-import com.wfm.soundcollaborations.webservice.JsonUtil;
 import com.wfm.soundcollaborations.R;
 import com.wfm.soundcollaborations.activities.MainActivity;
 import com.wfm.soundcollaborations.adapter.CompositionOverviewAdapter;
+import com.wfm.soundcollaborations.webservice.CompositionServiceClient;
 import com.wfm.soundcollaborations.webservice.dtos.CompositionOverviewResp;
 import com.wfm.soundcollaborations.webservice.dtos.OverviewResponse;
 
-import org.apache.commons.lang3.StringUtils;
-
-import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 
@@ -65,42 +61,36 @@ public class ComposeFragment extends Fragment {
         FloatingActionButton createCompositionButton = root.findViewById(R.id.new_composition_button);
         createCompositionButton.setOnClickListener(view -> startCreateCompositionActivity(view));
 
-
         client = new CompositionServiceClient(root.getContext());
-        Response.Listener<String> listener = response -> fillActivity(response);
+        Response.Listener<OverviewResponse> listener = overviewResponse -> fillActivity(overviewResponse);
         client.getOverviews(listener);
 
         return root; // Needed when adding a Fragment (See top of Fragment)
     }
 
 
-    private void fillActivity(String response) {
+    private void fillActivity(OverviewResponse overviewResponse) {
 
-        if (StringUtils.isNotBlank(response)) {
+        if (Objects.nonNull(overviewResponse)) {
 
-            // Get CompositionOverviews from Server JSON
-            OverviewResponse overviewResponse = JsonUtil.fromJson(response, OverviewResponse.class);
+            List<CompositionOverviewResp> compositions = overviewResponse.overviews;
 
-            if (overviewResponse != null) {
-                List<CompositionOverviewResp> compositions = overviewResponse.overviews;
+            if (isAdded()) {
 
-                if (isAdded()) {
+                FragmentActivity fragmentActivity = Objects.requireNonNull(getActivity());
+                CompositionOverviewAdapter adapter = new CompositionOverviewAdapter(fragmentActivity,
+                        compositions);
 
-                    FragmentActivity fragmentActivity = Objects.requireNonNull(getActivity());
-                    CompositionOverviewAdapter adapter = new CompositionOverviewAdapter(fragmentActivity,
-                            compositions);
+                RecyclerView recyclerView = root.findViewById(R.id.public_compositions_list);
+                recyclerView.setAdapter(adapter);
+                // Set horizontal scrolling
+                recyclerView.setLayoutManager(new LinearLayoutManager(getContext(),
+                        LinearLayoutManager.HORIZONTAL, false));
 
-                    RecyclerView recyclerView = root.findViewById(R.id.public_compositions_list);
-                    recyclerView.setAdapter(adapter);
-                    // Set horizontal scrolling
-                    recyclerView.setLayoutManager(new LinearLayoutManager(getContext(),
-                            LinearLayoutManager.HORIZONTAL, false));
+                // Enable Snapping when scrolling compositions horizontally
+                final SnapHelper snapHelper = new PagerSnapHelper();
+                snapHelper.attachToRecyclerView(recyclerView);
 
-                    // Enable Snapping when scrolling compositions horizontally
-                    final SnapHelper snapHelper = new PagerSnapHelper();
-                    snapHelper.attachToRecyclerView(recyclerView);
-
-                }
             }
         }
     }

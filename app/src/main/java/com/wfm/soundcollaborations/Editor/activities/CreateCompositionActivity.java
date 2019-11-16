@@ -2,20 +2,17 @@ package com.wfm.soundcollaborations.Editor.activities;
 
 import android.content.Intent;
 import android.os.Bundle;
-
-import com.google.android.material.textfield.TextInputEditText;
-import com.wfm.soundcollaborations.R;
+import android.view.View;
+import android.widget.Button;
+import android.widget.Toast;
 
 import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AppCompatActivity;
 
-import android.text.Editable;
-import android.view.Menu;
-import android.view.MenuItem;
-import android.widget.TextView;
-import android.widget.Toast;
-import android.view.View;
-import android.widget.Button;
+import com.google.android.material.textfield.TextInputEditText;
+import com.wfm.soundcollaborations.R;
+
+import org.apache.commons.lang3.StringUtils;
 
 public class CreateCompositionActivity extends AppCompatActivity {
 
@@ -46,16 +43,17 @@ public class CreateCompositionActivity extends AppCompatActivity {
     // TODO: still listens on deprecated button
     // See https://developer.android.com/training/basics/firstapp/starting-activity#java
     private void startEditorActivity(View view) {
-        Intent intent = new Intent(view.getContext(), EditorActivity.class);
 
         /*
         Read user input and check if text length is at least 1 character,
         Otherwise show warning
         */
-        getCompositionTitleInput();
-        if (compositionTitleInput.length() < 1) {
+        String compositionTitle = getCompositionTitleInput();
+        if (StringUtils.isBlank(compositionTitle)) {
             Toast.makeText(this, getString(R.string.min_text_input), Toast.LENGTH_LONG).show();
         } else {
+            Intent intent = new Intent(view.getContext(), EditorActivity.class);
+            intent.putExtra(String.valueOf(R.id.composition_title_textfield), compositionTitle);
             startActivity(intent);
         }
 }

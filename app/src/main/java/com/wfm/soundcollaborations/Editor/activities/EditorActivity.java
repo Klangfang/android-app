@@ -7,16 +7,8 @@ import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.content.res.ColorStateList;
 import android.os.Build;
-import android.os.Handler;
-import androidx.annotation.RequiresApi;
-import androidx.appcompat.app.ActionBar;
-import androidx.core.app.ActivityCompat;
-import androidx.core.content.ContextCompat;
-import androidx.appcompat.app.AlertDialog;
 import android.os.Bundle;
-import androidx.appcompat.app.AppCompatActivity;
-
-import android.text.Editable;
+import android.os.Handler;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -25,20 +17,26 @@ import android.widget.ImageButton;
 import android.widget.RelativeLayout;
 import android.widget.Toast;
 
+import androidx.annotation.RequiresApi;
+import androidx.appcompat.app.ActionBar;
+import androidx.appcompat.app.AlertDialog;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.app.ActivityCompat;
+import androidx.core.content.ContextCompat;
+
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.ohoussein.playpause.PlayPauseView;
+import com.wfm.soundcollaborations.Editor.exceptions.NoActiveTrackException;
 import com.wfm.soundcollaborations.Editor.exceptions.RecordTimeOutExceededException;
 import com.wfm.soundcollaborations.Editor.exceptions.SoundRecordingTimeException;
-import com.wfm.soundcollaborations.activities.MainActivity;
-import com.wfm.soundcollaborations.fragments.ComposeFragment;
-import com.wfm.soundcollaborations.webservice.CompositionServiceClient;
-import com.wfm.soundcollaborations.R;
-import com.wfm.soundcollaborations.Editor.exceptions.NoActiveTrackException;
 import com.wfm.soundcollaborations.Editor.exceptions.SoundWillBeOutOfCompositionException;
 import com.wfm.soundcollaborations.Editor.exceptions.SoundWillOverlapException;
 import com.wfm.soundcollaborations.Editor.model.composition.CompositionBuilder;
 import com.wfm.soundcollaborations.Editor.views.composition.CompositionView;
 import com.wfm.soundcollaborations.Editor.views.composition.SoundView;
+import com.wfm.soundcollaborations.R;
+import com.wfm.soundcollaborations.fragments.ComposeFragment;
+import com.wfm.soundcollaborations.webservice.CompositionServiceClient;
 import com.wfm.soundcollaborations.webservice.JsonUtil;
 import com.wfm.soundcollaborations.webservice.dtos.CompositionResponse;
 
@@ -50,8 +48,6 @@ import java.util.TimerTask;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
-
-import static android.content.Intent.FLAG_ACTIVITY_NEW_TASK;
 
 /**
  * Platzhalter für UI und Zusammenspiel mit der Compositionlogik.
@@ -98,6 +94,7 @@ public class EditorActivity extends AppCompatActivity {
 
     private boolean create;
 
+
     /**
      * create soundViews to be added to the corresponding sounds
      * let SoundDownloader update these views using listener
@@ -122,9 +119,10 @@ public class EditorActivity extends AppCompatActivity {
         // let SoundDownloader update these views using listener
         // when a view finished downloading it add itself to the track
         // when all sounds are loaded the CompositionOverviewResp will be ready to play the sounds
-        builder = new CompositionBuilder(compositionView, 4);
         Intent intent = getIntent();
+        String compositionTitle = intent.getStringExtra(String.valueOf(R.id.composition_title_textfield));
         String compositionJson = intent.getStringExtra(ComposeFragment.PICK_RESPONSE);
+        builder = new CompositionBuilder(compositionView, 4, compositionTitle);
         // create new composition has no json response
         if (StringUtils.isNotBlank(compositionJson)) {
 
@@ -165,7 +163,7 @@ public class EditorActivity extends AppCompatActivity {
             if (create) {
 
                 builder.create();
-                Toast.makeText(this, "Congratulations! Your composition has been released!", Toast.LENGTH_LONG).show();
+                Toast.makeText(this, "Congratulations! Your composition has been created!", Toast.LENGTH_LONG).show();
 
 
             } else {
@@ -175,13 +173,6 @@ public class EditorActivity extends AppCompatActivity {
                 Toast.makeText(this, "Congratulations! Your composition collaboration has been released!", Toast.LENGTH_LONG).show();
 
             }
-
-            //TODO later with callback producer to handle errors...
-            Intent intent = new Intent(compositionView.getContext(), MainActivity.class);
-            intent.setFlags(FLAG_ACTIVITY_NEW_TASK);
-            startActivity(intent);
-            //finish();
-            //startActivity(intent);
 
         }
 

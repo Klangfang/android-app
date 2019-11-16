@@ -6,10 +6,10 @@ import android.util.Log;
 import com.wfm.soundcollaborations.Editor.exceptions.RecordTimeOutExceededException;
 import com.wfm.soundcollaborations.Editor.model.Constants;
 import com.wfm.soundcollaborations.Editor.utils.AudioRecorderStatus;
-import com.wfm.soundcollaborations.Editor.utils.DateUtils;
 import com.wfm.soundcollaborations.Editor.utils.FileUtils;
 
 import java.io.IOException;
+import java.util.UUID;
 
 
 /**
@@ -39,17 +39,13 @@ public class AudioRecorder implements MediaRecorder.OnInfoListener
         if (status.equals(AudioRecorderStatus.EMPTY)) {
             status = AudioRecorderStatus.RECORDING;
 
-            if (this.filePath != null) {
-                FileUtils.deleteFile(this.filePath);
-            }
-
-            this.filePath = SOUND_FILE_BASE_URI_DIR + "SOUND_" +
-                    DateUtils.getCurrentDate("yyyyMMdd_HHmmss") + SOUND_FILE_EXTENSION;
+            String uniqueFileName = UUID.randomUUID().toString().replace("-", "");
+            filePath = SOUND_FILE_BASE_URI_DIR + uniqueFileName + SOUND_FILE_EXTENSION;
 
             mMediaRecorder = new MediaRecorder();
             mMediaRecorder.setAudioSource(MediaRecorder.AudioSource.MIC);
             mMediaRecorder.setOutputFormat(MediaRecorder.OutputFormat.THREE_GPP);
-            mMediaRecorder.setOutputFile(this.filePath);
+            mMediaRecorder.setOutputFile(filePath);
             mMediaRecorder.setAudioEncoder(MediaRecorder.AudioEncoder.AMR_NB);
             int newMaxDuration = 0;
             int restTime = MAX_DURATION - recordedTime;
@@ -88,7 +84,6 @@ public class AudioRecorder implements MediaRecorder.OnInfoListener
                 mMediaRecorder.stop();
                 mMediaRecorder.release();
                 mMediaRecorder = null;
-                //TODO this is bad this.filePath = null;
                 if (status.equals(AudioRecorderStatus.RECORDING)) {
                     status = AudioRecorderStatus.EMPTY;
                 }
@@ -100,7 +95,7 @@ public class AudioRecorder implements MediaRecorder.OnInfoListener
             // total recorded time for the track
             this.recordedTime = this.recordedTime + duration;
         } catch (Exception ex) {
-            FileUtils.deleteFile(this.filePath);
+            FileUtils.deleteFile(filePath);
             Log.d(TAG, "Recorded file has been deleted!");
         }
     }
@@ -120,7 +115,7 @@ public class AudioRecorder implements MediaRecorder.OnInfoListener
 
     public String getRecordedFilePath()
     {
-        return this.filePath;
+        return filePath;
     }
 
     public AudioRecorderStatus getStatus() {

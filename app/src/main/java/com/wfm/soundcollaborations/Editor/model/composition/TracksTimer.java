@@ -1,14 +1,13 @@
 package com.wfm.soundcollaborations.Editor.model.composition;
 
-import java.util.ArrayList;
-import java.util.Timer;
-import java.util.TimerTask;
-
 import android.os.Handler;
-import android.util.Log;
 
 import com.wfm.soundcollaborations.Editor.model.Constants;
 import com.wfm.soundcollaborations.Editor.views.composition.CompositionView;
+
+import java.util.List;
+import java.util.Timer;
+import java.util.TimerTask;
 
 /**
  * Created by mohammed on 11/18/17.
@@ -22,11 +21,11 @@ public class TracksTimer
     private int circlesReached = 0;
     private Timer mTimer;
     private Handler mHandler;
-    private ArrayList<Track> mTracks;
+    private List<Track> mTracks;
     private CompositionView mCompositionView;
     private boolean cancelTimer = false;
 
-    public TracksTimer(ArrayList<Track> tracks, CompositionView compositionView)
+    public TracksTimer(List<Track> tracks, CompositionView compositionView)
     {
         mHandler = new Handler();
         mTracks = tracks;
