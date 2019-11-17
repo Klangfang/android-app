@@ -31,6 +31,7 @@ import com.wfm.soundcollaborations.webservice.dtos.SoundResponse;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 import static android.content.Intent.FLAG_ACTIVITY_NEW_TASK;
 
@@ -445,4 +446,11 @@ public class CompositionBuilder
     }
 
 
+    public void cancel() {
+
+        if (Objects.nonNull(compositionResponse)) {
+            client.cancel(compositionResponse.id, listener -> showInfoAndStartNewTask());
+        }
+
+    }
 }

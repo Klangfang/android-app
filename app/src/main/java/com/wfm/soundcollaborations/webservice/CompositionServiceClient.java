@@ -104,6 +104,28 @@ public class CompositionServiceClient {
 
     }
 
+    public void cancel(Long compositionId,
+                       Response.Listener<CompositionResponse> listener) {
+
+        service.cancel(compositionId, CompositionUpdateRequest.build())
+                .enqueue(new Callback<CompositionResponse>() {
+                    @Override
+                    public void onResponse(Call<CompositionResponse> call,
+                                           retrofit2.Response<CompositionResponse> response) {
+
+                        CompositionResponse compositionResponse = response.body();
+                        listener.onResponse(compositionResponse);
+
+                    }
+
+                    @Override
+                    public void onFailure(Call<CompositionResponse> call, Throwable t) {
+                        //Handle failure
+                    }
+                });
+
+    }
+
 
     public void getOverviews(Response.Listener<OverviewResponse> listener) {
 

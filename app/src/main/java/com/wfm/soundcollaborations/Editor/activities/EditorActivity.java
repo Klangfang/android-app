@@ -173,6 +173,10 @@ public class EditorActivity extends AppCompatActivity {
 
             }
 
+        } else if (itemId == 16908332) {
+
+            builder.cancel();
+
         }
 
         return super.onOptionsItemSelected(item);
