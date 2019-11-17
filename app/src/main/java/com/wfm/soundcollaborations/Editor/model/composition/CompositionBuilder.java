@@ -426,9 +426,9 @@ public class CompositionBuilder
     }
 
 
-    public void release() {
+    public void join() {
 
-        client.release(compositionResponse.id,
+        client.join(compositionResponse.id,
                 recordedSounds,
                 listener -> showInfoAndStartNewTask());
 

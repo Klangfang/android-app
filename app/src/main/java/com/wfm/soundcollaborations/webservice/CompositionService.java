@@ -23,16 +23,21 @@ public interface CompositionService {
 
   @Headers({"Content-Type: application/json"})
   @POST("compositions")
-  Call<CompositionOverviewResp> createComposition(@Body CompositionRequest composition);
+  Call<CompositionOverviewResp> create(@Body CompositionRequest composition);
 
   @Headers({"Content-Type: application/json"})
-  @PUT("compositions/{id}?updateRequest=PICK")
-  Call<CompositionResponse> pickComposition(@Path("id") Long id,
-                                            @Body CompositionUpdateRequest compositionUpdateRequest);
+  @PUT("compositions/{id}?updateRequest=OPEN")
+  Call<CompositionResponse> open(@Path("id") Long id,
+                                 @Body CompositionUpdateRequest compositionUpdateRequest);
 
   @Headers({"Content-Type: application/json"})
-  @PUT("compositions/{id}?updateRequest=RELEASE")
-  Call<CompositionResponse> releaseComposition(@Path("id") Long id,
-                                              @Body CompositionUpdateRequest compositionUpdateRequest);
+  @PUT("compositions/{id}?updateRequest=CANCEL")
+  Call<CompositionResponse> cancel(@Path("id") Long id,
+                                   @Body CompositionUpdateRequest compositionUpdateRequest);
+
+  @Headers({"Content-Type: application/json"})
+  @PUT("compositions/{id}?updateRequest=JOIN")
+  Call<CompositionResponse> join(@Path("id") Long id,
+                                 @Body CompositionUpdateRequest compositionUpdateRequest);
 
 }

@@ -74,7 +74,7 @@ public class CompositionOverviewAdapter extends RecyclerView.Adapter<Composition
         holder.mCompositionTitleTextView.setText(currentOverview.title);
         holder.mMembersTextView.setText(currentOverview.numberOfMembers + "/4 Members"); //TODO replace string with resource
         holder.mPlayerControlView.setPlayer(getAudioPlayer(currentOverview.snippetUrl));
-        holder.mJoinButton.setOnClickListener(view -> doRequest(currentOverview.id, view));
+        holder.mJoinButton.setOnClickListener(view -> open(currentOverview.id, view));
 
     }
 
@@ -117,10 +117,10 @@ public class CompositionOverviewAdapter extends RecyclerView.Adapter<Composition
 
     }
 
-    private void doRequest(Long id, View view) {
+    private void open(Long id, View view) {
 
         Response.Listener<CompositionResponse> listener = response -> startEditorActivity(view, response);
-        client.pick(id, listener);
+        client.open(id, listener);
 
     }
 

@@ -168,7 +168,7 @@ public class EditorActivity extends AppCompatActivity {
             } else {
 
                 // Code for releasing the composition comes here
-                builder.release();
+                builder.join();
                 Toast.makeText(this, "Congratulations! Your composition collaboration has been released!", Toast.LENGTH_LONG).show();
 
             }

@@ -39,7 +39,7 @@ public class CompositionServiceClient {
                        List<Sound> recordedSounds,
                        Response.Listener<CompositionOverviewResp> listener) {
 
-        service.createComposition(CompositionRequest.build(compositionTitle, creatorName, recordedSounds))
+        service.create(CompositionRequest.build(compositionTitle, creatorName, recordedSounds))
                 .enqueue(new Callback<CompositionOverviewResp>() {
                     @Override
                     public void onResponse(Call<CompositionOverviewResp> call,
@@ -59,10 +59,10 @@ public class CompositionServiceClient {
     }
 
 
-    public void pick(Long compositionId,
-                        Response.Listener<CompositionResponse> listener) {
+    public void open(Long compositionId,
+                     Response.Listener<CompositionResponse> listener) {
 
-        service.pickComposition(compositionId, CompositionUpdateRequest.build())
+        service.open(compositionId, CompositionUpdateRequest.build())
                 .enqueue(new Callback<CompositionResponse>() {
                     @Override
                     public void onResponse(Call<CompositionResponse> call,
@@ -81,11 +81,11 @@ public class CompositionServiceClient {
 
     }
 
-    public void release(Long compositionId,
-                       List<Sound> recordedSounds,
-                       Response.Listener<CompositionResponse> listener) {
+    public void join(Long compositionId,
+                     List<Sound> recordedSounds,
+                     Response.Listener<CompositionResponse> listener) {
 
-        service.releaseComposition(compositionId, CompositionUpdateRequest.build(recordedSounds))
+        service.join(compositionId, CompositionUpdateRequest.build(recordedSounds))
                 .enqueue(new Callback<CompositionResponse>() {
                     @Override
                     public void onResponse(Call<CompositionResponse> call,
