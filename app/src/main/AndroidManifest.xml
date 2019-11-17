@@ -142,6 +142,7 @@
             android:name=".Editor.activities.EditorActivity"
             android:theme="@style/DarkTheme"
             android:label="Editor"
+            android:launchMode="singleInstance"
             android:parentActivityName=".activities.MainActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />

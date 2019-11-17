@@ -112,7 +112,6 @@ public class EditorActivity extends AppCompatActivity {
 
         setSupportActionBar(findViewById(R.id.base_toolbar));
         ActionBar actionBar = getSupportActionBar();
-        // TODO: Up button doesn't work yet
         assert actionBar != null;
         actionBar.setDisplayHomeAsUpEnabled(true);
         actionBar.setTitle(CreateCompositionActivity.compositionTitleInput);
