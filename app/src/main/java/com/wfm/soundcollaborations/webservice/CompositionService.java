@@ -26,7 +26,13 @@ public interface CompositionService {
   Call<CompositionOverviewResp> createComposition(@Body CompositionRequest composition);
 
   @Headers({"Content-Type: application/json"})
-  @PUT("compositions/{id}")
-  Call<CompositionResponse> updateComposition(@Path("id") Long id, @Body CompositionUpdateRequest compositionUpdateRequest);
+  @PUT("compositions/{id}?updateRequest=PICK")
+  Call<CompositionResponse> pickComposition(@Path("id") Long id,
+                                            @Body CompositionUpdateRequest compositionUpdateRequest);
+
+  @Headers({"Content-Type: application/json"})
+  @PUT("compositions/{id}?updateRequest=RELEASE")
+  Call<CompositionResponse> releaseComposition(@Path("id") Long id,
+                                              @Body CompositionUpdateRequest compositionUpdateRequest);
 
 }

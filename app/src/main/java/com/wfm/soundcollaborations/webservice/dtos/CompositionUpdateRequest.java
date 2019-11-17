@@ -1,22 +1,38 @@
 package com.wfm.soundcollaborations.webservice.dtos;
 
+import com.wfm.soundcollaborations.Editor.model.composition.Sound;
+
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
-public class CompositionUpdateRequest {
+public final class CompositionUpdateRequest {
 
     public List<SoundRequest> sounds;
 
-    public CompositionUpdateRequest() {
+    private CompositionUpdateRequest() {
 
         this.sounds = new ArrayList<>();
 
     }
 
-    public CompositionUpdateRequest(List<SoundRequest> sounds) {
+    private CompositionUpdateRequest(List<SoundRequest> sounds) {
 
         this.sounds = sounds;
 
+    }
+
+    public static CompositionUpdateRequest build(List<Sound> recordedSounds) {
+
+        List<SoundRequest> soundReqs = recordedSounds.stream()
+                .map(SoundRequest::build)
+                .collect(Collectors.toList());
+        return new CompositionUpdateRequest(soundReqs);
+    }
+
+    public static CompositionUpdateRequest build() {
+
+        return new CompositionUpdateRequest();
     }
 
 }

@@ -143,7 +143,7 @@ public class EditorActivity extends AppCompatActivity {
         deletedBtn.setEnabled(false);
         deletedBtn.setOnClickListener(delBtnview -> deleteConfirmation(delBtnview.getContext()));
 
-        client = new CompositionServiceClient(compositionView.getContext());
+        client = new CompositionServiceClient();
     }
 
     // Add Menu to Toolbar

@@ -1,6 +1,9 @@
 package com.wfm.soundcollaborations.webservice.dtos;
 
-public class SoundRequest {
+import com.wfm.soundcollaborations.Editor.model.composition.Sound;
+import com.wfm.soundcollaborations.Editor.utils.ByteArrayUtils;
+
+public final class SoundRequest {
 
     public Integer trackNumber;
 
@@ -12,12 +15,21 @@ public class SoundRequest {
 
     public byte[] soundBytes;
 
-    public SoundRequest(Integer trackNumber, Integer startPosition, Integer duration, byte[] soundBytes) {
+    private SoundRequest(Integer trackNumber,
+                         Integer startPosition,
+                         Integer duration,
+                         byte[] soundBytes) {
 
         this.trackNumber = trackNumber;
         this.startPosition = startPosition;
         this.duration = duration;
         this.soundBytes = soundBytes;
+
+    }
+
+    public static SoundRequest build(Sound s) {
+
+        return new SoundRequest(s.trackNumber, s.startPosition, s.duration, ByteArrayUtils.toByteArray(s.filePath));
 
     }
 

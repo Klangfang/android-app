@@ -3,10 +3,6 @@ package com.wfm.soundcollaborations.adapter;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
-
-import androidx.annotation.NonNull;
-import androidx.recyclerview.widget.RecyclerView;
-
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -14,8 +10,10 @@ import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.TextView;
 
-import com.android.volley.Response;
+import androidx.annotation.NonNull;
+import androidx.recyclerview.widget.RecyclerView;
 
+import com.android.volley.Response;
 import com.google.android.exoplayer2.Player;
 import com.google.android.exoplayer2.ui.PlayerControlView;
 import com.wfm.soundcollaborations.Editor.activities.EditorActivity;
@@ -25,9 +23,7 @@ import com.wfm.soundcollaborations.webservice.CompositionServiceClient;
 import com.wfm.soundcollaborations.webservice.JsonUtil;
 import com.wfm.soundcollaborations.webservice.dtos.CompositionOverviewResp;
 import com.wfm.soundcollaborations.webservice.dtos.CompositionResponse;
-import com.wfm.soundcollaborations.webservice.dtos.CompositionUpdateRequest;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -50,7 +46,7 @@ public class CompositionOverviewAdapter extends RecyclerView.Adapter<Composition
     public CompositionOverviewAdapter(Activity context, List<CompositionOverviewResp> compositionOverviews) {
         this.context = context;
         this.compositionOverviews = compositionOverviews;
-        client = new CompositionServiceClient(context.getApplicationContext());
+        client = new CompositionServiceClient();
     }
 
     /**
@@ -124,7 +120,7 @@ public class CompositionOverviewAdapter extends RecyclerView.Adapter<Composition
     private void doRequest(Long id, View view) {
 
         Response.Listener<CompositionResponse> listener = response -> startEditorActivity(view, response);
-        client.update(id, new CompositionUpdateRequest(new ArrayList<>()), listener);
+        client.pick(id, listener);
 
     }
 

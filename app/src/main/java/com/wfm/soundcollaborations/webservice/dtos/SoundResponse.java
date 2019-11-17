@@ -8,8 +8,6 @@ public class SoundResponse {
 
     public String url;
 
-    public String title;
-
     public Integer startPosition;
 
     public Integer duration;

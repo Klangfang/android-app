@@ -9,7 +9,6 @@ import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.Toast;
 
-import com.android.volley.Response;
 import com.liulishuo.filedownloader.BaseDownloadTask;
 import com.liulishuo.filedownloader.FileDownloadListener;
 import com.wfm.soundcollaborations.Editor.exceptions.NoActiveTrackException;
@@ -27,16 +26,9 @@ import com.wfm.soundcollaborations.Editor.views.composition.listeners.TrackViewO
 import com.wfm.soundcollaborations.Editor.views.composition.listeners.TrackWatchViewOnClickListener;
 import com.wfm.soundcollaborations.activities.MainActivity;
 import com.wfm.soundcollaborations.webservice.CompositionServiceClient;
-import com.wfm.soundcollaborations.webservice.dtos.CompositionOverviewResp;
-import com.wfm.soundcollaborations.webservice.dtos.CompositionRequest;
 import com.wfm.soundcollaborations.webservice.dtos.CompositionResponse;
-import com.wfm.soundcollaborations.webservice.dtos.CompositionUpdateRequest;
-import com.wfm.soundcollaborations.webservice.dtos.SoundRequest;
 import com.wfm.soundcollaborations.webservice.dtos.SoundResponse;
 
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -86,7 +78,7 @@ public class CompositionBuilder
         initTracksViews(numberOfTracks);
         initTracks(numberOfTracks);
         this.compositionTitle = compositionTitle;
-        client = new CompositionServiceClient(getCompositionView().getContext());
+        client = new CompositionServiceClient();
     }
 
     private void initTracksViews(int tracks)
@@ -424,62 +416,26 @@ public class CompositionBuilder
     }
 
 
-    public void release() {
-
-        try {
-
-            //TODO when using java > 8, refactor code
-            List<SoundRequest> soundReqs = new ArrayList<>();
-            for (Sound snd : recordedSounds) {
-
-                byte[] soundBytes = Files.readAllBytes(Paths.get(snd.filePath));
-
-                SoundRequest soundReq = new SoundRequest(snd.trackNumber, snd.startPosition, snd.duration, soundBytes);
-                soundReqs.add(soundReq);
-
-            }
-
-            Response.Listener<CompositionResponse> listener = response -> showInfoAndStartNewTask(response);
-            client.update(compositionResponse.id, new CompositionUpdateRequest(soundReqs), listener);
-
-        }
-        catch (IOException e) {
-            System.err.println("----> Can not read files" + e); //TODO android logging bzw. pop up
-        }
-
-    }
-
-
     public void create() {
 
-        try {
-            String CREATOR_NAME = "KLANGFANG";
-
-            //TODO when using java > 8, refactor code
-            List<SoundRequest> soundReqs = new ArrayList<>();
-            for (Sound snd : recordedSounds) {
-
-                byte[] soundBytes = Files.readAllBytes(Paths.get(snd.filePath));
-
-                SoundRequest soundReq = new SoundRequest(snd.trackNumber, snd.startPosition, snd.duration, soundBytes);
-                soundReqs.add(soundReq);
-
-            }
-
-            CompositionRequest compReq = new CompositionRequest(compositionTitle, CREATOR_NAME, soundReqs);
-
-            Response.Listener<CompositionOverviewResp> listener = response -> showInfoAndStartNewTask(response);
-            client.create(compReq, listener);
-
-        }
-        catch (IOException e) {
-            System.err.println(e); //TODO android logging bzw. pop up
-        }
+        client.create(compositionTitle,
+                "KLANGFANG",
+                recordedSounds,
+                listener -> showInfoAndStartNewTask());
 
     }
 
 
-    private <T> void showInfoAndStartNewTask(T response) {
+    public void release() {
+
+        client.release(compositionResponse.id,
+                recordedSounds,
+                listener -> showInfoAndStartNewTask());
+
+    }
+
+
+    private void showInfoAndStartNewTask() {
 
         Intent intent = new Intent(getCompositionView().getContext(), MainActivity.class);
         intent.setFlags(FLAG_ACTIVITY_NEW_TASK);

@@ -11,7 +11,7 @@ public class CompositionResponse {
 
     public String creatorName;
 
-    public String creationDate;
+    public String creationTime;
 
     public String status;
 

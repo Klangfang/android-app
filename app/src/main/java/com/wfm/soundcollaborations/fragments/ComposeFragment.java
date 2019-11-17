@@ -61,7 +61,7 @@ public class ComposeFragment extends Fragment {
         FloatingActionButton createCompositionButton = root.findViewById(R.id.new_composition_button);
         createCompositionButton.setOnClickListener(view -> startCreateCompositionActivity(view));
 
-        client = new CompositionServiceClient(root.getContext());
+        client = new CompositionServiceClient();
         Response.Listener<OverviewResponse> listener = overviewResponse -> fillActivity(overviewResponse);
         client.getOverviews(listener);
 

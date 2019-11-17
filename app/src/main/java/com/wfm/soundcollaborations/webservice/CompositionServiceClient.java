@@ -1,15 +1,15 @@
 package com.wfm.soundcollaborations.webservice;
 
 
-import android.content.Context;
-
-import com.android.volley.Request;
 import com.android.volley.Response;
+import com.wfm.soundcollaborations.Editor.model.composition.Sound;
 import com.wfm.soundcollaborations.webservice.dtos.CompositionOverviewResp;
 import com.wfm.soundcollaborations.webservice.dtos.CompositionRequest;
 import com.wfm.soundcollaborations.webservice.dtos.CompositionResponse;
 import com.wfm.soundcollaborations.webservice.dtos.CompositionUpdateRequest;
 import com.wfm.soundcollaborations.webservice.dtos.OverviewResponse;
+
+import java.util.List;
 
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -20,20 +20,8 @@ public class CompositionServiceClient {
 
     private CompositionService service;
 
-    private static String BASE_URL = HttpUtils.COMPOSITION_SERVICE_BASE_URL;
-    private static String VIEW_URL = HttpUtils.COMPOSITION_VIEW_URL;
 
-    private static final int POST = Request.Method.POST;
-    private static final int PUT = Request.Method.PUT;
-    private static final int GET = Request.Method.GET;
-
-
-    public CompositionServiceClient(Context context) {
-
-        Retrofit retrofit = new Retrofit.Builder()
-                .baseUrl("https://klangfang-service.herokuapp.com")
-                .addConverterFactory(GsonConverterFactory.create())
-                .build();
+    public CompositionServiceClient() {
 
         // Instantiate CompositionService
         service = new Retrofit.Builder()
@@ -46,65 +34,95 @@ public class CompositionServiceClient {
     }
 
 
-    public void create(CompositionRequest compositionRequest, Response.Listener<CompositionOverviewResp> listener) {
+    public void create(String compositionTitle,
+                       String creatorName,
+                       List<Sound> recordedSounds,
+                       Response.Listener<CompositionOverviewResp> listener) {
 
-        Call<CompositionOverviewResp> compositionOverviewCall = service.createComposition(compositionRequest);
-        compositionOverviewCall.enqueue(new Callback<CompositionOverviewResp>() {
-            @Override
-            public void onResponse(Call<CompositionOverviewResp> call, retrofit2.Response<CompositionOverviewResp> response) {
+        service.createComposition(CompositionRequest.build(compositionTitle, creatorName, recordedSounds))
+                .enqueue(new Callback<CompositionOverviewResp>() {
+                    @Override
+                    public void onResponse(Call<CompositionOverviewResp> call,
+                                           retrofit2.Response<CompositionOverviewResp> response) {
 
-                CompositionOverviewResp compositionOverviewResp = response.body();
-                listener.onResponse(compositionOverviewResp);
+                        CompositionOverviewResp compositionOverviewResp = response.body();
+                        listener.onResponse(compositionOverviewResp);
 
-            }
+                    }
 
-            @Override
-            public void onFailure(Call<CompositionOverviewResp> call, Throwable t) {
-                //Handle failure
-            }
-        });
+                    @Override
+                    public void onFailure(Call<CompositionOverviewResp> call, Throwable t) {
+                        //Handle failure
+                    }
+                });
 
     }
 
 
-    public void update(Long compositionId, CompositionUpdateRequest compositionUpdateRequest, Response.Listener<CompositionResponse> listener) {
+    public void pick(Long compositionId,
+                        Response.Listener<CompositionResponse> listener) {
 
-        Call<CompositionResponse> compositionOverviewCall = service.updateComposition(compositionId, compositionUpdateRequest   );
-        compositionOverviewCall.enqueue(new Callback<CompositionResponse>() {
-            @Override
-            public void onResponse(Call<CompositionResponse> call, retrofit2.Response<CompositionResponse> response) {
+        service.pickComposition(compositionId, CompositionUpdateRequest.build())
+                .enqueue(new Callback<CompositionResponse>() {
+                    @Override
+                    public void onResponse(Call<CompositionResponse> call,
+                                           retrofit2.Response<CompositionResponse> response) {
 
-                CompositionResponse compositionResponse = response.body();
-                listener.onResponse(compositionResponse);
+                        CompositionResponse compositionResponse = response.body();
+                        listener.onResponse(compositionResponse);
 
-            }
+                    }
 
-            @Override
-            public void onFailure(Call<CompositionResponse> call, Throwable t) {
-                //Handle failure
-            }
-        });
+                    @Override
+                    public void onFailure(Call<CompositionResponse> call, Throwable t) {
+                        //Handle failure
+                    }
+                });
+
+    }
+
+    public void release(Long compositionId,
+                       List<Sound> recordedSounds,
+                       Response.Listener<CompositionResponse> listener) {
+
+        service.releaseComposition(compositionId, CompositionUpdateRequest.build(recordedSounds))
+                .enqueue(new Callback<CompositionResponse>() {
+                    @Override
+                    public void onResponse(Call<CompositionResponse> call,
+                                           retrofit2.Response<CompositionResponse> response) {
+
+                        CompositionResponse compositionResponse = response.body();
+                        listener.onResponse(compositionResponse);
+
+                    }
+
+                    @Override
+                    public void onFailure(Call<CompositionResponse> call, Throwable t) {
+                        //Handle failure
+                    }
+                });
 
     }
 
 
     public void getOverviews(Response.Listener<OverviewResponse> listener) {
 
-        Call<OverviewResponse> compositionOverviewCall = service.getOverviews();
-        compositionOverviewCall.enqueue(new Callback<OverviewResponse>() {
-            @Override
-            public void onResponse(Call<OverviewResponse> call, retrofit2.Response<OverviewResponse> response) {
+        service.getOverviews()
+                .enqueue(new Callback<OverviewResponse>() {
+                    @Override
+                    public void onResponse(Call<OverviewResponse> call,
+                                           retrofit2.Response<OverviewResponse> response) {
 
-                OverviewResponse overviewResponse = response.body();
-                listener.onResponse(overviewResponse);
+                        OverviewResponse overviewResponse = response.body();
+                        listener.onResponse(overviewResponse);
 
-            }
+                    }
 
-            @Override
-            public void onFailure(Call<OverviewResponse> call, Throwable t) {
-                //Handle failure
-            }
-        });
+                    @Override
+                    public void onFailure(Call<OverviewResponse> call, Throwable t) {
+                        //Handle failure
+                    }
+                });
 
     }
 
