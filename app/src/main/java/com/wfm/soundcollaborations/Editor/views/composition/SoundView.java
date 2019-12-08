@@ -7,25 +7,25 @@ import android.graphics.Paint;
 import android.graphics.Path;
 import android.graphics.RectF;
 import android.util.AttributeSet;
+import android.util.Log;
 import android.view.View;
+import android.widget.RelativeLayout;
 
-import com.wfm.soundcollaborations.Editor.model.composition.Sound;
+import com.wfm.soundcollaborations.Editor.utils.DPUtils;
 import com.wfm.soundcollaborations.R;
 
 import java.util.ArrayList;
+import java.util.UUID;
 
-/**
- * Created by mohammed on 10/27/17.
- */
 
 public class SoundView extends View {
     private static final String TAG = SoundView.class.getSimpleName();
 
-    private static final int SOUND_SECOND_WIDTH = 60;
+    private SoundViewType soundViewType;
 
     private Paint linePaint;
     private ArrayList<Integer> waves;
-    private Integer trackNumber = -1;
+    private int trackIndex;
 
     private Path clipPath;
     private RectF rectangle;
@@ -33,26 +33,123 @@ public class SoundView extends View {
     int radius = 50;
     private Paint viewPaint;
 
-    private Sound sound;
+    private String uuid;
 
-    public SoundView(Context context) {
-        super(context);
-        init();
+
+    private static final int DOWNLOAD_COLOR = R.color.color_primary;
+    private static final int RECORD_COLOR = R.color.color_my_sound;
+    private static final int SELECT_COLOR = R.color.color_error;
+
+
+    public static class Builder {
+
+        private final Context context;
+
+        private Integer trackIndex;
+        private Integer startPosition;
+        private Integer duration;
+        private String url; //optional
+
+
+        public Builder(Context context) {
+
+            this.context = context;
+
+        }
+
+
+        public Builder trackIndex(Integer trackIndex) {
+
+            this.trackIndex = trackIndex;
+            return this;
+
+        }
+
+
+        public Builder startPosition(Integer startPosition) {
+
+            this.startPosition = startPosition;
+            return this;
+
+        }
+
+
+        public Builder url(String url) {
+
+            this.url = url;
+            return this;
+
+        }
+
+
+        public Builder duration(Integer duration) {
+
+            this.duration = duration;
+            return this;
+
+        }
+
+
+        public SoundView build(SoundViewType soundViewType) {
+
+
+            int layoutWidth = soundViewType.equals(SoundViewType.DOWNLOAD) ? DPUtils.getValueInDP(duration) : 0;
+            int layoutHeight = DPUtils.TRACK_HEIGHT;
+            int marginLeft = soundViewType.equals(SoundViewType.DOWNLOAD) ? DPUtils.getValueInDP(startPosition) : startPosition;
+            RelativeLayout.LayoutParams soundParams =
+                    new RelativeLayout.LayoutParams(layoutWidth, layoutHeight);
+            soundParams.setMargins(marginLeft, 0, 0, 0);
+            SoundView soundView = new SoundView(context, soundViewType);
+            soundView.setLayoutParams(soundParams);
+            soundView.setTrackIndex(trackIndex);
+            soundView.setOnLongClickListener(soundView::update);
+
+            /*
+            VisualizeSoundTask soundTask = new VisualizeSoundTask(soundView,
+                    new Sound.Builder()
+                            .trackNumber(trackIndex)
+                            .startPosition(startPosition)
+                            .duration(duration)
+                            .filePath(url)
+                            .build());
+*/
+            //TODO why no there, why it need file path soundTask.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR); maybe for dowloaded sounds
+
+            return soundView;
+
+        }
+
     }
 
-    public SoundView(Context context, AttributeSet attrs) {
-        super(context, attrs);
+
+    private SoundView(Context context, SoundViewType soundViewType) {
+
+        super(context);
+        this.soundViewType = soundViewType;
         init();
+
+    }
+
+
+    public SoundView(Context context, AttributeSet attrs) {
+
+        super(context, attrs);
+        this.soundViewType = SoundViewType.RECORD;
+        init();
+
     }
 
     private void init() {
+
+        uuid = UUID.randomUUID().toString();
+
         // clipping
         rectangle = new RectF();
         rectPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
+        initColor();
         //rectPaint.setStyle(Paint.Style.FILL); //das hier macht nichts
         //rectPaint.setStrokeCap(Paint.Cap.ROUND); //das hier macht nichts
-        rectPaint.setColor(getResources().getColor(R.color.color_primary)); // sets the color of downloaded sounds
-        //setBackground(new ColorDrawable(getResources().getColor(R.color.color_error))); //sets the wrapper background color of downloaded sounds
+        // setBackground(new ColorDrawable(getResources().getColor(R.color.color_error))); //sets the wrapper background color of downloaded sounds
         clipPath = new Path();
         //clipPath.addRoundRect(rectangle, radius, radius, Path.Direction.CW);
 
@@ -105,8 +202,8 @@ public class SoundView extends View {
         invalidate();
     }
 
-    public void setTrackNumber(int trackNumber) {
-        this.trackNumber = trackNumber;
+    public void setTrackIndex(int trackIndex) {
+        this.trackIndex = trackIndex;
     }
 
     public void increaseWidth(int width) {
@@ -114,35 +211,76 @@ public class SoundView extends View {
         invalidate();
     }
 
-    public Integer getTrackNumber() {
-        return this.trackNumber;
+    public int getTrackIndex() {
+        return trackIndex;
     }
 
-    // Set fill color of recorded sounds
-    public void setDefaultSoundColor() {
-        rectPaint.setColor(getResources().getColor(R.color.color_my_sound));
+
+    // Set and change fill color of recorded sound when longclicked
+    private void refresh() {
+
+        soundViewType = hasDefaultState() ? SoundViewType.DELETE : SoundViewType.RECORD_FINISH;
+
+        refreshColor();
         invalidate();
+
     }
 
-    // Change fill color of recorded sound when longclicked
-    public void setSelectedSoundColor() {
-        rectPaint.setColor(getResources().getColor(R.color.color_error));
-        invalidate();
+
+    private void refreshColor() {
+
+        int color = hasDefaultState() ? RECORD_COLOR : SELECT_COLOR;
+        rectPaint.setColor(getResources().getColor(color));
+
     }
 
-    public Sound getSound() {
-        return sound;
+
+    private void initColor() {
+
+        rectPaint.setColor(getResources().getColor(soundViewType.equals(SoundViewType.DOWNLOAD) ? DOWNLOAD_COLOR : RECORD_COLOR));
+
     }
 
-    public void setSound(Sound sound) {
-        this.sound = sound;
+
+    //TODO hasDeleteState
+    public boolean hasDefaultState() {
+
+        return soundViewType.equals(SoundViewType.RECORD_FINISH) || soundViewType.equals(SoundViewType.RECORD);
+
     }
 
-    public long getSoundLength() {
-        long soundLength = sound.getDuration();
-        int width = 0;
-        width += (soundLength / 1000) * SOUND_SECOND_WIDTH;
-        width += (soundLength % 1000) * SOUND_SECOND_WIDTH / 1000;
-        return width;
+
+    //TODO no param neaded?!!!!
+    public boolean update(View clickView) {
+
+        float xPosition = clickView.getX();
+        Log.v("long clicked", "pos: " + xPosition);
+
+        if (clickView instanceof SoundView) {
+
+            SoundView soundView = (SoundView) clickView;
+
+            soundView.refresh();
+
+            return true;
+
+        }
+
+        return false;
+
+    }
+
+
+    public String getUuid() {
+
+        return uuid;
+
+    }
+
+
+    public SoundViewType getSoundViewType() {
+
+        return soundViewType;
+
     }
 }

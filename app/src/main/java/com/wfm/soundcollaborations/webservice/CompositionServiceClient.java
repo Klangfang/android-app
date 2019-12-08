@@ -9,7 +9,8 @@ import com.wfm.soundcollaborations.webservice.dtos.CompositionResponse;
 import com.wfm.soundcollaborations.webservice.dtos.CompositionUpdateRequest;
 import com.wfm.soundcollaborations.webservice.dtos.OverviewResponse;
 
-import java.util.List;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -23,7 +24,7 @@ public class CompositionServiceClient {
 
     public CompositionServiceClient() {
 
-        // Instantiate CompositionService
+        // Instantiate Composition
         service = new Retrofit.Builder()
                 .baseUrl("https://klangfang-service.herokuapp.com")
                 .addConverterFactory(GsonConverterFactory.create())
@@ -36,10 +37,10 @@ public class CompositionServiceClient {
 
     public void create(String compositionTitle,
                        String creatorName,
-                       List<Sound> recordedSounds,
+                       Stream<Sound> recordedSounds,
                        Response.Listener<CompositionOverviewResp> listener) {
 
-        service.create(CompositionRequest.build(compositionTitle, creatorName, recordedSounds))
+        service.create(CompositionRequest.build(compositionTitle, creatorName, recordedSounds.collect(Collectors.toList())))
                 .enqueue(new Callback<CompositionOverviewResp>() {
                     @Override
                     public void onResponse(Call<CompositionOverviewResp> call,
@@ -82,10 +83,10 @@ public class CompositionServiceClient {
     }
 
     public void join(Long compositionId,
-                     List<Sound> recordedSounds,
+                     Stream<Sound> recordedSounds,
                      Response.Listener<CompositionResponse> listener) {
 
-        service.join(compositionId, CompositionUpdateRequest.build(recordedSounds))
+        service.join(compositionId, CompositionUpdateRequest.build(recordedSounds.collect(Collectors.toList())))
                 .enqueue(new Callback<CompositionResponse>() {
                     @Override
                     public void onResponse(Call<CompositionResponse> call,

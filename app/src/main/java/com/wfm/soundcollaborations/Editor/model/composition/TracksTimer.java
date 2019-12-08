@@ -13,8 +13,8 @@ import java.util.TimerTask;
  * Created by mohammed on 11/18/17.
  */
 
-public class TracksTimer
-{
+public class TracksTimer {
+
     private static final String TAG = TracksTimer.class.getSimpleName();
 
     private int positionInMillis = 0;
@@ -25,6 +25,9 @@ public class TracksTimer
     private CompositionView mCompositionView;
     private boolean cancelTimer = false;
 
+    private boolean playing = false;
+
+
     public TracksTimer(List<Track> tracks, CompositionView compositionView)
     {
         mHandler = new Handler();
@@ -32,8 +35,21 @@ public class TracksTimer
         mCompositionView = compositionView;
     }
 
-    public void play()
-    {
+
+    public void playOrPause() {
+
+
+        if (isPlaying()) {
+            pause();
+        } else {
+            play();
+        }
+
+    }
+
+
+    private void play() {
+
         cancelTimer = false;
         this.mCompositionView.setEnabled(false);
         mTimer = new Timer();
@@ -72,17 +88,24 @@ public class TracksTimer
                 });
             }
         }, 0, 1);
+
+        playing = true;
+
     }
 
-    public void pause()
-    {
+
+    private void pause() {
+
         cancelTimer = true;
         this.mCompositionView.setEnabled(true);
-        for(int i=0; i<mTracks.size(); i++)
-        {
+        for(int i=0; i<mTracks.size(); i++) {
             mTracks.get(i).pause(i);
         }
+
+        playing = false;
+
     }
+
 
     public void seek(int positionInMillis)
     {
@@ -112,4 +135,12 @@ public class TracksTimer
 
         mTracks.add(trackNumber, track);
     }
+
+
+    public boolean isPlaying() {
+
+        return playing;
+
+    }
+
 }

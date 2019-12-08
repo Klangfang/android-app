@@ -5,9 +5,11 @@ import android.util.Log;
 
 import com.wfm.soundcollaborations.Editor.model.audio.AudioPlayer;
 
-import java.time.LocalDate;
 import java.util.Arrays;
-import java.util.List;
+import java.util.Objects;
+import java.util.UUID;
+
+import static com.wfm.soundcollaborations.Editor.utils.DPUtils.SOUND_SECOND_WIDTH;
 
 /**
  * Created by mohammed on 10/27/17.
@@ -21,7 +23,7 @@ public class Sound {
     //BACKEND BEIM LADEN
     public Long id;
 
-    public Integer trackNumber;
+    public Integer trackIndex;
 
     //BACKEND BEIM LADEN
     public String title; // unique for saving files | has to be set dynamically
@@ -36,18 +38,92 @@ public class Sound {
 
     public AudioPlayer player;
 
+    // only for new sounds is important TODO later separate SoundDownloaded and SoundRecorded class
+    public String uuid;
 
-    public Sound() {
+    public static class Builder {
+
+        private Integer trackNumber;
+        private Integer startPosition;
+        private Integer duration;
+        private String filePath;
+
+
+        public Builder trackNumber(Integer trackNumber) {
+
+            this.trackNumber = trackNumber;
+            return this;
+
+        }
+
+
+        public Builder startPosition(Integer startPosition) {
+
+            this.startPosition = startPosition;
+            return this;
+
+        }
+
+
+        public Builder duration(Integer duration) {
+
+            this.duration = duration;
+            return this;
+
+        }
+
+
+        public Builder filePath(String filePath) {
+
+            this.filePath = filePath;
+            return this;
+
+        }
+
+
+        public Sound build() {
+
+            return new Sound(trackNumber, startPosition, duration, filePath);
+
+        }
 
     }
 
 
-    public Sound(Integer trackNumber, Integer startPosition, Integer duration, String filePath) {
-        this.trackNumber = trackNumber;
+    private Sound() {
+
+    }
+
+
+    public Sound(Long id, Integer trackIndex, Integer startPosition, Integer duration, String filePath) {
+
+        this.id = id;
+        this.trackIndex = trackIndex;
         this.startPosition = startPosition;
         this.duration = duration;
         this.filePath = filePath;
         this.creatorName = "talal"; // TODO it has to be set dynamically
+        uuid = UUID.randomUUID().toString();
+
+    }
+
+
+    private Sound(Integer trackIndex, Integer startPosition, Integer duration, String filePath) {
+
+        this.trackIndex = trackIndex;
+        this.startPosition = startPosition;
+        this.duration = duration;
+        this.filePath = filePath;
+        this.creatorName = "talal"; // TODO it has to be set dynamically
+        uuid = UUID.randomUUID().toString();
+
+    }
+
+
+    public boolean isRecored() {
+
+        return Objects.isNull(id);
+
     }
 
 
@@ -108,8 +184,8 @@ public class Sound {
         return positionInMillis - (maxPoint - soundsInside);
     }
 
-    public Integer getTrackNumber() {
-        return trackNumber;
+    public Integer getTrackIndex() {
+        return trackIndex;
     }
 
     //public String getTitle() {
@@ -121,7 +197,19 @@ public class Sound {
     }
 
     public Integer getDuration() {
+
         return duration;
+
+    }
+
+    public Integer calculateWidth() {
+
+        long duration = getDuration();
+        int width = 0;
+        width += (duration / 1000) * SOUND_SECOND_WIDTH;
+        width += (duration % 1000) * SOUND_SECOND_WIDTH / 1000;
+        return width;
+
     }
 
     public String getCreatorName() {
@@ -130,5 +218,9 @@ public class Sound {
 
     public String getFilePath() {
         return filePath;
+    }
+
+    public String getUuid() {
+        return uuid;
     }
 }

@@ -26,12 +26,11 @@ import androidx.core.content.ContextCompat;
 
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.ohoussein.playpause.PlayPauseView;
-import com.wfm.soundcollaborations.Editor.exceptions.NoActiveTrackException;
 import com.wfm.soundcollaborations.Editor.exceptions.RecordTimeOutExceededException;
 import com.wfm.soundcollaborations.Editor.exceptions.SoundRecordingTimeException;
 import com.wfm.soundcollaborations.Editor.exceptions.SoundWillBeOutOfCompositionException;
 import com.wfm.soundcollaborations.Editor.exceptions.SoundWillOverlapException;
-import com.wfm.soundcollaborations.Editor.model.composition.CompositionBuilder;
+import com.wfm.soundcollaborations.Editor.model.composition.Composition;
 import com.wfm.soundcollaborations.Editor.views.composition.CompositionView;
 import com.wfm.soundcollaborations.Editor.views.composition.SoundView;
 import com.wfm.soundcollaborations.R;
@@ -58,7 +57,8 @@ public class EditorActivity extends AppCompatActivity {
     @BindView(R.id.composition)
     CompositionView compositionView;
 
-    private CompositionBuilder builder;
+    private Composition composition;
+
     private Handler handler;
     private RelativeLayout.LayoutParams layoutParams;
     private int width = 0;
@@ -121,20 +121,25 @@ public class EditorActivity extends AppCompatActivity {
         Intent intent = getIntent();
         String compositionTitle = intent.getStringExtra(String.valueOf(R.id.composition_title_textfield));
         String compositionJson = intent.getStringExtra(ComposeFragment.PICK_RESPONSE);
-        builder = new CompositionBuilder(compositionView, 4, compositionTitle);
+        //builder = new CompositionBuilder(compositionView, 4, compositionTitle);
         // create new composition has no json response
         if (StringUtils.isNotBlank(compositionJson)) {
 
             create = false;
             compositionResponse = JsonUtil.fromJson(compositionJson, CompositionResponse.class);
             if (compositionResponse != null) {
-                builder.addSounds(compositionResponse);
+
+                composition = new Composition.CompositionConfigurer(compositionView)
+                        .build(compositionResponse);
+
             }
 
         } else {
 
             create = true;
-            builder.build();
+            composition = new Composition.CompositionConfigurer(compositionView)
+                    .title(compositionTitle)
+                    .build();
 
         }
 
@@ -161,21 +166,21 @@ public class EditorActivity extends AppCompatActivity {
 
             if (create) {
 
-                builder.create();
+                composition.create();
                 Toast.makeText(this, "Congratulations! Your composition has been created!", Toast.LENGTH_LONG).show();
 
 
             } else {
 
                 // Code for releasing the composition comes here
-                builder.join();
+                composition.join();
                 Toast.makeText(this, "Congratulations! Your composition collaboration has been released!", Toast.LENGTH_LONG).show();
 
             }
 
         } else if (itemId == 16908332) {
 
-            builder.cancel();
+            composition.cancel();
 
         }
 
@@ -192,11 +197,12 @@ public class EditorActivity extends AppCompatActivity {
 
 
     private void deleteConfirmation(Context context) {
+
         DialogInterface.OnClickListener dialogClickListener = (dialog, which) -> {
             switch (which){
                 case DialogInterface.BUTTON_POSITIVE:
                     //Yes button clicked
-                    builder.deleteSounds();
+                    composition.deleteSounds();
                     deletedBtn.setEnabled(false);
                     break;
 
@@ -209,24 +215,28 @@ public class EditorActivity extends AppCompatActivity {
         AlertDialog.Builder builder = new AlertDialog.Builder(context);
         builder.setMessage("Möchten Sie diesen Sound löschen?").setPositiveButton("Ja", dialogClickListener)
                 .setNegativeButton("Nein", dialogClickListener).show();
+
     }
 
-    private void selectSound(SoundView soundView) {
-       builder.selectSound(soundView);
+
+    private void registerDeleteSound(SoundView soundView) {
+
+       composition.registerDeleteSound(soundView);
        deletedBtn.setEnabled(true);
+
     }
+
 
     @RequiresApi(api = Build.VERSION_CODES.JELLY_BEAN_MR1)
     @OnClick(R.id.btn_play)
     public void play(View view)
     {
-        builder.play();
+        composition.play();
         updateStatusOnPlay();
         ((PlayPauseView) view).toggle();
 
         // Toggle enabled and disabled state for recordBtn
-        boolean isPlaying = builder.getPlayStatus();
-        if (isPlaying) {
+        if (composition.isPlaying()) {
             recordBtn.setBackgroundTintList(ColorStateList.valueOf(getResources().
                     getColor(R.color.grey_dark)));
             recordBtn.setImageTintList(ColorStateList.valueOf(getResources().
@@ -297,33 +307,24 @@ public class EditorActivity extends AppCompatActivity {
     }
 
 
+    //TODO more refactor
     public void record() {
+
         try {
-            soundView = builder.getRecordSoundView(this);
-            layoutParams = (RelativeLayout.LayoutParams) soundView.getLayoutParams();
 
             // Stop recording
             if (recording) {
-                resetEditorValues();
-                builder.prepareRecordedSound(soundView, soundLength, startPositionInWidth);
-            } else {
-                // Beim Zeitlimit oder bei einer Ueberlappung keine Aufnahme starten.
-                builder.checkLimits(soundView, soundLength, startPositionInWidth);
 
-                // Create sound view listener
-                soundView.setOnLongClickListener(clickView -> {
-                    float xPosition = clickView.getX();
-                    Log.v("long clicked", "pos: " + xPosition);
-                    if (builder.isSelectedSound((SoundView) clickView)) {
-                        ((SoundView) clickView).setDefaultSoundColor();
-                        deselectSound((SoundView) clickView);
-                    } else {
-                        ((SoundView) clickView).setSelectedSoundColor();
-                        selectSound((SoundView) clickView);
-                    }
-                    clickView.invalidate();
-                    return true;
-                });
+                resetEditorValues();
+                composition.finishRecording(soundLength, startPositionInWidth);
+
+            } else {
+
+                composition.createSoundView(this);
+                //layoutParams = (RelativeLayout.LayoutParams) soundView.getLayoutParams();
+
+                // Beim Zeitlimit oder bei einer Ueberlappung keine Aufnahme starten.
+                //TODO composition.checkLimits(soundLength, startPositionInWidth);
 
                 restartTimer();
 
@@ -334,79 +335,58 @@ public class EditorActivity extends AppCompatActivity {
                     recordTimer.scheduleAtFixedRate(new TimerTask() {
                         @Override
                         public void run() {
-                            handler.post(new Runnable() {
-                                @Override
-                                public void run() {
-                                    // do your work right here
+                            handler.post(() -> {
 
-                                    try {
+                                // do your work right here
+                                try {
 
-                                        builder.checkLimits(soundView, soundLength, startPositionInWidth);
+                                    composition.checkLimits(soundLength, startPositionInWidth);
 
-                                        if (recording) { // Die Aufnahme laueft weiter, wenn man nicht pausieren moechte.
-                                            // Aufnahme Animation
-                                            layoutParams = (RelativeLayout.LayoutParams) soundView.getLayoutParams();
-                                            width = width + 3;
-                                            soundLength = width;
-                                            layoutParams.width = width;
-                                            soundView.setLayoutParams(layoutParams);
-                                            int max = builder.getActiveTrack().getMaxAmplitude();
-                                            soundView.addWave(max);
-                                            Log.d(TAG, "Max Amplitude Recieved -> " + max);
-                                            soundView.invalidate();
-                                            builder.getCompositionView().increaseScrollPosition(3);
-                                            builder.getCompositionView().increaseViewWatchPercentage(soundView.getTrackNumber(), 0.17f);
-                                        }
-
-                                    } catch (SoundWillBeOutOfCompositionException e) {
-                                        recording = false;
-                                        resetEditorValues();
-                                        builder.prepareRecordedSound(soundView, soundLength, startPositionInWidth);
-                                    } catch (SoundWillOverlapException e) {
-                                        recording = false;
-                                        resetEditorValues();
-                                        builder.prepareRecordedSound(soundView, soundLength, startPositionInWidth);
-                                    } catch (SoundRecordingTimeException ex) {
-                                        recording = false;
-                                        resetEditorValues();
-                                        builder.prepareRecordedSound(soundView, soundLength, startPositionInWidth);
-                                    } catch (Exception e) {
-                                        recording = false;
-                                        resetEditorValues();
-                                        builder.prepareRecordedSound(soundView, soundLength, startPositionInWidth);
+                                    if (recording) { // Die Aufnahme laueft weiter, wenn man nicht pausieren moechte.
+                                        // Aufnahme Animation
+                                        composition.updateSoundView();
                                     }
+
+                                } catch (SoundWillBeOutOfCompositionException e) {
+                                    recording = false;
+                                    resetEditorValues();
+                                    composition.finishRecording(soundLength, startPositionInWidth);
+                                } catch (SoundWillOverlapException e) {
+                                    recording = false;
+                                    resetEditorValues();
+                                    composition.finishRecording(soundLength, startPositionInWidth);
+                                } catch (SoundRecordingTimeException ex) {
+                                    recording = false;
+                                    resetEditorValues();
+                                    composition.finishRecording(soundLength, startPositionInWidth);
+                                } catch (Exception e) {
+                                    recording = false;
+                                    resetEditorValues();
+                                    composition.finishRecording(soundLength, startPositionInWidth);
                                 }
                             });
                         }
                     }, 0, 50);
                 }
             }
-        } catch (NoActiveTrackException ex) {
-            Toast.makeText(this, "Please select Track!", Toast.LENGTH_LONG).show();
         } catch (RecordTimeOutExceededException ex) {
             resetEditorValues();
-            builder.prepareRecordedSound(soundView, soundLength, startPositionInWidth);
-        } catch (SoundWillOverlapException ex) {
+            composition.finishRecording(soundLength, startPositionInWidth);
+       // } catch (SoundWillOverlapException ex) {
 
-        } catch (SoundWillBeOutOfCompositionException ex) {
-        } catch (SoundRecordingTimeException ex) {
-            resetEditorValues();
-            builder.prepareRecordedSound(soundView, soundLength, startPositionInWidth);
+        //} catch (SoundWillBeOutOfCompositionException ex) {
+        //} catch (SoundRecordingTimeException ex) {
+          //  resetEditorValues();
+            //composition.finishRecording(soundLength, startPositionInWidth);
         } catch (Exception ex) {
             Log.e(TAG, ex.getMessage());
         }
+
     }
 
-    private void deselectSound(SoundView soundView) {
-        deletedBtn.setEnabled(!builder.deselectSound(soundView));
-    }
 
+    //TODO more refactor
     private boolean startRecord() throws RecordTimeOutExceededException {
-
-        // Clicking record while not recording
-        RelativeLayout.LayoutParams soundParams = (RelativeLayout.LayoutParams) soundView.getLayoutParams();
-        startPositionInWidth = soundParams.leftMargin;
-        layoutParams = (RelativeLayout.LayoutParams) soundView.getLayoutParams();
 
         recording = true;
 
@@ -420,14 +400,14 @@ public class EditorActivity extends AppCompatActivity {
 
 
         // Start recorder
-        builder.getActiveTrack().startTrackRecorder();
-
+        composition.startTrackRecorder();
         return true;
+
     }
 
     private void updateStatusOnPlay() {
 
-        recordBtn.setEnabled(!builder.getPlayStatus());
+
 
     }
 

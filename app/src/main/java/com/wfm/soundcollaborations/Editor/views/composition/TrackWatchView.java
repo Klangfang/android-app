@@ -13,8 +13,8 @@ import android.view.View;
  * Created by mohammed on 10/21/17.
  */
 
-public class TrackWatchView extends View
-{
+public class TrackWatchView extends View {
+
     private Paint circlePaint;
     private Paint innerCirclePaint;
     private Paint borderStrokePaint;
@@ -22,27 +22,34 @@ public class TrackWatchView extends View
     private float percentage = 0;
 
 
-    public TrackWatchView(Context context)
-    {
+    protected TrackWatchView(Context context) {
+
         super(context);
         init();
+
     }
 
-    public TrackWatchView(Context context, AttributeSet attrs)
-    {
+
+    protected TrackWatchView(Context context, AttributeSet attrs) {
+
         super(context, attrs);
         init();
+
     }
 
-    private void init()
-    {
+
+    private void init() {
+
         circlePaint = new Paint(Paint.ANTI_ALIAS_FLAG);
         innerCirclePaint = new Paint(Paint.ANTI_ALIAS_FLAG);
         innerCirclePaint.setColor(Color.BLACK);
         borderStrokePaint = new Paint(Paint.ANTI_ALIAS_FLAG);
         borderStrokePaint.setColor(Color.BLACK);
         borderStrokePaint.setStyle(Paint.Style.STROKE);
+        deactivate();
+
     }
+
 
     @Override
     protected void onDraw(Canvas canvas)

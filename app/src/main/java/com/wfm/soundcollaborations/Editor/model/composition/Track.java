@@ -9,6 +9,8 @@ import com.wfm.soundcollaborations.Editor.utils.AudioRecorderStatus;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 
 public class Track {
@@ -19,6 +21,14 @@ public class Track {
 
 
     public Track(){ recorder = new AudioRecorder(); }
+
+
+    public List<Sound> getRecordedSounds() {
+
+        return sounds.stream().filter(Sound::isRecored).collect(Collectors.toList());
+
+    }
+
 
     public void addRecordedSound(Sound sound) {
 
@@ -113,4 +123,16 @@ public class Track {
         return recorder.getDuration();
     }
 
+
+    public Map<String, Integer> deleteSounds(List<String> soundUUIDs) {
+
+        Map<String, Integer> soundsWidth = sounds.stream()
+                .filter(sound -> soundUUIDs.contains(sound.uuid))
+                .collect(Collectors.toMap(Sound::getUuid, Sound::calculateWidth));
+
+        sounds.removeIf(sound -> soundUUIDs.contains(sound.uuid));
+
+        return soundsWidth;
+
+    }
 }
