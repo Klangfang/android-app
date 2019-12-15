@@ -11,6 +11,7 @@ import android.util.Log;
 import android.view.View;
 import android.widget.RelativeLayout;
 
+import com.wfm.soundcollaborations.Editor.activities.EditorActivity;
 import com.wfm.soundcollaborations.Editor.utils.DPUtils;
 import com.wfm.soundcollaborations.R;
 
@@ -21,7 +22,10 @@ import java.util.UUID;
 public class SoundView extends View {
     private static final String TAG = SoundView.class.getSimpleName();
 
-    private SoundViewType soundViewType;
+    private SoundViewStatus soundViewStatus;
+
+    private View deleteBtn;
+    private TrackViewContainer trackViewContainer;
 
     private Paint linePaint;
     private ArrayList<Integer> waves;
@@ -38,27 +42,36 @@ public class SoundView extends View {
 
     private static final int DOWNLOAD_COLOR = R.color.color_primary;
     private static final int RECORD_COLOR = R.color.color_my_sound;
-    private static final int SELECT_COLOR = R.color.color_error;
+    private static final int SELECT_FOR_DELETE_COLOR = R.color.color_error;
 
 
     public static class Builder {
 
         private final Context context;
 
+        private SoundViewStatus status;
         private Integer trackIndex;
         private Integer startPosition;
         private Integer duration;
         private String url; //optional
 
 
-        public Builder(Context context) {
+        Builder(Context context) {
 
             this.context = context;
 
         }
 
 
-        public Builder trackIndex(Integer trackIndex) {
+        Builder status(SoundViewStatus status) {
+
+            this.status = status;
+            return this;
+
+        }
+
+
+        Builder trackIndex(Integer trackIndex) {
 
             this.trackIndex = trackIndex;
             return this;
@@ -66,7 +79,7 @@ public class SoundView extends View {
         }
 
 
-        public Builder startPosition(Integer startPosition) {
+        Builder startPosition(Integer startPosition) {
 
             this.startPosition = startPosition;
             return this;
@@ -74,7 +87,7 @@ public class SoundView extends View {
         }
 
 
-        public Builder url(String url) {
+        Builder url(String url) {
 
             this.url = url;
             return this;
@@ -90,16 +103,15 @@ public class SoundView extends View {
         }
 
 
-        public SoundView build(SoundViewType soundViewType) {
+        public SoundView build(TrackViewContainer trackViewContainer) {
 
-
-            int layoutWidth = soundViewType.equals(SoundViewType.DOWNLOAD) ? DPUtils.getValueInDP(duration) : 0;
+            int layoutWidth = status.equals(SoundViewStatus.DOWNLOAD) ? DPUtils.getValueInDP(duration) : 0;
             int layoutHeight = DPUtils.TRACK_HEIGHT;
-            int marginLeft = soundViewType.equals(SoundViewType.DOWNLOAD) ? DPUtils.getValueInDP(startPosition) : startPosition;
+            int marginLeft = status.equals(SoundViewStatus.DOWNLOAD) ? DPUtils.getValueInDP(startPosition) : startPosition;
             RelativeLayout.LayoutParams soundParams =
                     new RelativeLayout.LayoutParams(layoutWidth, layoutHeight);
             soundParams.setMargins(marginLeft, 0, 0, 0);
-            SoundView soundView = new SoundView(context, soundViewType);
+            SoundView soundView = new SoundView(context, status, trackViewContainer);
             soundView.setLayoutParams(soundParams);
             soundView.setTrackIndex(trackIndex);
             soundView.setOnLongClickListener(soundView::update);
@@ -122,10 +134,13 @@ public class SoundView extends View {
     }
 
 
-    private SoundView(Context context, SoundViewType soundViewType) {
+    private SoundView(Context context, SoundViewStatus soundViewStatus, TrackViewContainer trackViewContainer) {
 
         super(context);
-        this.soundViewType = soundViewType;
+        this.soundViewStatus = soundViewStatus;
+        EditorActivity editorActivity = (EditorActivity) context;
+        deleteBtn = editorActivity.findViewById(R.id.btn_delete);
+        this.trackViewContainer = trackViewContainer;
         init();
 
     }
@@ -134,7 +149,7 @@ public class SoundView extends View {
     public SoundView(Context context, AttributeSet attrs) {
 
         super(context, attrs);
-        this.soundViewType = SoundViewType.RECORD;
+        this.soundViewStatus = SoundViewStatus.RECORD;
         init();
 
     }
@@ -219,33 +234,39 @@ public class SoundView extends View {
     // Set and change fill color of recorded sound when longclicked
     private void refresh() {
 
-        soundViewType = hasDefaultState() ? SoundViewType.DELETE : SoundViewType.RECORD_FINISH;
-
-        refreshColor();
-        invalidate();
-
-    }
-
-
-    private void refreshColor() {
-
-        int color = hasDefaultState() ? RECORD_COLOR : SELECT_COLOR;
+        soundViewStatus = hasFinishRecordState() ? SoundViewStatus.SELECT_FOR_DELETE : SoundViewStatus.RECORD_FINISH;
+        deleteBtn.setEnabled(trackViewContainer.hasDeleteSoundViews() || hasDeleteState());
+        int color = hasFinishRecordState() ? RECORD_COLOR : SELECT_FOR_DELETE_COLOR;
         rectPaint.setColor(getResources().getColor(color));
+        invalidate();
 
     }
 
 
     private void initColor() {
 
-        rectPaint.setColor(getResources().getColor(soundViewType.equals(SoundViewType.DOWNLOAD) ? DOWNLOAD_COLOR : RECORD_COLOR));
+        rectPaint.setColor(getResources().getColor(soundViewStatus.equals(SoundViewStatus.DOWNLOAD) ? DOWNLOAD_COLOR : RECORD_COLOR));
 
     }
 
 
-    //TODO hasDeleteState
-    public boolean hasDefaultState() {
+    public boolean hasRecordState() {
 
-        return soundViewType.equals(SoundViewType.RECORD_FINISH) || soundViewType.equals(SoundViewType.RECORD);
+        return soundViewStatus.equals(SoundViewStatus.RECORD);
+
+    }
+
+
+    public boolean hasFinishRecordState() {
+
+        return soundViewStatus.equals(SoundViewStatus.RECORD_FINISH);
+
+    }
+
+
+    public boolean hasDeleteState() {
+
+        return soundViewStatus.equals(SoundViewStatus.SELECT_FOR_DELETE);
 
     }
 
@@ -278,9 +299,20 @@ public class SoundView extends View {
     }
 
 
-    public SoundViewType getSoundViewType() {
+    public SoundViewStatus getSoundViewStatus() {
 
-        return soundViewType;
+        return soundViewStatus;
+
+    }
+
+
+    public String finishRecording() {
+
+        if (hasRecordState()) {
+            soundViewStatus = SoundViewStatus.RECORD_FINISH;
+        }
+
+        return uuid;
 
     }
 }

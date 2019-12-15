@@ -1,7 +1,6 @@
 package com.wfm.soundcollaborations.Editor.views.composition;
 
 import android.content.Context;
-import android.graphics.Canvas;
 import android.util.Log;
 import android.view.ViewGroup;
 import android.widget.LinearLayout;
@@ -14,10 +13,11 @@ import com.wfm.soundcollaborations.Editor.views.composition.listeners.TrackWatch
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
+import java.util.Optional;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
-public class TrackViewContainer {
+class TrackViewContainer {
 
     private static final String TAG = TrackViewContainer.class.getSimpleName();
 
@@ -30,37 +30,13 @@ public class TrackViewContainer {
     private int index;
 
 
-    public void activate() {
-
-        trackView.activate();
-        trackWatchView.activate();
-
-    }
-
-
-    public int getTrackWatchViewWidth() {
-
-        return trackWatchView.getWidth();
-
-    }
-
-    public void updateTrackWatch(Map<String, Integer> soundWidths) {
-
-        //TODO check this warning
-        soundViews.stream()
-                .filter(s -> soundWidths.keySet().contains(s.getUuid()))
-                .forEach(s -> decreaseTrackWatchPercentage((soundWidths.get(s.getUuid()) / 3) * 0.17f));
-
-    }
-
-
     public static class Builder {
 
         private final boolean activate;
         private int index;
 
 
-        public Builder index(int index) {
+        Builder index(int index) {
 
             this.index = index;
             return this;
@@ -68,7 +44,7 @@ public class TrackViewContainer {
         }
 
 
-        public Builder(boolean activate) {
+        Builder(boolean activate) {
 
             this.activate = activate;
 
@@ -112,62 +88,26 @@ public class TrackViewContainer {
     }
 
 
-    public void increaseViewWatchPercentage(Context context, float percentage)
-            throws SoundRecordingTimeException {
-
-        if (isTrackWatchPercentageFull()) {
-            //TODO is context required here?!
-            throw new SoundRecordingTimeException(context);
-        }
-
-        trackWatchView.increasePercentage(percentage);
-
-    }
-
-
-    public void decreaseTrackWatchPercentage(float percentage) {
-
-        trackWatchView.decreasePercentage(percentage);
-
-    }
-
-
-    private boolean isTrackWatchPercentageFull() {
-        float actualPercentage = trackWatchView.getPercentage();
-        return actualPercentage >= 100;
-    }
-
-
-    // TODO make it better with one for each
-    protected List<String> deleteSoundViews() {
-
-        soundViews.removeIf(s -> s.hasDefaultState());
-
-        return soundViews.stream()
-                .map(SoundView::getUuid)
-                .collect(Collectors.toList());
-
-    }
-
-
-    protected void addSoundView(Context context, Sound sound) {
+    void addSoundView(Context context, Sound sound) {
 
         trackView.addSoundView(new SoundView.Builder(context)
+                .status(SoundViewStatus.DOWNLOAD)
                 .trackIndex(index)
                 .startPosition(sound.startPosition)
                 .duration(sound.duration)
                 .url(sound.filePath)
-                .build(SoundViewType.DOWNLOAD));
+                .build(this));
 
     }
 
 
-    protected void addSoundView(Context context, Integer scrollPosition) {
+    void addSoundView(Context context, Integer scrollPosition) {
 
         SoundView soundView = new SoundView.Builder(context)
+                .status(SoundViewStatus.RECORD)
                 .trackIndex(index)
                 .startPosition(scrollPosition)
-                .build(SoundViewType.RECORD);
+                .build(this);
 
         trackView.addSoundView(soundView);
         soundViews.add(soundView);
@@ -175,15 +115,15 @@ public class TrackViewContainer {
     }
 
 
-    protected void updateSoundView(Context context, int amplitude) {
+    void updateSoundView(Context context, int amplitude) {
 
         try {
 
-            //TODO maybe last element
             SoundView soundView = soundViews.stream()
-                    .filter(s -> s.getSoundViewType().equals(SoundViewType.RECORD))
+                    .filter(s -> s.getSoundViewStatus().equals(SoundViewStatus.RECORD))
                     .findAny()
                     .get();
+
             soundView.addWave(amplitude);
             soundView.invalidate();
             Log.d(TAG, "Max Amplitude Recieved -> " + amplitude);
@@ -202,14 +142,101 @@ public class TrackViewContainer {
     }
 
 
-    protected void drawLine(Canvas canvas) {
+    List<String> deleteSoundViews() {
 
-        trackView.drawLine(canvas);
+        Predicate<? super SoundView> deletePredicate = SoundView::hasDeleteState;
+
+        List<String> uuids = soundViews.stream()
+                .filter(deletePredicate)
+                .map(this::deleteFromTrackAndMap)
+                .collect(Collectors.toList());
+
+        soundViews.removeIf(deletePredicate);
+
+        return uuids;
 
     }
 
 
-    protected void deactivate() {
+    private String deleteFromTrackAndMap(SoundView soundView) {
+
+        trackView.deleteSoundViews(soundView);
+
+        return soundView.getUuid();
+
+    }
+
+
+    int getTrackWatchViewWidth() {
+
+        return trackWatchView.getWidth();
+
+    }
+
+
+    void updateTrackWatch(int soundWidths) {
+
+        //TODO wait until sdk 6 Integer.divideUnsigned(soundWidths / 3)
+        decreaseTrackWatchPercentage((float) (soundWidths / 3) * 0.17f);
+
+    }
+
+
+    Optional<String> finishRecording(int activeTrackIndex) {
+
+        Optional<String> uuid = Optional.empty();
+        Predicate<? super SoundView> recordPredicate = SoundView::hasRecordState;
+
+        if (index == activeTrackIndex) {
+            uuid = Optional.of(soundViews.stream()
+                    .filter(recordPredicate)
+                    .map(SoundView::finishRecording)
+                    .findAny()
+                    .get());
+        }
+
+        return uuid;
+
+    }
+
+
+    private void increaseViewWatchPercentage(Context context, float percentage)
+            throws SoundRecordingTimeException {
+
+        if (isTrackWatchPercentageFull()) {
+            //TODO is context required here?!
+            throw new SoundRecordingTimeException(context);
+        }
+
+        trackWatchView.increasePercentage(percentage);
+
+    }
+
+
+    private void decreaseTrackWatchPercentage(float percentage) {
+
+        trackWatchView.decreasePercentage(percentage);
+
+    }
+
+
+    private boolean isTrackWatchPercentageFull() {
+
+        float actualPercentage = trackWatchView.getPercentage();
+        return actualPercentage >= 100;
+
+    }
+
+
+    void activate() {
+
+        trackView.activate();
+        trackWatchView.activate();
+
+    }
+
+
+    void deactivate() {
 
         trackView.deactivate();
         trackWatchView.deactivate();
@@ -217,30 +244,26 @@ public class TrackViewContainer {
     }
 
 
-    protected void deleteSoundView(SoundView soundView) {
-
-        trackView.removeView(soundView);
-
-    }
-
-
-    protected TrackView getTrackView() {
+    TrackView getTrackView() {
         return trackView;
     }
 
 
-    protected TrackWatchView getTrackWatchView() {
+    TrackWatchView getTrackWatchView() {
         return trackWatchView;
     }
 
 
-    protected List<SoundView> getSoundViews() {
-        return soundViews;
+    int getIndex() {
+        return index;
     }
 
 
-    protected int getIndex() {
-        return index;
+    boolean hasDeleteSoundViews() {
+
+        return soundViews.stream()
+                .anyMatch(s -> s.getSoundViewStatus().equals(SoundViewStatus.SELECT_FOR_DELETE));
+
     }
 
 }

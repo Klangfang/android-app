@@ -12,7 +12,6 @@ import com.wfm.soundcollaborations.Editor.exceptions.SoundWillOverlapException;
 import com.wfm.soundcollaborations.Editor.utils.AudioRecorderStatus;
 import com.wfm.soundcollaborations.Editor.utils.DPUtils;
 import com.wfm.soundcollaborations.Editor.views.composition.CompositionView;
-import com.wfm.soundcollaborations.Editor.views.composition.SoundView;
 import com.wfm.soundcollaborations.activities.MainActivity;
 import com.wfm.soundcollaborations.webservice.CompositionServiceClient;
 import com.wfm.soundcollaborations.webservice.dtos.CompositionResponse;
@@ -21,7 +20,6 @@ import com.wfm.soundcollaborations.webservice.dtos.SoundResponse;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
-import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Stream;
 
@@ -108,15 +106,18 @@ public class Composition {
     //TODO why soundLegnthInWidth is not used?
     public void finishRecording(Integer soundLengthInWidth, Integer startPositionInWidth) {
 
-        Integer trackIndex = compositionView.getActiveTrackIndex();
+        int trackIndex = compositionView.getActiveTrackIndex();
         Track track = tracks.get(trackIndex);
+        tracks.remove(trackIndex);
         track.stopTrackRecorder();
         Integer duration = track.getDuration();
         String filePath = track.getFilePath();
 
         if (filePath != null && soundLengthInWidth != null && startPositionInWidth != null) {
 
+            String uuid = compositionView.finishRecording();
             Sound sound = new Sound.Builder()
+                    .uuid(uuid)
                     .trackNumber(trackIndex)
                     .startPosition(DPUtils.getPositionInMs(startPositionInWidth))
                     .duration(duration)
@@ -169,7 +170,7 @@ public class Composition {
     }
 
 
-    public void startTrackRecorder() throws RecordTimeOutExceededException {
+    private void startTrackRecorder() throws RecordTimeOutExceededException {
 
         int activeTrackIndex = compositionView.getActiveTrackIndex();
         Track track = tracks.get(activeTrackIndex);
@@ -182,7 +183,7 @@ public class Composition {
     public void deleteSounds() {
 
         tracks.forEach(track -> {
-            Map<String, Integer> soundWidths = track.deleteSounds(compositionView.deleteSoundViews());
+            int soundWidths = track.deleteSounds(compositionView.deleteSoundViews());
             compositionView.updateTrackWatches(soundWidths);
         });
 
@@ -253,9 +254,8 @@ public class Composition {
 
         public Composition build() {
 
-            Composition composition = new Composition(compositionView, compositionId, title, tracks);
+            return new Composition(compositionView, compositionId, title, tracks);
 
-            return composition;
         }
 
     }
@@ -268,10 +268,13 @@ public class Composition {
     }
 
 
-    public void createSoundView(Context context) {
+    public int createSoundView(Context context) throws RecordTimeOutExceededException {
 
-        compositionView.addSoundView(context);
+        int scrollPosition = compositionView.addSoundView(context);
 
+        startTrackRecorder();
+
+        return scrollPosition;
 
     }
 
@@ -279,15 +282,8 @@ public class Composition {
     private Stream<Sound> getRecordedSounds() {
 
         return tracks.stream()
-                .map(t -> t.getRecordedSounds())
+                .map(Track::getRecordedSounds)
                 .flatMap(Collection::stream);
-
-    }
-
-
-    public void registerDeleteSound(SoundView soundView) {
-
-        //TODO soundsToDelete.add(soundView); change status in view of compositionview track containers
 
     }
 

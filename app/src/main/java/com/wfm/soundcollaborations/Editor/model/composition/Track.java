@@ -9,7 +9,6 @@ import com.wfm.soundcollaborations.Editor.utils.AudioRecorderStatus;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.Map;
 import java.util.stream.Collectors;
 
 
@@ -20,24 +19,27 @@ public class Track {
     private int recorderTime;
 
 
-    public Track(){ recorder = new AudioRecorder(); }
+    Track() {
+        recorder = new AudioRecorder();
+    }
 
 
-    public List<Sound> getRecordedSounds() {
+    List<Sound> getRecordedSounds() {
 
-        return sounds.stream().filter(Sound::isRecored).collect(Collectors.toList());
+        return sounds.stream().filter(Sound::isRecorded).collect(Collectors.toList());
 
     }
 
 
-    public void addRecordedSound(Sound sound) {
+    private void addRecordedSound(Sound sound) {
 
         recorderTime = recorderTime + sound.getDuration();
         sounds.add(sound);
 
     }
 
-    public void addSound(Sound sound, Context context) {
+
+    protected void addSound(Sound sound, Context context) {
 
         sound.preparePlayer(context);
         sounds.add(sound);
@@ -49,7 +51,7 @@ public class Track {
         this.sounds.addAll(sounds);
     }
 
-    public void prepare(Context context) throws NullPointerException {
+    void prepare(Context context) throws NullPointerException {
         for (Sound sound : sounds) {
             sound.preparePlayer(context);
         }
@@ -68,14 +70,15 @@ public class Track {
         }
     }
 
-    public void seek(int positionInMillis) {
+
+    void seek(int positionInMillis) {
         for (Sound sound : sounds) {
             sound.seek(positionInMillis);
         }
     }
 
     // after adding a new sound to the list of sounds, we sort our list of sounds again and create a new player with this.
-    public void prepareSound(Sound sound, Context context)
+    void prepareSound(Sound sound, Context context)
     {
         addRecordedSound(sound);
 
@@ -85,18 +88,19 @@ public class Track {
         Collections.sort(sounds, (Sound s1, Sound s2) -> Long.valueOf(s1.getStartPosition()).compareTo(Long.valueOf(s2.getStartPosition())));
     }
 
+
     // Startet den Recorder
-    public void startTrackRecorder() throws RecordTimeOutExceededException {
+    void startTrackRecorder() throws RecordTimeOutExceededException {
         recorder.start();
     }
 
     // Stopt den Recorder
-    public void stopTrackRecorder() {
+    void stopTrackRecorder() {
         recorder.stop();
     }
 
     // Liefert den Recorder-Status zurueck
-    public AudioRecorderStatus getTrackRecorderStatus() {
+    AudioRecorderStatus getTrackRecorderStatus() {
         return recorder.getStatus();
     }
 
@@ -106,7 +110,7 @@ public class Track {
     }
 
     // Liefert die maximale Amplitude im Recorder zurueck
-    public int getMaxAmplitude() {
+    int getMaxAmplitude() {
         return recorder.getMaxAmplitude();
     }
 
@@ -124,15 +128,17 @@ public class Track {
     }
 
 
-    public Map<String, Integer> deleteSounds(List<String> soundUUIDs) {
+    int deleteSounds(List<String> soundUUIDs) {
 
-        Map<String, Integer> soundsWidth = sounds.stream()
+        //TODO why unterschiedliche uuids ?!!! Problem mit trackwatchview
+        int soundsWidths = sounds.stream()
                 .filter(sound -> soundUUIDs.contains(sound.uuid))
-                .collect(Collectors.toMap(Sound::getUuid, Sound::calculateWidth));
+                .mapToInt(Sound::calculateWidth)
+                .sum();
 
         sounds.removeIf(sound -> soundUUIDs.contains(sound.uuid));
 
-        return soundsWidth;
+        return soundsWidths;
 
     }
 }

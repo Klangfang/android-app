@@ -14,7 +14,6 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.ImageButton;
-import android.widget.RelativeLayout;
 import android.widget.Toast;
 
 import androidx.annotation.RequiresApi;
@@ -32,7 +31,6 @@ import com.wfm.soundcollaborations.Editor.exceptions.SoundWillBeOutOfComposition
 import com.wfm.soundcollaborations.Editor.exceptions.SoundWillOverlapException;
 import com.wfm.soundcollaborations.Editor.model.composition.Composition;
 import com.wfm.soundcollaborations.Editor.views.composition.CompositionView;
-import com.wfm.soundcollaborations.Editor.views.composition.SoundView;
 import com.wfm.soundcollaborations.R;
 import com.wfm.soundcollaborations.fragments.ComposeFragment;
 import com.wfm.soundcollaborations.webservice.CompositionServiceClient;
@@ -48,9 +46,7 @@ import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
 
-/**
- * Platzhalter für UI und Zusammenspiel mit der Compositionlogik.
- */
+
 public class EditorActivity extends AppCompatActivity {
 
     private static final String TAG = EditorActivity.class.getSimpleName();
@@ -60,14 +56,10 @@ public class EditorActivity extends AppCompatActivity {
     private Composition composition;
 
     private Handler handler;
-    private RelativeLayout.LayoutParams layoutParams;
-    private int width = 0;
 
-    //private boolean isPlaying = false;
     private boolean recording;
-    private boolean strobo;
-
-    private SoundView soundView;
+    private int startPositionInWidth;
+    private int soundLength;
 
     private Timer recordTimer = new Timer();
 
@@ -80,8 +72,6 @@ public class EditorActivity extends AppCompatActivity {
     @BindView(R.id.btn_play)
     PlayPauseView playBtn;
 
-    private Integer startPositionInWidth=null;
-    private Integer soundLength=null;
 
     /**
      * This constant creates a placeholder for the user's consent of the record audio permission.
@@ -219,14 +209,6 @@ public class EditorActivity extends AppCompatActivity {
     }
 
 
-    private void registerDeleteSound(SoundView soundView) {
-
-       composition.registerDeleteSound(soundView);
-       deletedBtn.setEnabled(true);
-
-    }
-
-
     @RequiresApi(api = Build.VERSION_CODES.JELLY_BEAN_MR1)
     @OnClick(R.id.btn_play)
     public void play(View view)
@@ -315,59 +297,47 @@ public class EditorActivity extends AppCompatActivity {
             // Stop recording
             if (recording) {
 
-                resetEditorValues();
-                composition.finishRecording(soundLength, startPositionInWidth);
+                finishRecoding();
 
             } else {
 
-                composition.createSoundView(this);
-                //layoutParams = (RelativeLayout.LayoutParams) soundView.getLayoutParams();
+                startRecording();
 
-                // Beim Zeitlimit oder bei einer Ueberlappung keine Aufnahme starten.
-                //TODO composition.checkLimits(soundLength, startPositionInWidth);
+                recordTimer.scheduleAtFixedRate(new TimerTask() {
+                    @Override
+                    public void run() {
+                        handler.post(() -> {
 
-                restartTimer();
+                            // do your work right here
+                            try {
 
-                boolean isNewRecording = startRecord();
-
-                if (isNewRecording) {
-
-                    recordTimer.scheduleAtFixedRate(new TimerTask() {
-                        @Override
-                        public void run() {
-                            handler.post(() -> {
-
-                                // do your work right here
-                                try {
-
-                                    composition.checkLimits(soundLength, startPositionInWidth);
-
-                                    if (recording) { // Die Aufnahme laueft weiter, wenn man nicht pausieren moechte.
-                                        // Aufnahme Animation
-                                        composition.updateSoundView();
-                                    }
-
-                                } catch (SoundWillBeOutOfCompositionException e) {
-                                    recording = false;
-                                    resetEditorValues();
-                                    composition.finishRecording(soundLength, startPositionInWidth);
-                                } catch (SoundWillOverlapException e) {
-                                    recording = false;
-                                    resetEditorValues();
-                                    composition.finishRecording(soundLength, startPositionInWidth);
-                                } catch (SoundRecordingTimeException ex) {
-                                    recording = false;
-                                    resetEditorValues();
-                                    composition.finishRecording(soundLength, startPositionInWidth);
-                                } catch (Exception e) {
-                                    recording = false;
-                                    resetEditorValues();
-                                    composition.finishRecording(soundLength, startPositionInWidth);
+                                composition.checkLimits(soundLength, startPositionInWidth);
+                                soundLength += 3;
+                                if (recording) { // Die Aufnahme laueft weiter, wenn man nicht pausieren moechte.
+                                    // Aufnahme Animation
+                                    composition.updateSoundView();
                                 }
-                            });
-                        }
-                    }, 0, 50);
-                }
+
+                            } catch (SoundWillBeOutOfCompositionException e) {
+                                recording = false;
+                                resetEditorValues();
+                                composition.finishRecording(soundLength, startPositionInWidth);
+                            } catch (SoundWillOverlapException e) {
+                                recording = false;
+                                resetEditorValues();
+                                composition.finishRecording(soundLength, startPositionInWidth);
+                            } catch (SoundRecordingTimeException ex) {
+                                recording = false;
+                                resetEditorValues();
+                                composition.finishRecording(soundLength, startPositionInWidth);
+                            } catch (Exception e) {
+                                recording = false;
+                                resetEditorValues();
+                                composition.finishRecording(soundLength, startPositionInWidth);
+                            }
+                        });
+                    }
+                }, 0, 50);
             }
         } catch (RecordTimeOutExceededException ex) {
             resetEditorValues();
@@ -385,25 +355,29 @@ public class EditorActivity extends AppCompatActivity {
     }
 
 
-    //TODO more refactor
-    private boolean startRecord() throws RecordTimeOutExceededException {
+    private void startRecording() throws RecordTimeOutExceededException {
 
-        recording = true;
+        // Beim Zeitlimit oder bei einer Ueberlappung keine Aufnahme starten.
+        //TODO composition.checkLimits(soundLength, startPositionInWidth);
 
-        // disable play button
+        startPositionInWidth = composition.createSoundView(this);
+
         playBtn.setEnabled(false);
-
-        // deaktiviere Cursor
-        compositionView.deactivate();
 
         handler = new Handler();
 
-
-        // Start recorder
-        composition.startTrackRecorder();
-        return true;
+        recording = true;
 
     }
+
+    private void finishRecoding() {
+
+        resetEditorValues();
+
+        composition.finishRecording(soundLength, startPositionInWidth);
+
+    }
+
 
     private void updateStatusOnPlay() {
 
@@ -413,29 +387,13 @@ public class EditorActivity extends AppCompatActivity {
 
     private void resetEditorValues() {
 
-        // restart timer
-        restartTimer();
-
-        // Aufgenommenen Sound zum Track hinzufuegen
-
-        // Reactivate scrolling
-        //compositionView.activate();
-
-        // set recording flag
-        recording = false;
-
-        // enable play button again
-        playBtn.setEnabled(true);
-
-        layoutParams = null;
-
-    }
-
-    private void restartTimer() {
-        compositionView.activate();
         recordTimer.cancel();
         recordTimer = new Timer();
-        width = 0;
+
+        recording = false;
+
+        playBtn.setEnabled(true);
+
     }
 
 }

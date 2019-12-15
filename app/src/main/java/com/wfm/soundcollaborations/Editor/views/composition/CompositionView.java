@@ -16,15 +16,11 @@ import com.wfm.soundcollaborations.R;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
-import java.util.Map;
 import java.util.stream.Collectors;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
 
-/**
- * Created by mohammed on 10/21/17.
- */
 
 public class CompositionView extends LinearLayout
 {
@@ -60,10 +56,24 @@ public class CompositionView extends LinearLayout
 
     }
 
-    public void updateTrackWatches(Map<String, Integer> soundWidths) {
+    public void updateTrackWatches(int soundWidths) {
 
         trackViewContainers.forEach(c -> c.updateTrackWatch(soundWidths));
 
+
+    }
+
+    public String finishRecording() {
+
+        activate();
+
+        return trackViewContainers.stream()
+                .filter(c -> c.getIndex() == activeTrackIndex)
+                .map(c -> c.finishRecording(activeTrackIndex))
+                .filter(uuid -> uuid.isPresent())
+                .map(uuid -> uuid.get())
+                .findAny()
+                .get();
 
     }
 
@@ -132,14 +142,9 @@ public class CompositionView extends LinearLayout
             }
         });
 
-        holderScrollView.getViewTreeObserver().addOnScrollChangedListener(new ViewTreeObserver.OnScrollChangedListener()
-        {
-            @Override
-            public void onScrollChanged()
-            {
-                scrollPosition = holderScrollView.getScrollX();
-                mOnScrollChanged.onNewScrollPosition(holderScrollView.getScrollX());
-            }
+        holderScrollView.getViewTreeObserver().addOnScrollChangedListener(() -> {
+            scrollPosition = holderScrollView.getScrollX();
+            mOnScrollChanged.onNewScrollPosition(holderScrollView.getScrollX());
         });
 
         holderScrollView.setOverScrollMode(View.OVER_SCROLL_NEVER);
@@ -155,11 +160,15 @@ public class CompositionView extends LinearLayout
     }
 
 
-    public void addSoundView(Context context) {
+    public int addSoundView(Context context) {
+
+        deactivate();
 
         trackViewContainers.stream()
                 .filter(c -> c.getIndex() == activeTrackIndex)
                 .forEach(c -> c.addSoundView(context, scrollPosition));
+
+        return scrollPosition;
 
     }
 
@@ -244,11 +253,13 @@ public class CompositionView extends LinearLayout
         mOnScrollChanged = scrollChanged;
     }
 
-    public void activate() {
+
+    private void activate() {
         setEnabled(true);
     }
 
-    public void deactivate() {
+
+    private void deactivate() {
 
         setEnabled(false);
 
@@ -257,19 +268,11 @@ public class CompositionView extends LinearLayout
 
     public List<String> deleteSoundViews() {
 
-        //TODO check if required
-        //tracksViewsHolder.removeView(trackView);
-        //tracksViews.remove(trackView);
-
-        //trackView.deleteSoundViews();
-
-        //tracksViewsHolder.addView(trackView);
-        //tracksViews.add(trackView);
-
         return trackViewContainers.stream()
                 .map(TrackViewContainer::deleteSoundViews)
                 .flatMap(Collection::stream)
                 .collect(Collectors.toList());
+
 
     }
 

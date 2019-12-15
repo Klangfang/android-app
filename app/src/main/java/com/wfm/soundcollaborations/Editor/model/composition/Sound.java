@@ -32,24 +32,33 @@ public class Sound {
 
     public Integer duration;
 
-    public String creatorName;
+    private String creatorName;
 
     public String filePath;
 
-    public AudioPlayer player;
+    private AudioPlayer player;
 
     // only for new sounds is important TODO later separate SoundDownloaded and SoundRecorded class
-    public String uuid;
+    String uuid;
 
     public static class Builder {
 
+        private String uuid;
         private Integer trackNumber;
         private Integer startPosition;
         private Integer duration;
         private String filePath;
 
 
-        public Builder trackNumber(Integer trackNumber) {
+        Builder uuid(String uuid) {
+
+            this.uuid = uuid;
+            return this;
+
+        }
+
+
+        Builder trackNumber(Integer trackNumber) {
 
             this.trackNumber = trackNumber;
             return this;
@@ -57,7 +66,7 @@ public class Sound {
         }
 
 
-        public Builder startPosition(Integer startPosition) {
+        Builder startPosition(Integer startPosition) {
 
             this.startPosition = startPosition;
             return this;
@@ -83,7 +92,7 @@ public class Sound {
 
         public Sound build() {
 
-            return new Sound(trackNumber, startPosition, duration, filePath);
+            return new Sound(uuid, trackNumber, startPosition, duration, filePath);
 
         }
 
@@ -95,7 +104,7 @@ public class Sound {
     }
 
 
-    public Sound(Long id, Integer trackIndex, Integer startPosition, Integer duration, String filePath) {
+    private Sound(Long id, Integer trackIndex, Integer startPosition, Integer duration, String filePath) {
 
         this.id = id;
         this.trackIndex = trackIndex;
@@ -108,26 +117,26 @@ public class Sound {
     }
 
 
-    private Sound(Integer trackIndex, Integer startPosition, Integer duration, String filePath) {
+    private Sound(String uuid, Integer trackIndex, Integer startPosition, Integer duration, String filePath) {
 
+        this.uuid = uuid;
         this.trackIndex = trackIndex;
         this.startPosition = startPosition;
         this.duration = duration;
         this.filePath = filePath;
         this.creatorName = "talal"; // TODO it has to be set dynamically
-        uuid = UUID.randomUUID().toString();
 
     }
 
 
-    public boolean isRecored() {
+    boolean isRecorded() {
 
         return Objects.isNull(id);
 
     }
 
 
-    public void preparePlayer(Context context) {
+    void preparePlayer(Context context) {
         player = new AudioPlayer(context);
         player.addSounds(Arrays.asList(filePath));
     }
@@ -161,7 +170,7 @@ public class Sound {
         return player.isPlaying();
     }
 
-    public void seek(long positionInMillis) {
+    void seek(long positionInMillis) {
         long seekingPosition = calculateSeekingTimeForPlayer(positionInMillis);
         Log.d(TAG, "Track seeking Time is => "+seekingPosition);
         player.seek(seekingPosition);
@@ -192,7 +201,7 @@ public class Sound {
       //  return title;
     //}
 
-    public Integer getStartPosition() {
+    Integer getStartPosition() {
         return startPosition;
     }
 
@@ -202,7 +211,8 @@ public class Sound {
 
     }
 
-    public Integer calculateWidth() {
+
+    Integer calculateWidth() {
 
         long duration = getDuration();
         int width = 0;
