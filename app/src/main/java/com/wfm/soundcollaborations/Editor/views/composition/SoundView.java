@@ -6,12 +6,14 @@ import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.Path;
 import android.graphics.RectF;
+import android.os.AsyncTask;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.view.View;
 import android.widget.RelativeLayout;
 
 import com.wfm.soundcollaborations.Editor.activities.EditorActivity;
+import com.wfm.soundcollaborations.Editor.tasks.VisualizeSoundTask;
 import com.wfm.soundcollaborations.Editor.utils.DPUtils;
 import com.wfm.soundcollaborations.R;
 
@@ -116,16 +118,11 @@ public class SoundView extends View {
             soundView.setTrackIndex(trackIndex);
             soundView.setOnLongClickListener(soundView::update);
 
-            /*
-            VisualizeSoundTask soundTask = new VisualizeSoundTask(soundView,
-                    new Sound.Builder()
-                            .trackNumber(trackIndex)
-                            .startPosition(startPosition)
-                            .duration(duration)
-                            .filePath(url)
-                            .build());
-*/
-            //TODO why no there, why it need file path soundTask.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR); maybe for dowloaded sounds
+            if (soundView.getSoundViewStatus().equals(SoundViewStatus.DOWNLOAD)) {
+                VisualizeSoundTask soundTask = new VisualizeSoundTask(soundView, url);
+                soundTask.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+            }
+
 
             return soundView;
 

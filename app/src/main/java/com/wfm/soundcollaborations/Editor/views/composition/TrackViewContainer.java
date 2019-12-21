@@ -90,13 +90,15 @@ class TrackViewContainer {
 
     void addSoundView(Context context, Sound sound) {
 
-        trackView.addSoundView(new SoundView.Builder(context)
+        SoundView soundView = new SoundView.Builder(context)
                 .status(SoundViewStatus.DOWNLOAD)
                 .trackIndex(index)
                 .startPosition(sound.startPosition)
                 .duration(sound.duration)
                 .url(sound.filePath)
-                .build(this));
+                .build(this);
+
+        trackView.addSoundView(soundView);
 
     }
 

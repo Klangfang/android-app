@@ -82,7 +82,7 @@ public class Sound {
         }
 
 
-        public Builder filePath(String filePath) {
+        Builder filePath(String filePath) {
 
             this.filePath = filePath;
             return this;
@@ -131,7 +131,7 @@ public class Sound {
 
     boolean isRecorded() {
 
-        return Objects.isNull(id);
+        return Objects.nonNull(uuid);
 
     }
 
