@@ -9,12 +9,6 @@ import java.util.Arrays;
 import java.util.Objects;
 import java.util.UUID;
 
-import static com.wfm.soundcollaborations.Editor.utils.DPUtils.SOUND_SECOND_WIDTH;
-
-/**
- * Created by mohammed on 10/27/17.
- * Edited by Talal
- */
 
 public class Sound {
 
@@ -208,17 +202,6 @@ public class Sound {
     public Integer getDuration() {
 
         return duration;
-
-    }
-
-
-    Integer calculateWidth() {
-
-        long duration = getDuration();
-        int width = 0;
-        width += (duration / 1000) * SOUND_SECOND_WIDTH;
-        width += (duration % 1000) * SOUND_SECOND_WIDTH / 1000;
-        return width;
 
     }
 

@@ -13,7 +13,6 @@ import com.wfm.soundcollaborations.Editor.views.composition.listeners.TrackWatch
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
@@ -21,7 +20,9 @@ class TrackViewContainer {
 
     private static final String TAG = TrackViewContainer.class.getSimpleName();
 
-    private static final float watchViewPercentage = 0.17f;
+    private static final float WATCH_VIEW_PERCENTAGE = 0.17f;
+
+    private static final int DISPLAY_STEP = 3;
 
     private TrackView trackView;
 
@@ -90,7 +91,7 @@ class TrackViewContainer {
     }
 
 
-    void addSoundView(Context context, Sound sound) {
+    void addSoundView(Context context, Sound sound) throws SoundRecordingTimeException {
 
         SoundView soundView = new SoundView.Builder(context)
                 .status(SoundViewStatus.DOWNLOAD)
@@ -101,6 +102,10 @@ class TrackViewContainer {
                 .build(this);
 
         trackView.addSoundView(soundView);
+
+        float percentage = (DPUtils.getValueInDP(sound.duration) / DISPLAY_STEP) * WATCH_VIEW_PERCENTAGE;
+
+        increaseWatchViewPercentage(percentage);
 
     }
 
@@ -119,29 +124,19 @@ class TrackViewContainer {
     }
 
 
-    void updateSoundView(int amplitude) {
+    void updateSoundView(int amplitude) throws Throwable {
 
-        try {
+        SoundView soundView = getRecordedSound();
 
-            SoundView soundView = soundViews.stream()
-                    .filter(s -> s.getSoundViewStatus().equals(SoundViewStatus.RECORD))
-                    .findAny()
-                    .get();
+        soundView.addWave(amplitude);
+        soundView.invalidate();
+        Log.d(TAG, "Max Amplitude Recieved -> " + amplitude);
 
-            soundView.addWave(amplitude);
-            soundView.invalidate();
-            Log.d(TAG, "Max Amplitude Recieved -> " + amplitude);
+        ViewGroup.LayoutParams layoutParams = soundView.getLayoutParams();
+        layoutParams.width += DISPLAY_STEP;
+        soundView.setLayoutParams(layoutParams);
 
-            ViewGroup.LayoutParams layoutParams = soundView.getLayoutParams();
-            layoutParams.width = layoutParams.width + 3;
-            soundView.setLayoutParams(layoutParams);
-
-            increaseWatchViewPercentage(watchViewPercentage);
-
-        } catch (SoundRecordingTimeException e) {
-            //TODO LOG or popup
-            e.printStackTrace();
-        }
+        increaseWatchViewPercentage(WATCH_VIEW_PERCENTAGE);
 
     }
 
@@ -181,26 +176,26 @@ class TrackViewContainer {
     void updateTrackWatch(int soundWidths) {
 
         //TODO wait until sdk 6 Integer.divideUnsigned(soundWidths / 3)
-        decreaseTrackWatchPercentage((float) (soundWidths / 3) * 0.17f);
+        decreaseTrackWatchPercentage((float) (soundWidths / DISPLAY_STEP) * WATCH_VIEW_PERCENTAGE);
 
     }
 
 
     String finishRecording() throws Throwable {
 
-        SoundView recordedSound = getRecordedSound()
-                .orElseThrow(() -> new RuntimeException("Could not finish recording."));
-        return recordedSound.finishRecording();
+        return getRecordedSound().finishRecording();
 
     }
 
 
-    private Optional<SoundView> getRecordedSound() {
+    private SoundView getRecordedSound() throws Throwable {
 
         Predicate<? super SoundView> recordPredicate = SoundView::hasRecordState;
         return soundViews.stream()
                 .filter(recordPredicate)
-                .findAny();
+                .findAny()
+                .orElseThrow(() -> new RuntimeException("Could not finish recording."));
+
     }
 
 

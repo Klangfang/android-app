@@ -115,8 +115,12 @@ public class EditorActivity extends AppCompatActivity {
             compositionResponse = JsonUtil.fromJson(compositionJson, CompositionResponse.class);
             if (compositionResponse != null) {
 
-                composition = new Composition.CompositionConfigurer(compositionView)
-                        .build(compositionResponse);
+                try {
+                    composition = new Composition.CompositionConfigurer(compositionView)
+                            .build(compositionResponse);
+                } catch (Throwable t) {
+                    handleErrorOnRecording(t.getMessage());
+                }
 
             }
 
@@ -307,6 +311,7 @@ public class EditorActivity extends AppCompatActivity {
 
             startRecording();
 
+            //TODO warum braucht er lange bis er stoppt? sauberes runnable mit auto stop?
             recordTimer.scheduleAtFixedRate(new TimerTask() {
                 @Override
                 public void run() {
@@ -314,10 +319,9 @@ public class EditorActivity extends AppCompatActivity {
 
                         // do your work right here
                         try {
-
-                            composition.checkLimits(soundLength, startPositionInWidth);
-                            soundLength += 3;
                             if (recording) { // Die Aufnahme laueft weiter, wenn man nicht pausieren moechte.
+                                composition.checkLimits(soundLength, startPositionInWidth);
+                                soundLength += 3;
                                 // Aufnahme Animation
                                 composition.updateSoundView();
                             }
@@ -373,7 +377,6 @@ public class EditorActivity extends AppCompatActivity {
     private void resetEditorValues() {
 
         recordTimer.cancel();
-        recordTimer = new Timer();
 
         recording = false;
 
@@ -384,11 +387,15 @@ public class EditorActivity extends AppCompatActivity {
 
     private void setEditorValues() {
 
+        soundLength = 0;
+
         playBtn.setEnabled(false);
 
-        handler = new Handler();
-
         recording = true;
+
+        recordTimer = new Timer();
+
+        handler = new Handler();
 
     }
 

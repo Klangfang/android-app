@@ -61,33 +61,25 @@ public class TracksTimer {
             @Override
             public void run()
             {
-                mHandler.post(new Runnable() {
-                    @Override
-                    public void run()
-                    {
-                        if(cancelTimer)
-                        {
-                            mTimer.cancel();
-                            return;
-                        }
-                        if(positionInMillis >= Constants.COMPOSITION_LENGTH_IN_MILLI_SECONDS)
-                        {
-                            reset();
-                        }
+                mHandler.post(() -> {
+                    if (cancelTimer) {
+                        mTimer.cancel();
+                        return;
+                    }
+                    if (positionInMillis >= Constants.COMPOSITION_LENGTH_IN_MILLI_SECONDS) {
+                        reset();
+                    }
 
-                        for(int i=0; i<mTracks.size(); i++)
-                        {
-                            mTracks.get(i).play(i, positionInMillis);
-                        }
+                    for (int i = 0; i < mTracks.size(); i++) {
+                        mTracks.get(i).play(i, positionInMillis);
+                    }
 
-                        // increase scroll position
-                        circlesReached += 1;
-                        positionInMillis += 1;
-                        if(circlesReached >= 50)
-                        {
-                            mCompositionView.increaseScrollPosition(3);
-                            circlesReached = 0;
-                        }
+                    // increase scroll position
+                    circlesReached += 1;
+                    positionInMillis += 1;
+                    if (circlesReached >= 50) {
+                        mCompositionView.increaseScrollPosition(3);
+                        circlesReached = 0;
                     }
                 });
             }

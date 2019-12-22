@@ -90,7 +90,7 @@ public class Composition {
         mTracksTimer.seek(positionInMillis);
     }
 
-    public void updateSoundView() {
+    public void updateSoundView() throws Throwable {
 
         //width = width + 3;
         //soundLength = width;
@@ -221,8 +221,7 @@ public class Composition {
         }
 
 
-
-        public Composition build(CompositionResponse compositionResponse) {
+        public Composition build(CompositionResponse compositionResponse) throws Throwable {
 
             for (SoundResponse sndResp : compositionResponse.sounds) {
 

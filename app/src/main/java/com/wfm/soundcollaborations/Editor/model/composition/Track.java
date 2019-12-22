@@ -5,6 +5,7 @@ import android.content.Context;
 import com.wfm.soundcollaborations.Editor.exceptions.RecordTimeOutExceededException;
 import com.wfm.soundcollaborations.Editor.model.audio.AudioRecorder;
 import com.wfm.soundcollaborations.Editor.utils.AudioRecorderStatus;
+import com.wfm.soundcollaborations.Editor.utils.DPUtils;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -133,7 +134,7 @@ public class Track {
         //TODO why unterschiedliche uuids ?!!! Problem mit trackwatchview
         int soundsWidths = sounds.stream()
                 .filter(sound -> soundUUIDs.contains(sound.uuid))
-                .mapToInt(Sound::calculateWidth)
+                .mapToInt(sound -> DPUtils.getValueInDP(sound.duration))
                 .sum();
 
         sounds.removeIf(sound -> soundUUIDs.contains(sound.uuid));

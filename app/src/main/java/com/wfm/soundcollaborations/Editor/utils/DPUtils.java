@@ -10,8 +10,7 @@ public final class DPUtils {
     public static int getValueInDP(long valueInMs) {
 
         int integerValueInMs = Long.valueOf(valueInMs).intValue();
-        int valueInDP = 0;
-        valueInDP = (integerValueInMs / 1000) * SOUND_SECOND_WIDTH;
+        int valueInDP = (integerValueInMs / 1000) * SOUND_SECOND_WIDTH;
         valueInDP += (integerValueInMs % 1000) * SOUND_SECOND_WIDTH / 1000;
         return valueInDP;
 

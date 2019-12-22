@@ -87,11 +87,14 @@ public class TrackWatchView extends View {
         canvas.drawCircle(getWidth()/2, getWidth()/2, getWidth()/6-padding, innerCirclePaint);
     }
 
-    public void increasePercentage(float percentage)
-    {
+    public void increasePercentage(float percentage) {
+
         this.percentage = this.percentage + percentage;
-        if(percentage >= 100)
+        if (percentage >= 100) {
+
             this.percentage = 100;
+
+        }
         invalidate();
     }
 

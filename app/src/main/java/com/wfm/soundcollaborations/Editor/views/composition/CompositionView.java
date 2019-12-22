@@ -16,7 +16,6 @@ import com.wfm.soundcollaborations.R;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
-import java.util.Optional;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
@@ -24,9 +23,11 @@ import butterknife.BindView;
 import butterknife.ButterKnife;
 
 
-public class CompositionView extends LinearLayout
-{
+public class CompositionView extends LinearLayout {
+
     private static final String TAG = CompositionView.class.getSimpleName();
+
+    private static final int SCROLL_STEP = 3;
 
     @BindView(R.id.hsv_holder)
     CompositionScrollView holderScrollView;
@@ -48,13 +49,11 @@ public class CompositionView extends LinearLayout
 
     private OnScrollChanged mOnScrollChanged;
 
-    public void updateSoundView(int amplitude) {
+    public void updateSoundView(int amplitude) throws Throwable {
 
-        trackViewContainers.stream()
-                .filter(c -> c.getIndex() == activeTrackIndex)
-                .forEach(c -> c.updateSoundView(amplitude));
+        getActiveTrackViewContainer().updateSoundView(amplitude);
 
-        increaseScrollPosition(3);
+        increaseScrollPosition(SCROLL_STEP);
 
     }
 
@@ -69,20 +68,27 @@ public class CompositionView extends LinearLayout
 
         activate();
 
-        return getActiveTrackViewContainer()
-                .orElseThrow(() -> new Throwable("Could not finish recording"))
-                .finishRecording();
+        return getActiveTrackViewContainer().finishRecording();
 
     }
 
 
-    private Optional<TrackViewContainer> getActiveTrackViewContainer() {
+    private TrackViewContainer getActiveTrackViewContainer() throws Throwable {
 
-        Predicate<? super TrackViewContainer> activePredicate = c -> c.getIndex() == activeTrackIndex;
+        return getTrackViewContainer(activeTrackIndex);
+
+    }
+
+
+    private TrackViewContainer getTrackViewContainer(Integer trackIndex) throws Throwable {
+
+
+        Predicate<? super TrackViewContainer> activePredicate = c -> c.getIndex() == trackIndex;
 
         return trackViewContainers.stream()
                 .filter(activePredicate)
-                .findAny();
+                .findAny()
+                .orElseThrow(() -> new Throwable("Could not get track view container"));
 
     }
 
@@ -143,13 +149,8 @@ public class CompositionView extends LinearLayout
         playerLineTrianglePaint.setColor(Color.rgb(0x56, 0x56, 0x56));
 
         ViewTreeObserver viewTreeObserver = getViewTreeObserver();
-        viewTreeObserver.addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
-            @Override
-            public void onGlobalLayout()
-            {
-                spaceLayout.setPadding(getWidth()/2, 0, getWidth()/2, 0);
-            }
-        });
+        viewTreeObserver.addOnGlobalLayoutListener(() ->
+                spaceLayout.setPadding(getWidth() / 2, 0, getWidth() / 2, 0));
 
         holderScrollView.getViewTreeObserver().addOnScrollChangedListener(() -> {
             scrollPosition = holderScrollView.getScrollX();
@@ -160,11 +161,9 @@ public class CompositionView extends LinearLayout
     }
 
 
-    public void addSoundView(Context context, Sound sound) {
+    public void addSoundView(Context context, Sound sound) throws Throwable {
 
-        trackViewContainers.stream()
-                .filter(c -> c.getIndex() == sound.trackIndex)
-                .forEach(c -> c.addSoundView(context, sound));
+        getTrackViewContainer(sound.trackIndex).addSoundView(context, sound);
 
     }
 
@@ -237,16 +236,18 @@ public class CompositionView extends LinearLayout
         return this.scrollPosition;
     }
 
-    public void increaseScrollPosition(int value)
-    {
+    public void increaseScrollPosition(int value) {
+
         this.scrollPosition += value;
         holderScrollView.scrollTo(this.scrollPosition, 0);
+
     }
 
-    public void setScrollPosition(int value)
-    {
+    public void setScrollPosition(int value) {
+
         this.scrollPosition = value;
         holderScrollView.scrollTo(value, 0);
+
     }
 
 
