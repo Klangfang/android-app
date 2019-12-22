@@ -25,10 +25,6 @@ import androidx.core.content.ContextCompat;
 
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.ohoussein.playpause.PlayPauseView;
-import com.wfm.soundcollaborations.Editor.exceptions.RecordTimeOutExceededException;
-import com.wfm.soundcollaborations.Editor.exceptions.SoundRecordingTimeException;
-import com.wfm.soundcollaborations.Editor.exceptions.SoundWillBeOutOfCompositionException;
-import com.wfm.soundcollaborations.Editor.exceptions.SoundWillOverlapException;
 import com.wfm.soundcollaborations.Editor.model.composition.Composition;
 import com.wfm.soundcollaborations.Editor.views.composition.CompositionView;
 import com.wfm.soundcollaborations.R;
@@ -211,24 +207,40 @@ public class EditorActivity extends AppCompatActivity {
 
     @RequiresApi(api = Build.VERSION_CODES.JELLY_BEAN_MR1)
     @OnClick(R.id.btn_play)
-    public void play(View view)
-    {
+    public void play(View view) {
+
         composition.play();
         updateStatusOnPlay();
         ((PlayPauseView) view).toggle();
 
         // Toggle enabled and disabled state for recordBtn
-        if (composition.isPlaying()) {
-            recordBtn.setBackgroundTintList(ColorStateList.valueOf(getResources().
-                    getColor(R.color.grey_dark)));
-            recordBtn.setImageTintList(ColorStateList.valueOf(getResources().
-                    getColor(R.color.grey_middle)));
+        ColorStateList backgroundColor;
+        ColorStateList imageColor;
+        if (composition.isNotPlaying()) {
+
+            backgroundColor = ColorStateList.valueOf(getResources().
+                    getColor(R.color.color_primary));
+
+            imageColor = ColorStateList.valueOf(getResources().
+                    getColor(R.color.white));
+
         } else {
-            recordBtn.setBackgroundTintList(ColorStateList.valueOf(getResources().
-                    getColor(R.color.color_primary)));
-            recordBtn.setImageTintList(ColorStateList.valueOf(getResources().
-                    getColor(R.color.white)));
+
+            backgroundColor = ColorStateList.valueOf(getResources().
+                    getColor(R.color.grey_dark));
+
+            imageColor = ColorStateList.valueOf(getResources().
+                    getColor(R.color.grey_middle));
         }
+
+        recordBtn.setBackgroundTintList(backgroundColor);
+        recordBtn.setImageTintList(imageColor);
+
+    }
+
+    private void updateStatusOnPlay() {
+
+        recordBtn.setEnabled(composition.isNotPlaying());
 
     }
 
@@ -289,101 +301,74 @@ public class EditorActivity extends AppCompatActivity {
     }
 
 
-    //TODO more refactor
     public void record() {
 
         try {
 
-            // Stop recording
-            if (recording) {
+            startRecording();
 
-                finishRecoding();
+            recordTimer.scheduleAtFixedRate(new TimerTask() {
+                @Override
+                public void run() {
+                    handler.post(() -> {
 
-            } else {
+                        // do your work right here
+                        try {
 
-                startRecording();
-
-                recordTimer.scheduleAtFixedRate(new TimerTask() {
-                    @Override
-                    public void run() {
-                        handler.post(() -> {
-
-                            // do your work right here
-                            try {
-
-                                composition.checkLimits(soundLength, startPositionInWidth);
-                                soundLength += 3;
-                                if (recording) { // Die Aufnahme laueft weiter, wenn man nicht pausieren moechte.
-                                    // Aufnahme Animation
-                                    composition.updateSoundView();
-                                }
-
-                            } catch (SoundWillBeOutOfCompositionException e) {
-                                recording = false;
-                                resetEditorValues();
-                                composition.finishRecording(soundLength, startPositionInWidth);
-                            } catch (SoundWillOverlapException e) {
-                                recording = false;
-                                resetEditorValues();
-                                composition.finishRecording(soundLength, startPositionInWidth);
-                            } catch (SoundRecordingTimeException ex) {
-                                recording = false;
-                                resetEditorValues();
-                                composition.finishRecording(soundLength, startPositionInWidth);
-                            } catch (Exception e) {
-                                recording = false;
-                                resetEditorValues();
-                                composition.finishRecording(soundLength, startPositionInWidth);
+                            composition.checkLimits(soundLength, startPositionInWidth);
+                            soundLength += 3;
+                            if (recording) { // Die Aufnahme laueft weiter, wenn man nicht pausieren moechte.
+                                // Aufnahme Animation
+                                composition.updateSoundView();
                             }
-                        });
-                    }
-                }, 0, 50);
-            }
-        } catch (RecordTimeOutExceededException ex) {
-            resetEditorValues();
-            composition.finishRecording(soundLength, startPositionInWidth);
-       // } catch (SoundWillOverlapException ex) {
 
-        //} catch (SoundWillBeOutOfCompositionException ex) {
-        //} catch (SoundRecordingTimeException ex) {
-          //  resetEditorValues();
-            //composition.finishRecording(soundLength, startPositionInWidth);
-        } catch (Exception ex) {
-            Log.e(TAG, ex.getMessage());
+                        } catch (Throwable e) {
+
+                            handleErrorOnRecording(e.getMessage());
+
+                        }
+                    });
+                }
+            }, 0, 50);
+        } catch (Throwable t) {
+
+            handleErrorOnRecording(t.getMessage());
+
         }
 
     }
 
 
-    private void startRecording() throws RecordTimeOutExceededException {
+    private void handleErrorOnRecording(String message) {
 
-        // Beim Zeitlimit oder bei einer Ueberlappung keine Aufnahme starten.
-        //TODO composition.checkLimits(soundLength, startPositionInWidth);
-
-        startPositionInWidth = composition.createSoundView(this);
-
-        playBtn.setEnabled(false);
-
-        handler = new Handler();
-
-        recording = true;
-
-    }
-
-    private void finishRecoding() {
-
+        recording = false;
         resetEditorValues();
 
-        composition.finishRecording(soundLength, startPositionInWidth);
+        Toast.makeText(this, message, Toast.LENGTH_LONG)
+                .show();
 
-    }
-
-
-    private void updateStatusOnPlay() {
-
+        Log.e(TAG, message);
 
 
     }
+
+    private void startRecording() throws Throwable {
+
+        if (recording) {
+
+            resetEditorValues();
+
+            composition.finishRecording(soundLength, startPositionInWidth);
+
+        } else {
+
+            startPositionInWidth = composition.createSoundView(this);
+
+            setEditorValues();
+
+        }
+    }
+
 
     private void resetEditorValues() {
 
@@ -393,6 +378,17 @@ public class EditorActivity extends AppCompatActivity {
         recording = false;
 
         playBtn.setEnabled(true);
+
+    }
+
+
+    private void setEditorValues() {
+
+        playBtn.setEnabled(false);
+
+        handler = new Handler();
+
+        recording = true;
 
     }
 

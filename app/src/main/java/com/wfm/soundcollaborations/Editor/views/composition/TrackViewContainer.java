@@ -21,6 +21,8 @@ class TrackViewContainer {
 
     private static final String TAG = TrackViewContainer.class.getSimpleName();
 
+    private static final float watchViewPercentage = 0.17f;
+
     private TrackView trackView;
 
     private TrackWatchView trackWatchView;
@@ -117,7 +119,7 @@ class TrackViewContainer {
     }
 
 
-    void updateSoundView(Context context, int amplitude) {
+    void updateSoundView(int amplitude) {
 
         try {
 
@@ -134,8 +136,8 @@ class TrackViewContainer {
             layoutParams.width = layoutParams.width + 3;
             soundView.setLayoutParams(layoutParams);
 
+            increaseWatchViewPercentage(watchViewPercentage);
 
-            increaseViewWatchPercentage(context, 0.17f);
         } catch (SoundRecordingTimeException e) {
             //TODO LOG or popup
             e.printStackTrace();
@@ -184,30 +186,31 @@ class TrackViewContainer {
     }
 
 
-    Optional<String> finishRecording(int activeTrackIndex) {
+    String finishRecording() throws Throwable {
 
-        Optional<String> uuid = Optional.empty();
-        Predicate<? super SoundView> recordPredicate = SoundView::hasRecordState;
-
-        if (index == activeTrackIndex) {
-            uuid = Optional.of(soundViews.stream()
-                    .filter(recordPredicate)
-                    .map(SoundView::finishRecording)
-                    .findAny()
-                    .get());
-        }
-
-        return uuid;
+        SoundView recordedSound = getRecordedSound()
+                .orElseThrow(() -> new RuntimeException("Could not finish recording."));
+        return recordedSound.finishRecording();
 
     }
 
 
-    private void increaseViewWatchPercentage(Context context, float percentage)
+    private Optional<SoundView> getRecordedSound() {
+
+        Predicate<? super SoundView> recordPredicate = SoundView::hasRecordState;
+        return soundViews.stream()
+                .filter(recordPredicate)
+                .findAny();
+    }
+
+
+    private void increaseWatchViewPercentage(float percentage)
             throws SoundRecordingTimeException {
 
         if (isTrackWatchPercentageFull()) {
-            //TODO is context required here?!
-            throw new SoundRecordingTimeException(context);
+
+            throw new SoundRecordingTimeException();
+
         }
 
         trackWatchView.increasePercentage(percentage);

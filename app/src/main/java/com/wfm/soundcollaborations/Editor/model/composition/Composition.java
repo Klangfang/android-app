@@ -74,7 +74,7 @@ public class Composition {
 
         compositionView.setOnScrollChanged(position -> {
 
-            if(!mTracksTimer.isPlaying()) {
+            if (mTracksTimer.isNotPlaying()) {
                 int milliseconds = (int)(position * 16.6666);
                 seek(milliseconds);
                 Log.d(TAG, "Milliseconds => "+milliseconds+" position => "+ position);
@@ -98,17 +98,18 @@ public class Composition {
         //soundView.setLayoutParams(layoutParams);
 
         int maxAmplitude = tracks.get(compositionView.getActiveTrackIndex()).getMaxAmplitude();
-        compositionView.updateSoundView(compositionView.getContext(), maxAmplitude);
+        compositionView.updateSoundView(maxAmplitude);
 
     }
 
 
     //TODO why soundLegnthInWidth is not used?
-    public void finishRecording(Integer soundLengthInWidth, Integer startPositionInWidth) {
+    public void finishRecording(Integer soundLengthInWidth, Integer startPositionInWidth)
+            throws Throwable {
 
         int trackIndex = compositionView.getActiveTrackIndex();
         Track track = tracks.get(trackIndex);
-        tracks.remove(trackIndex);
+        tracks.remove(trackIndex); // TODO without remove
         track.stopTrackRecorder();
         Integer duration = track.getDuration();
         String filePath = track.getFilePath();
@@ -133,15 +134,14 @@ public class Composition {
     }
 
 
-    //TODO check this check and optimize it
     public void checkLimits(Integer soundLengthInWidth, Integer startPositionInWidth)
-            throws SoundWillOverlapException, SoundWillBeOutOfCompositionException, SoundRecordingTimeException {
+            throws Throwable {
 
         int activeTrackIndex = compositionView.getActiveTrackIndex();
         Track track = tracks.get(activeTrackIndex);
         if (track.getTrackRecorderStatus().equals(AudioRecorderStatus.STOPPED)) {
             finishRecording(soundLengthInWidth, startPositionInWidth);
-            throw new SoundRecordingTimeException(compositionView.getContext());
+            throw new SoundRecordingTimeException();
         }
 
         // Check Sound out of composition
@@ -149,7 +149,7 @@ public class Composition {
         if((cursorPositionInDP + SOUND_SECOND_WIDTH) > TRACK_WIDTH_IN_MS) {
             // Stop recorder
             finishRecording(soundLengthInWidth, startPositionInWidth);
-            throw new SoundWillBeOutOfCompositionException(compositionView.getContext());
+            throw new SoundWillBeOutOfCompositionException();
         }
 
         // check sound overlapping
@@ -163,7 +163,7 @@ public class Composition {
             int distanceToEndPos = cursorPositionInDP + 20 ;
             if (distanceToStartPos > startPositionInDP && distanceToEndPos < endPositionInDP) {
                 finishRecording(soundLengthInWidth, startPositionInWidth);
-                throw new SoundWillOverlapException(compositionView.getContext());
+                throw new SoundWillOverlapException();
             }
         }
 
@@ -295,9 +295,9 @@ public class Composition {
     }
 
 
-    public boolean isPlaying() {
+    public boolean isNotPlaying() {
 
-        return mTracksTimer.isPlaying();
+        return mTracksTimer.isNotPlaying();
 
     }
 

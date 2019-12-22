@@ -39,10 +39,14 @@ public class TracksTimer {
     public void playOrPause() {
 
 
-        if (isPlaying()) {
-            pause();
-        } else {
+        if (isNotPlaying()) {
+
             play();
+
+        } else {
+
+            pause();
+
         }
 
     }
@@ -137,9 +141,9 @@ public class TracksTimer {
     }
 
 
-    public boolean isPlaying() {
+    public boolean isNotPlaying() {
 
-        return playing;
+        return !playing;
 
     }
 

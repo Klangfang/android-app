@@ -16,6 +16,8 @@ import com.wfm.soundcollaborations.R;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.Optional;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 import butterknife.BindView;
@@ -46,11 +48,11 @@ public class CompositionView extends LinearLayout
 
     private OnScrollChanged mOnScrollChanged;
 
-    public void updateSoundView(Context context, int amplitude) {
+    public void updateSoundView(int amplitude) {
 
         trackViewContainers.stream()
                 .filter(c -> c.getIndex() == activeTrackIndex)
-                .forEach(c -> c.updateSoundView(context, amplitude));
+                .forEach(c -> c.updateSoundView(amplitude));
 
         increaseScrollPosition(3);
 
@@ -63,17 +65,24 @@ public class CompositionView extends LinearLayout
 
     }
 
-    public String finishRecording() {
+    public String finishRecording() throws Throwable {
 
         activate();
 
+        return getActiveTrackViewContainer()
+                .orElseThrow(() -> new Throwable("Could not finish recording"))
+                .finishRecording();
+
+    }
+
+
+    private Optional<TrackViewContainer> getActiveTrackViewContainer() {
+
+        Predicate<? super TrackViewContainer> activePredicate = c -> c.getIndex() == activeTrackIndex;
+
         return trackViewContainers.stream()
-                .filter(c -> c.getIndex() == activeTrackIndex)
-                .map(c -> c.finishRecording(activeTrackIndex))
-                .filter(uuid -> uuid.isPresent())
-                .map(uuid -> uuid.get())
-                .findAny()
-                .get();
+                .filter(activePredicate)
+                .findAny();
 
     }
 

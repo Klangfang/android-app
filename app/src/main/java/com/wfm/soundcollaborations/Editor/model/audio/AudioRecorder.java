@@ -67,7 +67,7 @@ public class AudioRecorder implements MediaRecorder.OnInfoListener
             startTime = Long.valueOf(System.currentTimeMillis()).intValue();
         } else if (status.equals(AudioRecorderStatus.RECORDING) && recordedTime >= MAX_DURATION) {
             status = AudioRecorderStatus.STOPPED;
-            throw new RecordTimeOutExceededException();
+            throw new RecordTimeOutExceededException("Record has reached maximum time.");
         }
     }
 

@@ -1,16 +1,11 @@
 package com.wfm.soundcollaborations.Editor.exceptions;
 
 
-import android.content.Context;
-import android.widget.Toast;
+public class SoundWillOverlapException extends Throwable {
 
-/**
- * Created by mohammed on 11/4/17.
- */
+    public SoundWillOverlapException() {
 
-public class SoundWillOverlapException extends Exception {
+        super("Recording will overlap with other sounds!");
 
-    public SoundWillOverlapException(Context context) {
-        Toast.makeText(context, "Recording will overlap with other sounds!", Toast.LENGTH_LONG).show();
     }
 }
