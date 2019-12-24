@@ -1,16 +1,16 @@
 package com.wfm.soundcollaborations.activities;
 
 import android.os.Bundle;
-import androidx.appcompat.app.ActionBar;
-import androidx.appcompat.widget.Toolbar;
-
 import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.RelativeLayout;
-import androidx.appcompat.widget.SwitchCompat;
 import android.widget.TextView;
+
+import androidx.appcompat.app.ActionBar;
+import androidx.appcompat.widget.SwitchCompat;
+import androidx.appcompat.widget.Toolbar;
 
 import com.wfm.soundcollaborations.R;
 import com.wfm.soundcollaborations.database.SoundEntity;
@@ -143,7 +143,7 @@ public class SaveSoundActivity extends BaseActivity implements FragmentObserver
         }
 
         /*if (fileURI != null ) {
-            soundPlayerView.play(fileURI);
+            soundPlayerView.playOrPause(fileURI);
 
             int[] as = getIntent().getExtras().getIntArray("amplitudes");
             for (int a : as){
@@ -152,7 +152,7 @@ public class SaveSoundActivity extends BaseActivity implements FragmentObserver
 
             soundPlayerView.visualize(amplitudes);
         } else {
-            soundPlayerView.play(soundID);
+            soundPlayerView.playOrPause(soundID);
 
             List<TagEntity> tagEntries;
             try {

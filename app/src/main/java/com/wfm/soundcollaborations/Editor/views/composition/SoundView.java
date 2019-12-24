@@ -20,6 +20,8 @@ import com.wfm.soundcollaborations.R;
 import java.util.ArrayList;
 import java.util.UUID;
 
+import static com.wfm.soundcollaborations.Editor.views.composition.SoundViewStatus.SELECT_FOR_DELETE;
+
 
 public class SoundView extends View {
     private static final String TAG = SoundView.class.getSimpleName();
@@ -231,7 +233,7 @@ public class SoundView extends View {
     // Set and change fill color of recorded sound when longclicked
     private void refresh() {
 
-        soundViewStatus = hasFinishRecordState() ? SoundViewStatus.SELECT_FOR_DELETE : SoundViewStatus.RECORD_FINISH;
+        soundViewStatus = hasFinishRecordState() ? SELECT_FOR_DELETE : SoundViewStatus.RECORD_FINISH;
         deleteBtn.setEnabled(trackViewContainer.hasDeleteSoundViews() || hasDeleteState());
         int color = hasFinishRecordState() ? RECORD_COLOR : SELECT_FOR_DELETE_COLOR;
         rectPaint.setColor(getResources().getColor(color));
@@ -263,7 +265,7 @@ public class SoundView extends View {
 
     public boolean hasDeleteState() {
 
-        return soundViewStatus.equals(SoundViewStatus.SELECT_FOR_DELETE);
+        return soundViewStatus.equals(SELECT_FOR_DELETE);
 
     }
 
@@ -299,6 +301,13 @@ public class SoundView extends View {
     public SoundViewStatus getSoundViewStatus() {
 
         return soundViewStatus;
+
+    }
+
+
+    public boolean isSelectedForDelete() {
+
+        return soundViewStatus.equals(SELECT_FOR_DELETE);
 
     }
 

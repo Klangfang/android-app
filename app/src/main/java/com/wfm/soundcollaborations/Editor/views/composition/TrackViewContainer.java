@@ -16,13 +16,15 @@ import java.util.List;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
+import static com.wfm.soundcollaborations.Editor.utils.DPUtils.TRACK_HEIGHT;
+import static com.wfm.soundcollaborations.Editor.utils.DPUtils.TRACK_WIDTH_IN_MS;
+import static com.wfm.soundcollaborations.Editor.views.composition.CompositionView.SCROLL_STEP;
+
 class TrackViewContainer {
 
     private static final String TAG = TrackViewContainer.class.getSimpleName();
 
     private static final float WATCH_VIEW_PERCENTAGE = 0.17f;
-
-    private static final int DISPLAY_STEP = 3;
 
     private TrackView trackView;
 
@@ -60,13 +62,13 @@ class TrackViewContainer {
 
             TrackView trackView = new TrackView(context);
             trackView.setOnClickListener(new TrackViewOnClickListener(compositionView, index));
-            LinearLayout.LayoutParams trackParams  = new LinearLayout.LayoutParams(DPUtils.TRACK_WIDTH_IN_MS, DPUtils.TRACK_HEIGHT);
+            LinearLayout.LayoutParams trackParams = new LinearLayout.LayoutParams(TRACK_WIDTH_IN_MS, TRACK_HEIGHT);
             trackParams.setMargins(0, 10, 0, 10);
             trackView.setLayoutParams(trackParams);
 
             TrackWatchView trackWatchView = new TrackWatchView(context);
             trackWatchView.setOnClickListener(new TrackWatchViewOnClickListener(compositionView, index));
-            LinearLayout.LayoutParams watchParams  = new LinearLayout.LayoutParams(DPUtils.TRACK_HEIGHT, DPUtils.TRACK_HEIGHT);
+            LinearLayout.LayoutParams watchParams = new LinearLayout.LayoutParams(TRACK_HEIGHT, TRACK_HEIGHT);
             watchParams.setMargins(10, 10, 0, 10);
             trackWatchView.setLayoutParams(watchParams);
 
@@ -103,7 +105,7 @@ class TrackViewContainer {
 
         trackView.addSoundView(soundView);
 
-        float percentage = (DPUtils.getValueInDP(sound.duration) / DISPLAY_STEP) * WATCH_VIEW_PERCENTAGE;
+        float percentage = (DPUtils.getValueInDP(sound.duration) / SCROLL_STEP) * WATCH_VIEW_PERCENTAGE;
 
         increaseWatchViewPercentage(percentage);
 
@@ -133,7 +135,7 @@ class TrackViewContainer {
         Log.d(TAG, "Max Amplitude Recieved -> " + amplitude);
 
         ViewGroup.LayoutParams layoutParams = soundView.getLayoutParams();
-        layoutParams.width += DISPLAY_STEP;
+        layoutParams.width += SCROLL_STEP;
         soundView.setLayoutParams(layoutParams);
 
         increaseWatchViewPercentage(WATCH_VIEW_PERCENTAGE);
@@ -176,7 +178,7 @@ class TrackViewContainer {
     void updateTrackWatch(int soundWidths) {
 
         //TODO wait until sdk 6 Integer.divideUnsigned(soundWidths / 3)
-        decreaseTrackWatchPercentage((float) (soundWidths / DISPLAY_STEP) * WATCH_VIEW_PERCENTAGE);
+        decreaseTrackWatchPercentage((float) (soundWidths / SCROLL_STEP) * WATCH_VIEW_PERCENTAGE);
 
     }
 
@@ -228,21 +230,29 @@ class TrackViewContainer {
     }
 
 
-    void activate() {
+    void activate(boolean activate) {
 
-        trackView.activate();
-        trackWatchView.activate();
+        if (activate) {
+
+            trackView.activate();
+            trackWatchView.activate();
+
+        } else {
+
+            trackView.deactivate();
+            trackWatchView.deactivate();
+
+        }
 
     }
 
 
-    void deactivate() {
+    void enable(boolean enable) {
 
-        trackView.deactivate();
-        trackWatchView.deactivate();
+        trackView.setEnabled(enable);
+        trackWatchView.setEnabled(enable);
 
     }
-
 
     TrackView getTrackView() {
         return trackView;
@@ -262,7 +272,7 @@ class TrackViewContainer {
     boolean hasDeleteSoundViews() {
 
         return soundViews.stream()
-                .anyMatch(s -> s.getSoundViewStatus().equals(SoundViewStatus.SELECT_FOR_DELETE));
+                .anyMatch(SoundView::isSelectedForDelete);
 
     }
 

@@ -15,13 +15,17 @@ import java.util.stream.Collectors;
 
 public class Track {
 
+    private int trackNumber;
     private List<Sound> sounds = new ArrayList<>();
     private AudioRecorder recorder;
     private int recorderTime;
 
 
-    Track() {
+    Track(int trackNumber) {
+
+        this.trackNumber = trackNumber;
         recorder = new AudioRecorder();
+
     }
 
 
@@ -40,7 +44,7 @@ public class Track {
     }
 
 
-    protected void addSound(Sound sound, Context context) {
+    void addSound(Sound sound, Context context) {
 
         sound.preparePlayer(context);
         sounds.add(sound);
@@ -52,30 +56,25 @@ public class Track {
         this.sounds.addAll(sounds);
     }
 
+
     void prepare(Context context) throws NullPointerException {
-        for (Sound sound : sounds) {
-            sound.preparePlayer(context);
-        }
+
+        sounds.forEach(s -> s.preparePlayer(context));
 
     }
 
-    public void play(int trackNumber, int positionInMillis) {
-        for (Sound sound : sounds) {
-            sound.play(trackNumber, positionInMillis);
-        }
-    }
 
-    public void pause(int trackNumber) {
-        for (Sound sound : sounds) {
-            sound.pause(trackNumber);
-        }
+    void playOrPause(boolean pressPlay, int positionInMillis) {
+
+        sounds.forEach(s -> s.playOrPause(pressPlay, positionInMillis));
+
     }
 
 
     void seek(int positionInMillis) {
-        for (Sound sound : sounds) {
-            sound.seek(positionInMillis);
-        }
+
+        sounds.forEach(s -> s.seek(positionInMillis));
+
     }
 
     // after adding a new sound to the list of sounds, we sort our list of sounds again and create a new player with this.
@@ -106,7 +105,7 @@ public class Track {
     }
 
     // Liefert den erzeugten Sound-Dateipfad zurueck
-    public String getFilePath() {
+    String getFilePath() {
         return recorder.getRecordedFilePath();
     }
 
@@ -142,4 +141,12 @@ public class Track {
         return soundsWidths;
 
     }
+
+    boolean isPlaying() {
+
+        return sounds.stream()
+                .anyMatch(Sound::isPlaying);
+
+    }
+
 }

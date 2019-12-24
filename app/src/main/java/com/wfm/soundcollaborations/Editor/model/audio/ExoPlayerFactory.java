@@ -12,6 +12,9 @@ import com.google.android.exoplayer2.util.Util;
 
 import java.util.List;
 
+import static com.google.android.exoplayer2.ExoPlayerFactory.newSimpleInstance;
+
+
 public class ExoPlayerFactory {
 
     private static final String APP_NAME = "Klangfang";
@@ -23,7 +26,7 @@ public class ExoPlayerFactory {
     public void createExoPlayer(Context context) {
 
         this.context = context;
-        player = com.google.android.exoplayer2.ExoPlayerFactory.newSimpleInstance(context);
+        player = newSimpleInstance(context);
 
     }
 
@@ -44,44 +47,32 @@ public class ExoPlayerFactory {
 
     }
 
-    public int getBufferedPercentage() {
-
-        return player.getBufferedPercentage();
-
-    }
-
     public SimpleExoPlayer getPlayer() {
 
         return player;
 
     }
 
-    public void release() {
+    void release() {
 
         player.stop();
         player.release();
 
     }
 
-    public void pause(boolean playWhenReady) {
+    void playOrPause(boolean play) {
 
-        player.setPlayWhenReady(playWhenReady);
-
-    }
-
-    public void play(boolean playWhenReady) {
-
-        player.setPlayWhenReady(playWhenReady);
+        player.setPlayWhenReady(play);
 
     }
 
-    public void seek(long positionsMs) {
+    void seek(long positionsMs) {
 
         player.seekTo(0, positionsMs);
 
     }
 
-    public void reset() {
+    void reset() {
 
         player.seekTo(0);
 

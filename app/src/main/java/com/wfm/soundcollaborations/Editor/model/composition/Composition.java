@@ -6,9 +6,6 @@ import android.util.Log;
 import android.widget.Toast;
 
 import com.wfm.soundcollaborations.Editor.exceptions.RecordTimeOutExceededException;
-import com.wfm.soundcollaborations.Editor.exceptions.SoundRecordingTimeException;
-import com.wfm.soundcollaborations.Editor.exceptions.SoundWillBeOutOfCompositionException;
-import com.wfm.soundcollaborations.Editor.exceptions.SoundWillOverlapException;
 import com.wfm.soundcollaborations.Editor.utils.AudioRecorderStatus;
 import com.wfm.soundcollaborations.Editor.utils.DPUtils;
 import com.wfm.soundcollaborations.Editor.views.composition.CompositionView;
@@ -26,15 +23,21 @@ import java.util.stream.Stream;
 import static android.content.Intent.FLAG_ACTIVITY_NEW_TASK;
 import static com.wfm.soundcollaborations.Editor.utils.DPUtils.SOUND_SECOND_WIDTH;
 import static com.wfm.soundcollaborations.Editor.utils.DPUtils.TRACK_WIDTH_IN_MS;
+import static com.wfm.soundcollaborations.Editor.views.composition.CompositionView.SCROLL_STEP;
 
 public class Composition {
 
-    private static final String TAG = CompositionBuilder.class.getSimpleName();
-
+    private static final String TAG = Composition.class.getSimpleName();
 
     private final CompositionView compositionView;
     private final Long compositionId;
     private final String title;
+    private final Context context;
+
+    private int startPositionInDP;
+    private int soundLengthInDP;
+
+    private boolean recording;
 
     private List<Track> tracks;
 
@@ -44,11 +47,13 @@ public class Composition {
     private CompositionServiceClient csClient;
 
 
-    private Composition(CompositionView compositionView,
+    private Composition(Context context,
+                        CompositionView compositionView,
                         Long compositionId,
                         String title,
                         List<Track> tracks) {
 
+        this.context = context;
         this.compositionView = compositionView;
         this.compositionId = compositionId;
         this.title = title;
@@ -65,7 +70,7 @@ public class Composition {
     // for playing and pausing sounds
     private void createTracksController() {
 
-        mTracksTimer = new TracksTimer(tracks, compositionView);
+        mTracksTimer = new TracksTimer(context, tracks, compositionView);
 
     }
 
@@ -74,10 +79,10 @@ public class Composition {
 
         compositionView.setOnScrollChanged(position -> {
 
-            if (mTracksTimer.isNotPlaying()) {
+            if (!isPlaying()) {
                 int milliseconds = (int)(position * 16.6666);
                 seek(milliseconds);
-                Log.d(TAG, "Milliseconds => "+milliseconds+" position => "+ position);
+                Log.d(TAG, String.format("Milliseconds =>  %d position => %d", milliseconds, position));
             }
 
         });
@@ -85,27 +90,69 @@ public class Composition {
     }
 
 
-    private void seek(int positionInMillis)
-    {
+    private void seek(int positionInMillis) {
+
         mTracksTimer.seek(positionInMillis);
-    }
-
-    public void updateSoundView() throws Throwable {
-
-        //width = width + 3;
-        //soundLength = width;
-        //layoutParams.width = width;
-        //soundView.setLayoutParams(layoutParams);
-
-        int maxAmplitude = tracks.get(compositionView.getActiveTrackIndex()).getMaxAmplitude();
-        compositionView.updateSoundView(maxAmplitude);
 
     }
 
 
-    //TODO why soundLegnthInWidth is not used?
-    public void finishRecording(Integer soundLengthInWidth, Integer startPositionInWidth)
-            throws Throwable {
+    public StopReason simulateRecording() throws Throwable {
+
+        if (isRecording()) {
+
+            StopReason stopReason = checkStop();
+
+            if (stopReason.equals(StopReason.NO_STOP)) {
+
+                increaseSoundLength();
+
+                int maxAmplitude = tracks.get(compositionView.getActiveTrackIndex()).getMaxAmplitude();
+                compositionView.updateSoundView(maxAmplitude);
+
+                recording = true;
+            }
+
+            return stopReason;
+        }
+
+        return StopReason.NO_STOP;
+
+    }
+
+    private void increaseSoundLength() {
+
+        this.soundLengthInDP += SCROLL_STEP;
+
+    }
+
+
+    public boolean startRecording(Context context) throws Throwable {
+
+        if (isNotRecording()) {
+
+            startPositionInDP = compositionView.addSoundView(context);
+
+            soundLengthInDP = 0;
+
+            startTrackRecorder();
+
+            recording = true;
+
+        } else {
+
+            finishRecording();
+
+        }
+
+        return isRecording();
+
+    }
+
+
+    private void finishRecording() throws Throwable {
+
+        recording = false;
 
         int trackIndex = compositionView.getActiveTrackIndex();
         Track track = tracks.get(trackIndex);
@@ -114,13 +161,13 @@ public class Composition {
         Integer duration = track.getDuration();
         String filePath = track.getFilePath();
 
-        if (filePath != null && soundLengthInWidth != null && startPositionInWidth != null) {
+        if (filePath != null) {
 
             String uuid = compositionView.finishRecording();
             Sound sound = new Sound.Builder()
                     .uuid(uuid)
                     .trackNumber(trackIndex)
-                    .startPosition(DPUtils.getPositionInMs(startPositionInWidth))
+                    .startPosition(DPUtils.getPositionInMs(startPositionInDP))
                     .duration(duration)
                     .filePath(filePath)
                     .build();
@@ -134,22 +181,22 @@ public class Composition {
     }
 
 
-    public void checkLimits(Integer soundLengthInWidth, Integer startPositionInWidth)
-            throws Throwable {
+    private StopReason checkStop() {
 
         int activeTrackIndex = compositionView.getActiveTrackIndex();
         Track track = tracks.get(activeTrackIndex);
         if (track.getTrackRecorderStatus().equals(AudioRecorderStatus.STOPPED)) {
-            finishRecording(soundLengthInWidth, startPositionInWidth);
-            throw new SoundRecordingTimeException();
+
+            return StopReason.MAXIMUM_RECORDING_TIME_REACHED;
+
         }
 
         // Check Sound out of composition
         int cursorPositionInDP = this.compositionView.getScrollPosition();
         if((cursorPositionInDP + SOUND_SECOND_WIDTH) > TRACK_WIDTH_IN_MS) {
-            // Stop recorder
-            finishRecording(soundLengthInWidth, startPositionInWidth);
-            throw new SoundWillBeOutOfCompositionException();
+
+            return StopReason.COMPOSITION_END_REACHED;
+
         }
 
         // check sound overlapping
@@ -162,10 +209,13 @@ public class Composition {
             int distanceToStartPos = cursorPositionInDP + 20 ;
             int distanceToEndPos = cursorPositionInDP + 20 ;
             if (distanceToStartPos > startPositionInDP && distanceToEndPos < endPositionInDP) {
-                finishRecording(soundLengthInWidth, startPositionInWidth);
-                throw new SoundWillOverlapException();
+
+                return StopReason.SOUND_RECORD_OVERLAP;
+
             }
         }
+
+        return StopReason.NO_STOP;
 
     }
 
@@ -189,23 +239,38 @@ public class Composition {
 
     }
 
+    public void enable() {
+
+        compositionView.enable(true);
+
+    }
+
 
     public static class CompositionConfigurer {
 
-        private final CompositionView compositionView;
+        private Context context;
+        private CompositionView compositionView;
 
         private Long compositionId;
         private String title;
 
         private List<Track> tracks = new ArrayList<>();
 
-        public CompositionConfigurer(CompositionView compositionView) {
+        public CompositionConfigurer compositionView(CompositionView compositionView) {
 
             this.compositionView = compositionView;
 
-            for(int i=0; i<4; i++) {
+            return this;
 
-                Track track = new Track();
+        }
+
+        public CompositionConfigurer(Context context) {
+
+            this.context = context;
+
+            for (int i = 0; i < 4; i++) {
+
+                Track track = new Track(i);
                 tracks.add(track);
 
             }
@@ -253,7 +318,7 @@ public class Composition {
 
         public Composition build() {
 
-            return new Composition(compositionView, compositionId, title, tracks);
+            return new Composition(context, compositionView, compositionId, title, tracks);
 
         }
 
@@ -267,17 +332,6 @@ public class Composition {
     }
 
 
-    public int createSoundView(Context context) throws RecordTimeOutExceededException {
-
-        int scrollPosition = compositionView.addSoundView(context);
-
-        startTrackRecorder();
-
-        return scrollPosition;
-
-    }
-
-
     private Stream<Sound> getRecordedSounds() {
 
         return tracks.stream()
@@ -287,16 +341,9 @@ public class Composition {
     }
 
 
-    public void play() {
+    public void playOrPause(boolean pressPlay) {
 
-        mTracksTimer.playOrPause();
-
-    }
-
-
-    public boolean isNotPlaying() {
-
-        return mTracksTimer.isNotPlaying();
+        mTracksTimer.playOrPause(pressPlay);
 
     }
 
@@ -341,5 +388,24 @@ public class Composition {
 
     }
 
+    private boolean isNotRecording() {
+
+        return !isRecording();
+
+    }
+
+
+    private boolean isRecording() {
+
+        return recording;
+    }
+
+
+    private boolean isPlaying() {
+
+        return tracks.stream()
+                .anyMatch(Track::isPlaying);
+
+    }
 
 }

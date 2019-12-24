@@ -27,7 +27,7 @@ public class CompositionView extends LinearLayout {
 
     private static final String TAG = CompositionView.class.getSimpleName();
 
-    private static final int SCROLL_STEP = 3;
+    public static final int SCROLL_STEP = 3;
 
     @BindView(R.id.hsv_holder)
     CompositionScrollView holderScrollView;
@@ -48,49 +48,6 @@ public class CompositionView extends LinearLayout {
     private int scrollPosition = 0;
 
     private OnScrollChanged mOnScrollChanged;
-
-    public void updateSoundView(int amplitude) throws Throwable {
-
-        getActiveTrackViewContainer().updateSoundView(amplitude);
-
-        increaseScrollPosition(SCROLL_STEP);
-
-    }
-
-    public void updateTrackWatches(int soundWidths) {
-
-        trackViewContainers.forEach(c -> c.updateTrackWatch(soundWidths));
-
-
-    }
-
-    public String finishRecording() throws Throwable {
-
-        activate();
-
-        return getActiveTrackViewContainer().finishRecording();
-
-    }
-
-
-    private TrackViewContainer getActiveTrackViewContainer() throws Throwable {
-
-        return getTrackViewContainer(activeTrackIndex);
-
-    }
-
-
-    private TrackViewContainer getTrackViewContainer(Integer trackIndex) throws Throwable {
-
-
-        Predicate<? super TrackViewContainer> activePredicate = c -> c.getIndex() == trackIndex;
-
-        return trackViewContainers.stream()
-                .filter(activePredicate)
-                .findAny()
-                .orElseThrow(() -> new Throwable("Could not get track view container"));
-
-    }
 
 
     public interface OnScrollChanged
@@ -161,6 +118,25 @@ public class CompositionView extends LinearLayout {
     }
 
 
+    private TrackViewContainer getActiveTrackViewContainer() throws Throwable {
+
+        return getTrackViewContainer(activeTrackIndex);
+
+    }
+
+
+    private TrackViewContainer getTrackViewContainer(Integer trackIndex) throws Throwable {
+
+
+        Predicate<? super TrackViewContainer> activePredicate = c -> c.getIndex() == trackIndex;
+
+        return trackViewContainers.stream()
+                .filter(activePredicate)
+                .findAny()
+                .orElseThrow(() -> new Throwable("Could not get track view container"));
+
+    }
+
     public void addSoundView(Context context, Sound sound) throws Throwable {
 
         getTrackViewContainer(sound.trackIndex).addSoundView(context, sound);
@@ -168,37 +144,71 @@ public class CompositionView extends LinearLayout {
     }
 
 
-    public int addSoundView(Context context) {
+    public int addSoundView(Context context) throws Throwable {
 
-        deactivate();
+        enable(false);
 
-        trackViewContainers.stream()
-                .filter(c -> c.getIndex() == activeTrackIndex)
-                .forEach(c -> c.addSoundView(context, scrollPosition));
+        getActiveTrackViewContainer().addSoundView(context, scrollPosition);
 
         return scrollPosition;
 
     }
 
 
+    public void updateSoundView(int amplitude) throws Throwable {
+
+        getActiveTrackViewContainer().updateSoundView(amplitude);
+
+        increaseScrollPosition();
+
+    }
+
+    public void updateTrackWatches(int soundWidths) {
+
+        trackViewContainers.forEach(c -> c.updateTrackWatch(soundWidths));
+
+
+    }
+
+    public String finishRecording() throws Throwable {
+
+        enable(true);
+
+        return getActiveTrackViewContainer().finishRecording();
+
+    }
+
+
+    public void enable(boolean enable) {
+
+        setEnabled(enable);
+
+        trackViewContainers.forEach(c -> c.enable(enable));
+
+    }
+
+
     public void refreshActiveTrackIndex(int trackIndex) {
 
-        trackViewContainers.forEach(TrackViewContainer::deactivate);
+        trackViewContainers.forEach(c -> c.activate(false));
 
         trackViewContainers.stream()
                 .filter(c -> c.getIndex() == trackIndex)
-                .forEach(TrackViewContainer::activate);
+                .forEach(c -> c.activate(true));
 
         activeTrackIndex = trackIndex;
 
     }
 
+
     @Override
-    protected void dispatchDraw(Canvas canvas)
-    {
+    protected void dispatchDraw(Canvas canvas) {
+
         super.dispatchDraw(canvas);
         drawPlayerLine(canvas);
+
     }
+
 
     private void drawPlayerLine(Canvas canvas) {
 
@@ -236,9 +246,9 @@ public class CompositionView extends LinearLayout {
         return this.scrollPosition;
     }
 
-    public void increaseScrollPosition(int value) {
+    public void increaseScrollPosition() {
 
-        this.scrollPosition += value;
+        this.scrollPosition += SCROLL_STEP;
         holderScrollView.scrollTo(this.scrollPosition, 0);
 
     }
@@ -252,27 +262,16 @@ public class CompositionView extends LinearLayout {
 
 
     @Override
-    public void setEnabled(boolean enabled)
-    {
+    public void setEnabled(boolean enabled) {
+
         super.setEnabled(enabled);
         holderScrollView.setEnabled(enabled);
+
     }
 
     public void setOnScrollChanged(OnScrollChanged scrollChanged)
     {
         mOnScrollChanged = scrollChanged;
-    }
-
-
-    private void activate() {
-        setEnabled(true);
-    }
-
-
-    private void deactivate() {
-
-        setEnabled(false);
-
     }
 
 

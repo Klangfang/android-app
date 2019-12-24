@@ -3,9 +3,9 @@ package com.wfm.soundcollaborations.Editor.model.composition;
 import android.content.Context;
 import android.util.Log;
 
-import com.wfm.soundcollaborations.Editor.model.audio.AudioPlayer;
+import com.wfm.soundcollaborations.Editor.model.audio.SoundPlayer;
 
-import java.util.Arrays;
+import java.util.Collections;
 import java.util.Objects;
 import java.util.UUID;
 
@@ -13,6 +13,9 @@ import java.util.UUID;
 public class Sound {
 
     private static final String TAG = Sound.class.getSimpleName();
+
+    private static final boolean PLAY = true;
+    private static final boolean PAUSE = false;
 
     //BACKEND BEIM LADEN
     public Long id;
@@ -30,10 +33,12 @@ public class Sound {
 
     public String filePath;
 
-    private AudioPlayer player;
+    private SoundPlayer player;
 
     // only for new sounds is important TODO later separate SoundDownloaded and SoundRecorded class
     String uuid;
+
+    private boolean playing;
 
     public static class Builder {
 
@@ -131,38 +136,39 @@ public class Sound {
 
 
     void preparePlayer(Context context) {
-        player = new AudioPlayer(context);
-        player.addSounds(Arrays.asList(filePath));
+        player = new SoundPlayer(context);
+        player.addSounds(Collections.singletonList(filePath));
     }
 
 
-    public void play(int trackNumber, int positionInMillis) {
-        // Den Player starten, wenn an der Stelle einen Sound vorhanden ist.
-        // Der Player selbst weiss nicht, wo die Sounds sich befinden.
+    void playOrPause(boolean pressPlay, int positionInMS) {
+
+        // Start the player, if the current position has sounds.
         long endPosition = startPosition + duration;
-        if (startPosition <= positionInMillis && endPosition > positionInMillis) {
-            if (!isPlaying()) {
-                player.play();
+        boolean currentPositionHasSound = startPosition <= positionInMS && endPosition > positionInMS;
 
-                Log.d(TAG, "Track "+trackNumber+" is Playing in "+positionInMillis);
+        if (pressPlay) {
+
+            if (!playing && currentPositionHasSound) {
+
+                player.playOrPause(PLAY);
+                playing = PLAY;
+
             }
+
         } else {
-            player.pause();
 
-            Log.d(TAG, "Track " + trackNumber + " is Paused in " + positionInMillis);
+            player.playOrPause(PAUSE);
+            playing = PAUSE;
+
         }
+
+        String status = playing ? "Playing" : "Paused";
+
+        Log.d(TAG, String.format("Track %d is %s in  %s", trackIndex, status, positionInMS));
+
     }
 
-    public void pause(int trackNumber) {
-        player.pause();
-
-        Log.d(TAG, "Track " + trackNumber + " is Paused");
-    }
-
-    private boolean isPlaying()
-    {
-        return player.isPlaying();
-    }
 
     void seek(long positionInMillis) {
         long seekingPosition = calculateSeekingTimeForPlayer(positionInMillis);
@@ -215,5 +221,12 @@ public class Sound {
 
     public String getUuid() {
         return uuid;
+    }
+
+
+    boolean isPlaying() {
+
+        return playing;
+
     }
 }
