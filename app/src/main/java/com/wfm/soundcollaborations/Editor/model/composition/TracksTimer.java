@@ -19,6 +19,9 @@ class TracksTimer {
 
     private static final int COMPOSITION_MAX_DURATION_IN_MS = 1000 * 120;
 
+    private static final int PLAYING_PERIOD_IN_MS = 1;
+    private static final long NO_DELAY = 0;
+
     private final Context context;
 
     private int positionInMillis = POSITION_ZERO;
@@ -65,15 +68,15 @@ class TracksTimer {
                         playOrPauseInternal(true);
 
                         // increase scroll position
-                        circlesReached += 1;
-                        positionInMillis += 1;
+                        circlesReached += PLAYING_PERIOD_IN_MS;
+                        positionInMillis += PLAYING_PERIOD_IN_MS;
                         if (circlesReached >= 50) {
                             mCompositionView.increaseScrollPosition();
                             circlesReached = 0;
                         }
                     });
                 }
-            }, 0, 1);
+            }, NO_DELAY, PLAYING_PERIOD_IN_MS);
 
 
         } else {
