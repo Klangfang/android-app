@@ -4,46 +4,37 @@ import android.os.AsyncTask;
 
 import com.wfm.soundcollaborations.Editor.model.audio.AudioDecoder;
 import com.wfm.soundcollaborations.Editor.model.audio.AudioVisualizer;
-import com.wfm.soundcollaborations.Editor.model.composition.Sound;
-import com.wfm.soundcollaborations.Editor.utils.FileUtils;
 import com.wfm.soundcollaborations.Editor.views.composition.SoundView;
 
-/**
- * Created by mohammed on 11/9/17.
- */
 
-public class VisualizeSoundTask extends AsyncTask<Void, Chunk, Void>
-{
+public class VisualizeSoundTask extends AsyncTask<Void, Chunk, Void> {
+
     private SoundView soundView;
-    private Sound sound;
+    private String path;
 
     private AudioDecoder mAudioDecoder;
     private AudioVisualizer mAudioVisualizer;
 
-    public VisualizeSoundTask(SoundView soundView, Sound sound)
-    {
+    public VisualizeSoundTask(SoundView soundView, String path) {
+
         this.soundView = soundView;
-        this.sound = sound;
+        this.path = path;
         this.mAudioDecoder = new AudioDecoder();
         this.mAudioVisualizer = new AudioVisualizer();
     }
 
     @Override
-    protected Void doInBackground(Void... voids)
-    {
-        String name = sound.getFilePath().split("/")[sound.getFilePath().split("/").length - 1];
-        String path = FileUtils.getKlangfangCacheDirectory()+"/"+name;
+    protected Void doInBackground(Void... voids) {
 
         this.mAudioDecoder.decode(path, new AudioDecoder.Listener() {
             @Override
-            public void onAudioDurationDetected(long audioLengthMilli)
-            {
+            public void onAudioDurationDetected(long audioLengthMilli) {
 
             }
 
             @Override
-            public void onSampleRateAndChannelsDetected(int sampleRate, int channels)
-            {
+            public void onSampleRateAndChannelsDetected(int sampleRate, int channels) {
+
                 mAudioVisualizer.setSampleRate(sampleRate);
                 mAudioVisualizer.setChannelsNumber(channels);
             }
@@ -54,8 +45,8 @@ public class VisualizeSoundTask extends AsyncTask<Void, Chunk, Void>
             }
 
             @Override
-            public void onShortChunkData(short[] chunk)
-            {
+            public void onShortChunkData(short[] chunk) {
+
                 Chunk chunkObj = new Chunk(chunk);
                 publishProgress(chunkObj);
             }
@@ -65,14 +56,9 @@ public class VisualizeSoundTask extends AsyncTask<Void, Chunk, Void>
     }
 
     @Override
-    protected void onProgressUpdate(Chunk... values)
-    {
+    protected void onProgressUpdate(Chunk... values) {
+
         short[] chunk = values[0].getChunk();
-        this.mAudioVisualizer.visualize(chunk, 20, new AudioVisualizer.listener() {
-            @Override
-            public void valueCaptured(int value) {
-                soundView.addWave(value);
-            }
-        });
+        this.mAudioVisualizer.visualize(chunk, 20, value -> soundView.addWave(value));
     }
 }

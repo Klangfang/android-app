@@ -1,22 +1,23 @@
 package com.wfm.soundcollaborations.activities;
 
-import android.os.Handler;
-import androidx.appcompat.app.ActionBar;
-import androidx.appcompat.app.AppCompatActivity;
 import android.os.Bundle;
-import androidx.appcompat.widget.Toolbar;
+import android.os.Handler;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.wfm.soundcollaborations.Editor.exceptions.RecordTimeOutExceededException;
-import com.wfm.soundcollaborations.R;
-import com.wfm.soundcollaborations.Editor.model.audio.AudioPlayer;
+import androidx.appcompat.app.ActionBar;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.Toolbar;
+
 import com.wfm.soundcollaborations.Editor.model.Constants;
 import com.wfm.soundcollaborations.Editor.model.audio.AudioRecorder;
+import com.wfm.soundcollaborations.Editor.model.audio.SoundPlayer;
+import com.wfm.soundcollaborations.R;
 import com.wfm.soundcollaborations.views.SoundView;
+
 import java.util.Timer;
 import java.util.TimerTask;
 
@@ -40,7 +41,7 @@ public class RecordActivity extends AppCompatActivity
 
     private AudioRecorder mAudioRecorder;
     private boolean isRecording = false;
-    private AudioPlayer mTrackPlayer;
+    private SoundPlayer mTrackPlayer;
     private boolean isPlaying = false;
 
 
@@ -85,19 +86,15 @@ public class RecordActivity extends AppCompatActivity
                 if(! isRecording)
                 {
                     resetPlayBtn();
-                    try {
-                        mAudioRecorder.start();
-                        initRecordTimeTimer();
-                        initVisualizeAmplitudesTimer();
-                        ((Button)(view)).setText("Finish");
-                        isRecording = true;
-                    } catch (RecordTimeOutExceededException e) {
-                        // TODO for example log the exception!!!
-                    }
+                    mAudioRecorder.start(0);
+                    initRecordTimeTimer();
+                    initVisualizeAmplitudesTimer();
+                    ((Button) (view)).setText("Finish");
+                    isRecording = true;
                 }
                 else
                 {
-                    mAudioRecorder.stop();
+                    mAudioRecorder.stop(0);
                     recordTimeTimer.cancel();
                     visualizeAmplitudesTimer.cancel();
                     resetValues();
@@ -125,9 +122,9 @@ public class RecordActivity extends AppCompatActivity
                         Log.d(TAG, "Value of "+i+" = "+ grains[i]);
                         soundVisualizerView.addWave(grains[i] * 2);
                     }
-                    /*mTrackPlayer = new AudioPlayer(getBaseContext(), Uri.parse(mAudioRecorder.getRecordedFilePath()));
+                    /*mTrackPlayer = new SoundPlayer(getBaseContext(), Uri.parse(mAudioRecorder.getRecordedFilePath()));
 
-                    mTrackPlayer.play();
+                    mTrackPlayer.playOrPause();
                     view.setEnabled(false);
                     mTrackPlayer.getMediaPlayer().setOnCompletionListener(
                             new MediaPlayer.OnCompletionListener() {
@@ -203,7 +200,7 @@ public class RecordActivity extends AppCompatActivity
 
     private void maxTimeForRecordingReached()
     {
-        mAudioRecorder.stop();
+        mAudioRecorder.stop(0);
         recordTimeTimer.cancel();
         visualizeAmplitudesTimer.cancel();
         recordBtn.setText("Record");

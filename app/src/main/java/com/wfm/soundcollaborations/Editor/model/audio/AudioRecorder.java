@@ -3,7 +3,6 @@ package com.wfm.soundcollaborations.Editor.model.audio;
 import android.media.MediaRecorder;
 import android.util.Log;
 
-import com.wfm.soundcollaborations.Editor.exceptions.RecordTimeOutExceededException;
 import com.wfm.soundcollaborations.Editor.model.Constants;
 import com.wfm.soundcollaborations.Editor.utils.AudioRecorderStatus;
 import com.wfm.soundcollaborations.Editor.utils.FileUtils;
@@ -12,35 +11,35 @@ import java.io.IOException;
 import java.util.UUID;
 
 
-/**
- * Created by markus on 09.10.16.
- * Edited by Mohammed on 06.10.17
- */
 public class AudioRecorder implements MediaRecorder.OnInfoListener
 {
     private final static String TAG = AudioRecorder.class.getSimpleName();
 
     private static final int MAX_DURATION = Constants.MAX_RECORD_TIME * 1000;
+    private static final String SOUND_FILE_BASE_PATH = FileUtils.getKlangfangCacheDirectory() + "/";
+    private static final String SOUND_FILE_EXTENSION = ".3gp";
 
     private MediaRecorder mMediaRecorder;
-    private final String SOUND_FILE_BASE_URI_DIR = FileUtils.getKlangfangCacheDirectory() + "/";
-    private final String SOUND_FILE_EXTENSION = ".3gp";
-    private String filePath;
+
     private AudioRecorderStatus status = AudioRecorderStatus.EMPTY;
-    private int recordedTime = 0;
+
+    private String filePath;
+
     private int startTime;
     private int duration;
+
+    private int recordedTime = 0;
 
     public AudioRecorder() {}
 
 
-    public void start() throws RecordTimeOutExceededException {
+    public void start(int startTime) {
         // create new sound file path
         if (status.equals(AudioRecorderStatus.EMPTY)) {
             status = AudioRecorderStatus.RECORDING;
 
             String uniqueFileName = UUID.randomUUID().toString().replace("-", "");
-            filePath = SOUND_FILE_BASE_URI_DIR + uniqueFileName + SOUND_FILE_EXTENSION;
+            filePath = SOUND_FILE_BASE_PATH + uniqueFileName + SOUND_FILE_EXTENSION;
 
             mMediaRecorder = new MediaRecorder();
             mMediaRecorder.setAudioSource(MediaRecorder.AudioSource.MIC);
@@ -64,19 +63,15 @@ public class AudioRecorder implements MediaRecorder.OnInfoListener
             }
 
             mMediaRecorder.start();
-            startTime = Long.valueOf(System.currentTimeMillis()).intValue();
+            this.startTime = startTime;
         } else if (status.equals(AudioRecorderStatus.RECORDING) && recordedTime >= MAX_DURATION) {
             status = AudioRecorderStatus.STOPPED;
-            throw new RecordTimeOutExceededException();
+            Log.d(TAG, "Max Duration Reached");
         }
     }
 
-    // Stop and set max time is reached
-   /* public void stop() {
-        stop();
-    }*/
 
-    public void stop() {
+    public void stop(int stopTime) {
 
         try {
             if (mMediaRecorder != null) {
@@ -90,13 +85,16 @@ public class AudioRecorder implements MediaRecorder.OnInfoListener
             }
 
             // sound length
-            duration = Long.valueOf(System.currentTimeMillis() - startTime).intValue();
+            duration = Long.valueOf(stopTime - startTime).intValue();
+
+            //TODO due to asynchronous stop and no guarantee to immediately stop recording,
+            // before play and before publish (the view is already consistent)
 
             // total recorded time for the track
             this.recordedTime = this.recordedTime + duration;
         } catch (Exception ex) {
             FileUtils.deleteFile(filePath);
-            Log.d(TAG, "Recorded file has been deleted!");
+            Log.e(TAG, "Recorded file has been deleted!");
         }
     }
 
@@ -130,8 +128,7 @@ public class AudioRecorder implements MediaRecorder.OnInfoListener
     public void onInfo(MediaRecorder mediaRecorder, int i, int i1) {
         if (i == MediaRecorder.MEDIA_RECORDER_INFO_MAX_DURATION_REACHED)
         {
-            Log.e(TAG, "Max Duration Reached");
-           // stop(MAX_DURATION); //TODO Fuehrt dazu, dass die Aufnahme verschwindet....
+            Log.d(TAG, "Max Duration Reached");
             status = AudioRecorderStatus.STOPPED;
         }
     }

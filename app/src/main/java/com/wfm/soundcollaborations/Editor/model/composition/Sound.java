@@ -3,25 +3,24 @@ package com.wfm.soundcollaborations.Editor.model.composition;
 import android.content.Context;
 import android.util.Log;
 
-import com.wfm.soundcollaborations.Editor.model.audio.AudioPlayer;
+import com.wfm.soundcollaborations.Editor.model.audio.SoundPlayer;
 
-import java.time.LocalDate;
-import java.util.Arrays;
-import java.util.List;
+import java.util.Collections;
+import java.util.Objects;
+import java.util.UUID;
 
-/**
- * Created by mohammed on 10/27/17.
- * Edited by Talal
- */
 
 public class Sound {
 
     private static final String TAG = Sound.class.getSimpleName();
 
+    private static final boolean PLAY = true;
+    private static final boolean PAUSE = false;
+
     //BACKEND BEIM LADEN
     public Long id;
 
-    public Integer trackNumber;
+    public Integer trackIndex;
 
     //BACKEND BEIM LADEN
     public String title; // unique for saving files | has to be set dynamically
@@ -30,62 +29,148 @@ public class Sound {
 
     public Integer duration;
 
-    public String creatorName;
+    private String creatorName;
 
     public String filePath;
 
-    public AudioPlayer player;
+    private SoundPlayer player;
+
+    // only for new sounds is important TODO later separate SoundDownloaded and SoundRecorded class
+    String uuid;
+
+    private boolean playing;
+
+    public static class Builder {
+
+        private String uuid;
+        private Integer trackNumber;
+        private Integer startPosition;
+        private Integer duration;
+        private String filePath;
 
 
-    public Sound() {
+        Builder uuid(String uuid) {
+
+            this.uuid = uuid;
+            return this;
+
+        }
+
+
+        Builder trackNumber(Integer trackNumber) {
+
+            this.trackNumber = trackNumber;
+            return this;
+
+        }
+
+
+        Builder startPosition(Integer startPosition) {
+
+            this.startPosition = startPosition;
+            return this;
+
+        }
+
+
+        public Builder duration(Integer duration) {
+
+            this.duration = duration;
+            return this;
+
+        }
+
+
+        Builder filePath(String filePath) {
+
+            this.filePath = filePath;
+            return this;
+
+        }
+
+
+        public Sound build() {
+
+            return new Sound(uuid, trackNumber, startPosition, duration, filePath);
+
+        }
 
     }
 
 
-    public Sound(Integer trackNumber, Integer startPosition, Integer duration, String filePath) {
-        this.trackNumber = trackNumber;
+    private Sound() {
+
+    }
+
+
+    private Sound(Long id, Integer trackIndex, Integer startPosition, Integer duration, String filePath) {
+
+        this.id = id;
+        this.trackIndex = trackIndex;
         this.startPosition = startPosition;
         this.duration = duration;
         this.filePath = filePath;
         this.creatorName = "talal"; // TODO it has to be set dynamically
+        uuid = UUID.randomUUID().toString();
+
     }
 
 
-    public void preparePlayer(Context context) {
-        player = new AudioPlayer(context);
-        player.addSounds(Arrays.asList(filePath));
+    private Sound(String uuid, Integer trackIndex, Integer startPosition, Integer duration, String filePath) {
+
+        this.uuid = uuid;
+        this.trackIndex = trackIndex;
+        this.startPosition = startPosition;
+        this.duration = duration;
+        this.filePath = filePath;
+        this.creatorName = "talal"; // TODO it has to be set dynamically
+
     }
 
 
-    public void play(int trackNumber, int positionInMillis) {
-        // Den Player starten, wenn an der Stelle einen Sound vorhanden ist.
-        // Der Player selbst weiss nicht, wo die Sounds sich befinden.
+    boolean isRecorded() {
+
+        return Objects.nonNull(uuid);
+
+    }
+
+
+    void preparePlayer(Context context) {
+        player = new SoundPlayer(context);
+        player.addSounds(Collections.singletonList(filePath));
+    }
+
+
+    void playOrPause(boolean pressPlay, int positionInMS) {
+
+        // Start the player, if the current position has sounds.
         long endPosition = startPosition + duration;
-        if (startPosition <= positionInMillis && endPosition > positionInMillis) {
-            if (!isPlaying()) {
-                player.play();
+        boolean currentPositionHasSound = startPosition <= positionInMS && endPosition > positionInMS;
 
-                Log.d(TAG, "Track "+trackNumber+" is Playing in "+positionInMillis);
+        if (pressPlay) {
+
+            if (!playing && currentPositionHasSound) {
+
+                player.playOrPause(PLAY);
+                playing = PLAY;
+
             }
+
         } else {
-            player.pause();
 
-            Log.d(TAG, "Track " + trackNumber + " is Paused in " + positionInMillis);
+            player.playOrPause(PAUSE);
+            playing = PAUSE;
+
         }
+
+        String status = playing ? "Playing" : "Paused";
+
+        Log.d(TAG, String.format("Track %d is %s in  %s", trackIndex, status, positionInMS));
+
     }
 
-    public void pause(int trackNumber) {
-        player.pause();
 
-        Log.d(TAG, "Track " + trackNumber + " is Paused");
-    }
-
-    private boolean isPlaying()
-    {
-        return player.isPlaying();
-    }
-
-    public void seek(long positionInMillis) {
+    void seek(long positionInMillis) {
         long seekingPosition = calculateSeekingTimeForPlayer(positionInMillis);
         Log.d(TAG, "Track seeking Time is => "+seekingPosition);
         player.seek(seekingPosition);
@@ -108,20 +193,22 @@ public class Sound {
         return positionInMillis - (maxPoint - soundsInside);
     }
 
-    public Integer getTrackNumber() {
-        return trackNumber;
+    public Integer getTrackIndex() {
+        return trackIndex;
     }
 
     //public String getTitle() {
       //  return title;
     //}
 
-    public Integer getStartPosition() {
+    Integer getStartPosition() {
         return startPosition;
     }
 
     public Integer getDuration() {
+
         return duration;
+
     }
 
     public String getCreatorName() {
@@ -130,5 +217,16 @@ public class Sound {
 
     public String getFilePath() {
         return filePath;
+    }
+
+    public String getUuid() {
+        return uuid;
+    }
+
+
+    boolean isPlaying() {
+
+        return playing;
+
     }
 }

@@ -1,115 +1,136 @@
 package com.wfm.soundcollaborations.Editor.model.composition;
 
+import android.content.Context;
 import android.os.Handler;
 
-import com.wfm.soundcollaborations.Editor.model.Constants;
+import com.wfm.soundcollaborations.Editor.activities.EditorActivity;
 import com.wfm.soundcollaborations.Editor.views.composition.CompositionView;
 
 import java.util.List;
 import java.util.Timer;
 import java.util.TimerTask;
 
-/**
- * Created by mohammed on 11/18/17.
- */
 
-public class TracksTimer
-{
+class TracksTimer {
+
     private static final String TAG = TracksTimer.class.getSimpleName();
 
-    private int positionInMillis = 0;
-    private int circlesReached = 0;
+    private static final int POSITION_ZERO = 0;
+
+    private static final int COMPOSITION_MAX_DURATION_IN_MS = 1000 * 120;
+
+    private static final int PLAYING_PERIOD_IN_MS = 1;
+    private static final long NO_DELAY = 0;
+
+    private final Context context;
+
+    private int positionInMillis = POSITION_ZERO;
+    private int circlesReached = POSITION_ZERO;
     private Timer mTimer;
     private Handler mHandler;
     private List<Track> mTracks;
     private CompositionView mCompositionView;
     private boolean cancelTimer = false;
 
-    public TracksTimer(List<Track> tracks, CompositionView compositionView)
-    {
+
+    TracksTimer(Context context, List<Track> tracks, CompositionView compositionView) {
+
+        this.context = context;
         mHandler = new Handler();
         mTracks = tracks;
         mCompositionView = compositionView;
+
     }
 
-    public void play()
-    {
-        cancelTimer = false;
-        this.mCompositionView.setEnabled(false);
-        mTimer = new Timer();
-        mTimer.scheduleAtFixedRate(new TimerTask() {
-            @Override
-            public void run()
-            {
-                mHandler.post(new Runnable() {
-                    @Override
-                    public void run()
-                    {
-                        if(cancelTimer)
-                        {
+
+    void playOrPause(boolean pressPlay) {
+
+        cancelTimer = !pressPlay;
+
+        this.mCompositionView.enable(!pressPlay);
+
+        if (pressPlay) {
+
+            mTimer = new Timer();
+            mTimer.scheduleAtFixedRate(new TimerTask() {
+                @Override
+                public void run() {
+                    mHandler.post(() -> {
+                        if (cancelTimer) {
                             mTimer.cancel();
                             return;
                         }
-                        if(positionInMillis >= Constants.COMPOSITION_LENGTH_IN_MILLI_SECONDS)
-                        {
+                        if (positionInMillis >= COMPOSITION_MAX_DURATION_IN_MS) {
                             reset();
+                            return;
                         }
 
-                        for(int i=0; i<mTracks.size(); i++)
-                        {
-                            mTracks.get(i).play(i, positionInMillis);
-                        }
+                        playOrPauseInternal(true);
 
                         // increase scroll position
-                        circlesReached += 1;
-                        positionInMillis += 1;
-                        if(circlesReached >= 50)
-                        {
-                            mCompositionView.increaseScrollPosition(3);
+                        circlesReached += PLAYING_PERIOD_IN_MS;
+                        positionInMillis += PLAYING_PERIOD_IN_MS;
+                        if (circlesReached >= 50) {
+                            mCompositionView.increaseScrollPosition();
                             circlesReached = 0;
                         }
-                    }
-                });
-            }
-        }, 0, 1);
+                    });
+                }
+            }, NO_DELAY, PLAYING_PERIOD_IN_MS);
+
+
+        } else {
+
+            playOrPauseInternal(false);
+
+        }
+
     }
 
-    public void pause()
-    {
-        cancelTimer = true;
-        this.mCompositionView.setEnabled(true);
-        for(int i=0; i<mTracks.size(); i++)
-        {
-            mTracks.get(i).pause(i);
-        }
+
+    private void playOrPauseInternal(boolean pressPlay) {
+
+        mTracks.forEach(t -> t.playOrPause(pressPlay, positionInMillis));
+
     }
 
-    public void seek(int positionInMillis)
-    {
-        for(int i=0; i<mTracks.size(); i++)
-        {
-            mTracks.get(i).seek(positionInMillis);
-        }
+
+    void seek(int positionInMillis) {
+
+        mTracks.forEach(t -> t.seek(positionInMillis));
+
         this.positionInMillis = positionInMillis;
+
     }
 
-    public void reset()
-    {
-        if (mTimer !=null) {
+
+    private void reset() {
+
+        if (mTimer != null) {
             mTimer.cancel();
         }
-        positionInMillis = 0;
 
-        if (mCompositionView!= null) {
-            mCompositionView.setScrollPosition(0);
+        positionInMillis = POSITION_ZERO;
+
+        if (mCompositionView != null) {
+
+            mCompositionView.setScrollPosition(POSITION_ZERO);
+
             this.mCompositionView.setEnabled(true);
+
+            EditorActivity editorActivity = (EditorActivity) this.context;
+
+            editorActivity.handleStop(StopReason.COMPOSITION_END_REACHED);
+
+
         }
     }
 
-    public void updateTrack(int trackNumber, Track track) {
 
-        mTracks.remove(trackNumber);
+    void updateTrack(int trackNumber, Track track) {
 
-        mTracks.add(trackNumber, track);
+        mTracks.set(trackNumber, track);
+
     }
+
 }

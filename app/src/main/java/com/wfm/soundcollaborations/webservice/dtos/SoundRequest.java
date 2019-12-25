@@ -29,7 +29,7 @@ public final class SoundRequest {
 
     public static SoundRequest build(Sound s) {
 
-        return new SoundRequest(s.trackNumber, s.startPosition, s.duration, ByteArrayUtils.toByteArray(s.filePath));
+        return new SoundRequest(s.trackIndex, s.startPosition, s.duration, ByteArrayUtils.toByteArray(s.filePath));
 
     }
 

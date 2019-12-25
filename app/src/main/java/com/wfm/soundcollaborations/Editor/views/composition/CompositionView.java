@@ -10,22 +10,24 @@ import android.view.View;
 import android.view.ViewTreeObserver;
 import android.widget.LinearLayout;
 
-import com.wfm.soundcollaborations.Editor.exceptions.SoundRecordingTimeException;
-import com.wfm.soundcollaborations.Editor.exceptions.SoundWillBeOutOfCompositionException;
+import com.wfm.soundcollaborations.Editor.model.composition.Sound;
 import com.wfm.soundcollaborations.R;
 
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
+import java.util.function.Predicate;
+import java.util.stream.Collectors;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
 
-/**
- * Created by mohammed on 10/21/17.
- */
 
-public class CompositionView extends LinearLayout
-{
+public class CompositionView extends LinearLayout {
+
     private static final String TAG = CompositionView.class.getSimpleName();
+
+    public static final int SCROLL_STEP = 3;
 
     @BindView(R.id.hsv_holder)
     CompositionScrollView holderScrollView;
@@ -36,23 +38,24 @@ public class CompositionView extends LinearLayout
     @BindView(R.id.ll_space)
     LinearLayout spaceLayout;
 
-    ArrayList<TrackView> tracksViews = new ArrayList<>();
-    ArrayList<TrackWatchView> tracksWatchViews = new ArrayList<>();
+    List<TrackViewContainer> trackViewContainers = new ArrayList<>();
 
     private Paint playerLinePaint;
     private Path playerLineTriangle;
     private Paint playerLineTrianglePaint;
 
-    private int activeTrack = -1;
+    private int activeTrackIndex;
     private int scrollPosition = 0;
 
     private OnScrollChanged mOnScrollChanged;
+
 
     public interface OnScrollChanged
     {
         void onNewScrollPosition(int position);
     }
 
+    //TODO i think this is not used
     public CompositionView(Context context)
     {
         super(context);
@@ -61,12 +64,32 @@ public class CompositionView extends LinearLayout
         initVariables();
     }
 
-    public CompositionView(Context context, AttributeSet attrs)
-    {
+
+    public CompositionView(Context context, AttributeSet attrs) {
+
         super(context, attrs);
         View.inflate(getContext(), R.layout.tracks_and_trackwatch_viewgroup, this);
         ButterKnife.bind(this);
         initVariables();
+
+        // default first Track is activated
+        activeTrackIndex = 0;
+
+        for(int i = 0; i< 4; i++) {
+
+            final boolean activate = (i == activeTrackIndex);
+
+            TrackViewContainer trackViewContainer = new TrackViewContainer.Builder(activate)
+                    .index(i)
+                    .build(this);
+
+            tracksViewsHolder.addView(trackViewContainer.getTrackView());
+            trackWatchesViewsHolder.addView(trackViewContainer.getTrackWatchView());
+
+            trackViewContainers.add(trackViewContainer);
+
+        }
+
     }
 
 
@@ -83,90 +106,121 @@ public class CompositionView extends LinearLayout
         playerLineTrianglePaint.setColor(Color.rgb(0x56, 0x56, 0x56));
 
         ViewTreeObserver viewTreeObserver = getViewTreeObserver();
-        viewTreeObserver.addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
-            @Override
-            public void onGlobalLayout()
-            {
-                spaceLayout.setPadding(getWidth()/2, 0, getWidth()/2, 0);
-            }
-        });
+        viewTreeObserver.addOnGlobalLayoutListener(() ->
+                spaceLayout.setPadding(getWidth() / 2, 0, getWidth() / 2, 0));
 
-        holderScrollView.getViewTreeObserver().addOnScrollChangedListener(new ViewTreeObserver.OnScrollChangedListener()
-        {
-            @Override
-            public void onScrollChanged()
-            {
-                scrollPosition = holderScrollView.getScrollX();
-                mOnScrollChanged.onNewScrollPosition(holderScrollView.getScrollX());
-            }
+        holderScrollView.getViewTreeObserver().addOnScrollChangedListener(() -> {
+            scrollPosition = holderScrollView.getScrollX();
+            mOnScrollChanged.onNewScrollPosition(holderScrollView.getScrollX());
         });
 
         holderScrollView.setOverScrollMode(View.OVER_SCROLL_NEVER);
     }
 
-    public void addSoundView(SoundView soundView) {
-       // int trackNumber = soundView.getTrackNumber();
-       // TrackView trackView = tracksViews.remove(trackNumber);
-       // tracksViewsHolder.removeView(trackView);
-       // trackView.addSoundView(soundView);
-       // tracksViewsHolder.addView(trackView);
-       // tracksViews.add(trackNumber, trackView);
+
+    private TrackViewContainer getActiveTrackViewContainer() throws Throwable {
+
+        return getTrackViewContainer(activeTrackIndex);
+
     }
 
 
-    public void addTrackView(TrackWatchView trackWatchView, TrackView trackView)
-    {
-        // add watch view
-        trackWatchesViewsHolder.addView(trackWatchView);
-        tracksWatchViews.add(trackWatchView);
-        // add track view
-        tracksViewsHolder.addView(trackView);
-        tracksViews.add(trackView);
+    private TrackViewContainer getTrackViewContainer(Integer trackIndex) throws Throwable {
+
+
+        Predicate<? super TrackViewContainer> activePredicate = c -> c.getIndex() == trackIndex;
+
+        return trackViewContainers.stream()
+                .filter(activePredicate)
+                .findAny()
+                .orElseThrow(() -> new Throwable("Could not get track view container"));
+
     }
 
-    public void deleteSoundView(SoundView soundView, float percentage) {
-        int trackNumber = soundView.getTrackNumber();
-        // Delete Sound View from Track View
-        TrackView trackView = tracksViews.get(trackNumber);
+    public void addSoundView(Context context, Sound sound) throws Throwable {
 
-        tracksViewsHolder.removeView(trackView);
-        tracksViews.remove(trackNumber);
-        trackView.deleteSoundView(soundView);
+        getTrackViewContainer(sound.trackIndex).addSoundView(context, sound);
 
-        tracksViewsHolder.addView(trackView, trackNumber);
-        tracksViews.add(trackNumber, trackView);
-
-        // Decrease Track Watch Percentage
-        decreaseTrackWatchPercentage(trackNumber, percentage);
     }
 
-    public void activateTrack(int index)
-    {
-        for(int i=0; i<tracksViews.size(); i++)
-        {
-            tracksViews.get(i).deactivate();
-            tracksWatchViews.get(i).deactivate();
-        }
 
-        tracksViews.get(index).activate();
-        tracksWatchViews.get(index).activate();
-        this.activeTrack = index;
+    public int addSoundView(Context context) throws Throwable {
+
+        enable(false);
+
+        getActiveTrackViewContainer().addSoundView(context, scrollPosition);
+
+        return scrollPosition;
+
     }
+
+
+    public void updateSoundView(int amplitude) throws Throwable {
+
+        getActiveTrackViewContainer().updateSoundView(amplitude);
+
+        increaseScrollPosition();
+
+    }
+
+    public void updateTrackWatches(int soundWidths) {
+
+        trackViewContainers.forEach(c -> c.updateTrackWatch(soundWidths));
+
+
+    }
+
+    public String finishRecording() throws Throwable {
+
+        enable(true);
+
+        return getActiveTrackViewContainer().finishRecording();
+
+    }
+
+
+    public void enable(boolean enable) {
+
+        setEnabled(enable);
+
+        trackViewContainers.forEach(c -> c.enable(enable));
+
+    }
+
+
+    public void refreshActiveTrackIndex(int trackIndex) {
+
+        trackViewContainers.forEach(c -> c.activate(false));
+
+        trackViewContainers.stream()
+                .filter(c -> c.getIndex() == trackIndex)
+                .forEach(c -> c.activate(true));
+
+        activeTrackIndex = trackIndex;
+
+    }
+
 
     @Override
-    protected void dispatchDraw(Canvas canvas)
-    {
+    protected void dispatchDraw(Canvas canvas) {
+
         super.dispatchDraw(canvas);
         drawPlayerLine(canvas);
+
     }
+
 
     private void drawPlayerLine(Canvas canvas) {
 
         float x = getWidth() / 2;
 
-        if (!tracksViews.isEmpty()) {
-            canvas.drawLine(x, 0, x, getHeight() - (tracksWatchViews.get(0).getWidth() / 2) - 20, playerLinePaint);
-        }
+        int trackWatchViewWidth = trackViewContainers.stream()
+                .filter(c -> c.getIndex() == 0)
+                .map(TrackViewContainer::getTrackWatchViewWidth)
+                .findAny()
+                .get();
+
+        canvas.drawLine(x, 0, x, getHeight() - (trackWatchViewWidth / 2) - 20, playerLinePaint);
 
         playerLineTriangle = new Path();
         playerLineTriangle.moveTo(x+10, 0);
@@ -176,52 +230,43 @@ public class CompositionView extends LinearLayout
         playerLineTriangle.close();
 
         canvas.drawPath(playerLineTriangle, playerLineTrianglePaint);
+
     }
 
-    public int getActiveTrack()
-    {
-        return this.activeTrack;
+
+    public int getActiveTrackIndex() {
+
+        return activeTrackIndex;
+
     }
+
 
     public int getScrollPosition()
     {
         return this.scrollPosition;
     }
 
-    public void increaseScrollPosition(int value)
-    {
-        this.scrollPosition += value;
+    public void increaseScrollPosition() {
+
+        this.scrollPosition += SCROLL_STEP;
         holderScrollView.scrollTo(this.scrollPosition, 0);
+
     }
 
-    public void setScrollPosition(int value)
-    {
+    public void setScrollPosition(int value) {
+
         this.scrollPosition = value;
         holderScrollView.scrollTo(value, 0);
+
     }
 
-    public void increaseViewWatchPercentage(int trackNumber, float percentage) throws SoundRecordingTimeException {
-        if (isTrackWatchPercentageFull(trackNumber)) {
-            throw new SoundRecordingTimeException(getContext());
-        }
-        this.tracksWatchViews.get(trackNumber).increasePercentage(percentage);
-    }
-
-    public void decreaseTrackWatchPercentage(int trackNumber, float percentage)
-    {
-        this.tracksWatchViews.get(trackNumber).decreasePercentage(percentage);
-    }
-
-    public boolean isTrackWatchPercentageFull(int trackNumber) {
-        float actualPercentage = this.tracksWatchViews.get(trackNumber).getPercentage();
-        return actualPercentage >= 100;
-    }
 
     @Override
-    public void setEnabled(boolean enabled)
-    {
+    public void setEnabled(boolean enabled) {
+
         super.setEnabled(enabled);
         holderScrollView.setEnabled(enabled);
+
     }
 
     public void setOnScrollChanged(OnScrollChanged scrollChanged)
@@ -229,12 +274,15 @@ public class CompositionView extends LinearLayout
         mOnScrollChanged = scrollChanged;
     }
 
-    public void activate() {
-        setEnabled(true);
-    }
 
-    public void deactivate() {
-        setEnabled(false);
+    public List<String> deleteSoundViews() {
+
+        return trackViewContainers.stream()
+                .map(TrackViewContainer::deleteSoundViews)
+                .flatMap(Collection::stream)
+                .collect(Collectors.toList());
+
+
     }
 
 }

@@ -14,71 +14,91 @@ import com.wfm.soundcollaborations.R;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 
-/**
- * Created by mohammed on 10/21/17.
- */
 
-public class TrackView extends LinearLayout
-{
-    private static final String TAG = TrackView.class.getSimpleName();
+public class TrackView extends LinearLayout {
+
     private Paint linePaint;
     @BindView(R.id.ll_sounds_holder)
     RelativeLayout soundsHolderLayout;
 
-    public TrackView(Context context)
-    {
+
+    protected TrackView(Context context) {
+
         super(context);
+
         View.inflate(context, R.layout.view_track, this);
         ButterKnife.bind(this);
         init();
+
     }
 
-    public TrackView(Context context, AttributeSet attrs)
-    {
+
+    protected TrackView(Context context, AttributeSet attrs) {
+
         super(context, attrs);
         View.inflate(context, R.layout.view_track, this);
         ButterKnife.bind(this);
         init();
+
     }
 
-    private void init()
-    {
+
+    private void init() {
+
         setOrientation(LinearLayout.HORIZONTAL);
         setWillNotDraw(false);
         linePaint = new Paint(Paint.ANTI_ALIAS_FLAG);
         linePaint.setStyle(Paint.Style.STROKE);
         linePaint.setStrokeWidth(1);
         linePaint.setColor(Color.rgb(0x5a, 0x5a, 0x5a));
+
+        deactivate();
+
     }
 
     @Override
-    protected void dispatchDraw(Canvas canvas)
-    {
+    protected void dispatchDraw(Canvas canvas) {
+
         super.dispatchDraw(canvas);
         drawLine(canvas);
+
     }
 
-    public void drawLine(Canvas canvas)
-    {
+
+    protected void drawLine(Canvas canvas) {
+
         canvas.drawLine(0, getHeight()/2, getWidth(), getHeight()/2, linePaint);
+
     }
 
-    public void activate()
-    {
+
+    protected void activate() {
+
         linePaint.setColor(Color.WHITE);
         invalidate();
+
     }
 
-    public void deactivate()
-    {
+
+    protected void deactivate() {
+
         linePaint.setColor(Color.rgb(0x5a, 0x5a, 0x5a));
         invalidate();
+
     }
 
-    public void addSoundView(SoundView soundView)
-    {
+
+    protected void addSoundView(SoundView soundView) {
+
         soundsHolderLayout.addView(soundView);
+
     }
 
-    public void deleteSoundView(SoundView soundView) { soundsHolderLayout.removeView(soundView);}
+
+    protected void deleteSoundViews(SoundView soundView) {
+
+        soundsHolderLayout.removeView(soundView);
+
+    }
+
 }
