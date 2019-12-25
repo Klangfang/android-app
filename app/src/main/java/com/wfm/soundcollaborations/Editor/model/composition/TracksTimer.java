@@ -117,7 +117,7 @@ class TracksTimer {
 
             EditorActivity editorActivity = (EditorActivity) this.context;
 
-            editorActivity.handleStop(StopReason.COMPOSITION_END_REACHED.name());
+            editorActivity.handleStop(StopReason.COMPOSITION_END_REACHED);
 
 
         }

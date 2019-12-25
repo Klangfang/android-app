@@ -29,8 +29,8 @@ public final class DPUtils {
         long startPositionInDP = getValueInDP(startPositionInMS);
         long endPositionInDP = startPositionInDP + getValueInDP(durationInMS);
 
-        boolean checkStartPosConstraint = cursorPositionInDP <= startPositionInDP;
-        boolean checkEndPosConstraint = cursorPositionInDP >= endPositionInDP;
+        boolean checkStartPosConstraint = cursorPositionInDP < startPositionInDP;
+        boolean checkEndPosConstraint = cursorPositionInDP > endPositionInDP;
 
         return !(checkStartPosConstraint || checkEndPosConstraint);
 

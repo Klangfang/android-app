@@ -2,7 +2,6 @@ package com.wfm.soundcollaborations.Editor.model.composition;
 
 import android.content.Context;
 
-import com.wfm.soundcollaborations.Editor.exceptions.RecordTimeOutExceededException;
 import com.wfm.soundcollaborations.Editor.model.audio.AudioRecorder;
 import com.wfm.soundcollaborations.Editor.utils.AudioRecorderStatus;
 import com.wfm.soundcollaborations.Editor.utils.DPUtils;
@@ -90,7 +89,7 @@ public class Track {
 
 
     // Startet den Recorder
-    void startTrackRecorder(int startTime) throws RecordTimeOutExceededException {
+    void startTrackRecorder(int startTime) {
         recorder.start(startTime);
     }
 

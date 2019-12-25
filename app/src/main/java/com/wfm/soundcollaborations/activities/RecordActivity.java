@@ -12,7 +12,6 @@ import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 
-import com.wfm.soundcollaborations.Editor.exceptions.RecordTimeOutExceededException;
 import com.wfm.soundcollaborations.Editor.model.Constants;
 import com.wfm.soundcollaborations.Editor.model.audio.AudioRecorder;
 import com.wfm.soundcollaborations.Editor.model.audio.SoundPlayer;
@@ -87,15 +86,11 @@ public class RecordActivity extends AppCompatActivity
                 if(! isRecording)
                 {
                     resetPlayBtn();
-                    try {
-                        mAudioRecorder.start(0);
-                        initRecordTimeTimer();
-                        initVisualizeAmplitudesTimer();
-                        ((Button)(view)).setText("Finish");
-                        isRecording = true;
-                    } catch (RecordTimeOutExceededException e) {
-                        // TODO for example log the exception!!!
-                    }
+                    mAudioRecorder.start(0);
+                    initRecordTimeTimer();
+                    initVisualizeAmplitudesTimer();
+                    ((Button) (view)).setText("Finish");
+                    isRecording = true;
                 }
                 else
                 {

@@ -39,10 +39,13 @@ import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
 
+import static android.content.res.ColorStateList.valueOf;
+
 
 public class EditorActivity extends AppCompatActivity {
 
     private static final String TAG = EditorActivity.class.getSimpleName();
+
     @BindView(R.id.composition)
     CompositionView compositionView;
 
@@ -234,6 +237,7 @@ public class EditorActivity extends AppCompatActivity {
             } else {
 
                 recordTaskScheduler.cancel();
+                handleStop(StopReason.FINISH_RECORDING);
 
             }
 
@@ -249,32 +253,47 @@ public class EditorActivity extends AppCompatActivity {
     @OnClick(R.id.btn_play)
     public void play(View view) {
 
+        switchState(true);
+        composition.playOrPause(pressPlay);
+
+    }
+
+    private void switchState(boolean togglePlay) {
+
         recordBtn.setEnabled(pressPlay);
 
         pressPlay = !pressPlay;
 
-        composition.playOrPause(pressPlay);
+        if (togglePlay) {
+            playBtn.toggle();
+        }
 
-        ((PlayPauseView) view).toggle();
+        setRecordBtnColors(pressPlay);
 
-        // Toggle enabled and disabled state for recordBtn
+    }
+
+
+    private void setRecordBtnColors(boolean pressPlay) {
+
+
+        //TODO define in CommonUtil as map maybe
+        ColorStateList RECORD_ENABLED_BACKGROUND = valueOf(getResources().getColor(R.color.color_primary));
+        ColorStateList RECORD_DISABLED_BACKGROUND = valueOf(getResources().getColor(R.color.grey_dark));
+        ColorStateList RECORD_ENABLED_IMAGE = valueOf(getResources().getColor(R.color.white));
+        ColorStateList RECORD_DISABLED_IMAGE = valueOf(getResources().getColor(R.color.grey_middle));
+
         ColorStateList backgroundColor;
         ColorStateList imageColor;
+
         if (pressPlay) {
 
-            backgroundColor = ColorStateList.valueOf(getResources().
-                    getColor(R.color.grey_dark));
-
-            imageColor = ColorStateList.valueOf(getResources().
-                    getColor(R.color.grey_middle));
+            backgroundColor = RECORD_DISABLED_BACKGROUND;
+            imageColor = RECORD_DISABLED_IMAGE;
 
         } else {
 
-            backgroundColor = ColorStateList.valueOf(getResources().
-                    getColor(R.color.color_primary));
-
-            imageColor = ColorStateList.valueOf(getResources().
-                    getColor(R.color.white));
+            backgroundColor = RECORD_ENABLED_BACKGROUND;
+            imageColor = RECORD_ENABLED_IMAGE;
 
         }
 
@@ -282,6 +301,7 @@ public class EditorActivity extends AppCompatActivity {
         recordBtn.setImageTintList(imageColor);
 
     }
+
 
     /**
      * This method is called, when the record-button is clicked.
@@ -328,8 +348,7 @@ public class EditorActivity extends AppCompatActivity {
 
     void handleErrorOnRecording(String message) {
 
-        playBtn.setEnabled(true);
-        recordBtn.setEnabled(true);
+        reset(false);
 
         Toast.makeText(this, message, Toast.LENGTH_LONG)
                 .show();
@@ -340,24 +359,29 @@ public class EditorActivity extends AppCompatActivity {
     }
 
 
-    public void handleStop(String message) {
+    public void handleStop(StopReason stopReason) {
 
-        playBtn.setEnabled(true);
-        pressPlay = true;
-        recordBtn.setEnabled(true);
+        reset(stopReason.equals(StopReason.COMPOSITION_END_REACHED));
 
-        composition.enable();
-
-        //TODO call play toggle and recolor record btn
-
+        String message = stopReason.getReason();
         Toast.makeText(this, message, Toast.LENGTH_LONG)
                 .show();
 
         Log.d(TAG, message);
 
-
     }
 
+
+    private void reset(boolean togglePlay) {
+
+        playBtn.setEnabled(true);
+        pressPlay = true;
+        recordBtn.setEnabled(true);
+        composition.enable();
+
+        switchState(togglePlay);
+
+    }
 
     /**
      * Simulates recording session
@@ -380,7 +404,7 @@ public class EditorActivity extends AppCompatActivity {
 
         if (!stopReason.equals(StopReason.NO_STOP)) {
 
-            handleStop(stopReason.getReason());
+            handleStop(stopReason);
 
         }
 

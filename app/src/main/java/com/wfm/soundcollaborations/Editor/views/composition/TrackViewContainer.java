@@ -5,7 +5,6 @@ import android.util.Log;
 import android.view.ViewGroup;
 import android.widget.LinearLayout;
 
-import com.wfm.soundcollaborations.Editor.exceptions.SoundRecordingTimeException;
 import com.wfm.soundcollaborations.Editor.model.composition.Sound;
 import com.wfm.soundcollaborations.Editor.utils.DPUtils;
 import com.wfm.soundcollaborations.Editor.views.composition.listeners.TrackViewOnClickListener;
@@ -93,7 +92,7 @@ class TrackViewContainer {
     }
 
 
-    void addSoundView(Context context, Sound sound) throws SoundRecordingTimeException {
+    void addSoundView(Context context, Sound sound) {
 
         SoundView soundView = new SoundView.Builder(context)
                 .status(SoundViewStatus.DOWNLOAD)
@@ -201,14 +200,7 @@ class TrackViewContainer {
     }
 
 
-    private void increaseWatchViewPercentage(float percentage)
-            throws SoundRecordingTimeException {
-
-        if (isTrackWatchPercentageFull()) {
-
-            throw new SoundRecordingTimeException();
-
-        }
+    private void increaseWatchViewPercentage(float percentage) {
 
         trackWatchView.increasePercentage(percentage);
 
@@ -218,14 +210,6 @@ class TrackViewContainer {
     private void decreaseTrackWatchPercentage(float percentage) {
 
         trackWatchView.decreasePercentage(percentage);
-
-    }
-
-
-    private boolean isTrackWatchPercentageFull() {
-
-        float actualPercentage = trackWatchView.getPercentage();
-        return actualPercentage >= 100;
 
     }
 

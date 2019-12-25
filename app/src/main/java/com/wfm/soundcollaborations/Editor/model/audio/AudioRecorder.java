@@ -3,7 +3,6 @@ package com.wfm.soundcollaborations.Editor.model.audio;
 import android.media.MediaRecorder;
 import android.util.Log;
 
-import com.wfm.soundcollaborations.Editor.exceptions.RecordTimeOutExceededException;
 import com.wfm.soundcollaborations.Editor.model.Constants;
 import com.wfm.soundcollaborations.Editor.utils.AudioRecorderStatus;
 import com.wfm.soundcollaborations.Editor.utils.FileUtils;
@@ -34,7 +33,7 @@ public class AudioRecorder implements MediaRecorder.OnInfoListener
     public AudioRecorder() {}
 
 
-    public void start(int startTime) throws RecordTimeOutExceededException {
+    public void start(int startTime) {
         // create new sound file path
         if (status.equals(AudioRecorderStatus.EMPTY)) {
             status = AudioRecorderStatus.RECORDING;
@@ -68,7 +67,6 @@ public class AudioRecorder implements MediaRecorder.OnInfoListener
         } else if (status.equals(AudioRecorderStatus.RECORDING) && recordedTime >= MAX_DURATION) {
             status = AudioRecorderStatus.STOPPED;
             Log.d(TAG, "Max Duration Reached");
-            throw new RecordTimeOutExceededException("Record has reached maximum time.");
         }
     }
 

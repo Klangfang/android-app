@@ -5,7 +5,6 @@ import android.content.Intent;
 import android.util.Log;
 import android.widget.Toast;
 
-import com.wfm.soundcollaborations.Editor.exceptions.RecordTimeOutExceededException;
 import com.wfm.soundcollaborations.Editor.utils.AudioRecorderStatus;
 import com.wfm.soundcollaborations.Editor.views.composition.CompositionView;
 import com.wfm.soundcollaborations.activities.MainActivity;
@@ -40,6 +39,8 @@ public class Composition {
     private int soundLengthInDP;
 
     private boolean recording;
+
+    private CompositionStatus status = CompositionStatus.READY;
 
     private List<Track> tracks;
 
@@ -131,20 +132,23 @@ public class Composition {
 
     public boolean startRecording(Context context) throws Throwable {
 
-        if (isNotRecording()) {
+        if (status.equals(CompositionStatus.READY)) {
+            if (isNotRecording()) {
 
-            startPositionInDP = compositionView.addSoundView(context);
+                startPositionInDP = compositionView.addSoundView(context);
 
-            soundLengthInDP = 0;
+                soundLengthInDP = 0;
 
-            startTrackRecorder(getPositionInMs(compositionView.getScrollPosition()));
+                startTrackRecorder(getPositionInMs(compositionView.getScrollPosition()));
 
-            recording = true;
+                recording = true;
 
-        } else {
+            } else {
 
-            finishRecording();
+                //TODO remember the last sound recording duration, in order to change the global composition state to exhausted
+                finishRecording();
 
+            }
         }
 
         return isRecording();
@@ -191,6 +195,8 @@ public class Composition {
 
             finishRecording();
 
+            status = CompositionStatus.EXHAUSTED;
+
             return StopReason.MAXIMUM_RECORDING_TIME_REACHED;
 
         }
@@ -222,7 +228,7 @@ public class Composition {
     }
 
 
-    private void startTrackRecorder(int startTime) throws RecordTimeOutExceededException {
+    private void startTrackRecorder(int startTime) {
 
         int activeTrackIndex = compositionView.getActiveTrackIndex();
         Track track = tracks.get(activeTrackIndex);
