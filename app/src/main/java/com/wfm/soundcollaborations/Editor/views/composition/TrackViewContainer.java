@@ -16,8 +16,8 @@ import java.util.List;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
-import static com.wfm.soundcollaborations.Editor.utils.DPUtils.TRACK_HEIGHT;
-import static com.wfm.soundcollaborations.Editor.utils.DPUtils.TRACK_WIDTH_IN_MS;
+import static com.wfm.soundcollaborations.Editor.utils.DPUtils.TRACK_MAX_HEIGHT;
+import static com.wfm.soundcollaborations.Editor.utils.DPUtils.TRACK_MAX_LENGTH_IN_MS;
 import static com.wfm.soundcollaborations.Editor.views.composition.CompositionView.SCROLL_STEP;
 
 class TrackViewContainer {
@@ -62,13 +62,13 @@ class TrackViewContainer {
 
             TrackView trackView = new TrackView(context);
             trackView.setOnClickListener(new TrackViewOnClickListener(compositionView, index));
-            LinearLayout.LayoutParams trackParams = new LinearLayout.LayoutParams(TRACK_WIDTH_IN_MS, TRACK_HEIGHT);
+            LinearLayout.LayoutParams trackParams = new LinearLayout.LayoutParams(TRACK_MAX_LENGTH_IN_MS, TRACK_MAX_HEIGHT);
             trackParams.setMargins(0, 10, 0, 10);
             trackView.setLayoutParams(trackParams);
 
             TrackWatchView trackWatchView = new TrackWatchView(context);
             trackWatchView.setOnClickListener(new TrackWatchViewOnClickListener(compositionView, index));
-            LinearLayout.LayoutParams watchParams = new LinearLayout.LayoutParams(TRACK_HEIGHT, TRACK_HEIGHT);
+            LinearLayout.LayoutParams watchParams = new LinearLayout.LayoutParams(TRACK_MAX_HEIGHT, TRACK_MAX_HEIGHT);
             watchParams.setMargins(10, 10, 0, 10);
             trackWatchView.setLayoutParams(watchParams);
 

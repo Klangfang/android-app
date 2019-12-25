@@ -90,13 +90,13 @@ public class Track {
 
 
     // Startet den Recorder
-    void startTrackRecorder() throws RecordTimeOutExceededException {
-        recorder.start();
+    void startTrackRecorder(int startTime) throws RecordTimeOutExceededException {
+        recorder.start(startTime);
     }
 
     // Stopt den Recorder
-    void stopTrackRecorder() {
-        recorder.stop();
+    void stopTrackRecorder(int endTime) {
+        recorder.stop(endTime);
     }
 
     // Liefert den Recorder-Status zurueck

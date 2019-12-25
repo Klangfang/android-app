@@ -2,26 +2,41 @@ package com.wfm.soundcollaborations.Editor.utils;
 
 public final class DPUtils {
 
-    public static final int TRACK_WIDTH_IN_MS = 7200;
-    public static final int SOUND_SECOND_WIDTH = 60;
-    public static final int TRACK_HEIGHT = 75;
+    public static final int TRACK_MAX_LENGTH_IN_MS = 7200;
+    private static final int SOUND_MAX_LENGTH_IN_S = 60;
+    public static final int TRACK_MAX_HEIGHT = 75;
 
 
     public static int getValueInDP(long valueInMs) {
 
         int integerValueInMs = Long.valueOf(valueInMs).intValue();
-        int valueInDP = (integerValueInMs / 1000) * SOUND_SECOND_WIDTH;
-        valueInDP += (integerValueInMs % 1000) * SOUND_SECOND_WIDTH / 1000;
+        int valueInDP = (integerValueInMs / 1000) * SOUND_MAX_LENGTH_IN_S;
+        valueInDP += (integerValueInMs % 1000) * SOUND_MAX_LENGTH_IN_S / 1000;
         return valueInDP;
 
     }
 
 
-    public static boolean hasReachedLimit(int cursorPositionInDP) {
+    public static boolean soundHasReachedMaxLength(int cursorPositionInDP) {
 
-        return (cursorPositionInDP + SOUND_SECOND_WIDTH) > TRACK_WIDTH_IN_MS;
+        return (cursorPositionInDP + SOUND_MAX_LENGTH_IN_S) > TRACK_MAX_LENGTH_IN_MS;
 
     }
+
+
+    public static boolean overlapConstraintsViolation(int cursorPositionInDP, int startPositionInMS, int durationInMS) {
+
+        long startPositionInDP = getValueInDP(startPositionInMS);
+        long endPositionInDP = startPositionInDP + getValueInDP(durationInMS);
+
+        boolean checkStartPosConstraint = cursorPositionInDP <= startPositionInDP;
+        boolean checkEndPosConstraint = cursorPositionInDP >= endPositionInDP;
+
+        return !(checkStartPosConstraint || checkEndPosConstraint);
+
+
+    }
+
 
     public static int getPositionInMs(int width) {
 

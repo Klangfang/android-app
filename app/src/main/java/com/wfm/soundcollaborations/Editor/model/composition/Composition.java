@@ -7,7 +7,6 @@ import android.widget.Toast;
 
 import com.wfm.soundcollaborations.Editor.exceptions.RecordTimeOutExceededException;
 import com.wfm.soundcollaborations.Editor.utils.AudioRecorderStatus;
-import com.wfm.soundcollaborations.Editor.utils.DPUtils;
 import com.wfm.soundcollaborations.Editor.views.composition.CompositionView;
 import com.wfm.soundcollaborations.activities.MainActivity;
 import com.wfm.soundcollaborations.webservice.CompositionServiceClient;
@@ -18,11 +17,14 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Objects;
+import java.util.function.Function;
+import java.util.function.Predicate;
 import java.util.stream.Stream;
 
 import static android.content.Intent.FLAG_ACTIVITY_NEW_TASK;
-import static com.wfm.soundcollaborations.Editor.utils.DPUtils.SOUND_SECOND_WIDTH;
-import static com.wfm.soundcollaborations.Editor.utils.DPUtils.TRACK_WIDTH_IN_MS;
+import static com.wfm.soundcollaborations.Editor.utils.DPUtils.getPositionInMs;
+import static com.wfm.soundcollaborations.Editor.utils.DPUtils.overlapConstraintsViolation;
+import static com.wfm.soundcollaborations.Editor.utils.DPUtils.soundHasReachedMaxLength;
 import static com.wfm.soundcollaborations.Editor.views.composition.CompositionView.SCROLL_STEP;
 
 public class Composition {
@@ -135,7 +137,7 @@ public class Composition {
 
             soundLengthInDP = 0;
 
-            startTrackRecorder();
+            startTrackRecorder(getPositionInMs(compositionView.getScrollPosition()));
 
             recording = true;
 
@@ -156,8 +158,7 @@ public class Composition {
 
         int trackIndex = compositionView.getActiveTrackIndex();
         Track track = tracks.get(trackIndex);
-        tracks.remove(trackIndex); // TODO without remove
-        track.stopTrackRecorder();
+        track.stopTrackRecorder(getPositionInMs(compositionView.getScrollPosition()));
         Integer duration = track.getDuration();
         String filePath = track.getFilePath();
 
@@ -167,7 +168,7 @@ public class Composition {
             Sound sound = new Sound.Builder()
                     .uuid(uuid)
                     .trackNumber(trackIndex)
-                    .startPosition(DPUtils.getPositionInMs(startPositionInDP))
+                    .startPosition(getPositionInMs(startPositionInDP))
                     .duration(duration)
                     .filePath(filePath)
                     .build();
@@ -176,43 +177,44 @@ public class Composition {
 
         }
 
-        tracks.add(trackIndex, track);
+        tracks.set(trackIndex, track);
 
     }
 
 
-    private StopReason checkStop() {
+    private StopReason checkStop() throws Throwable {
 
         int activeTrackIndex = compositionView.getActiveTrackIndex();
         Track track = tracks.get(activeTrackIndex);
+
         if (track.getTrackRecorderStatus().equals(AudioRecorderStatus.STOPPED)) {
+
+            finishRecording();
 
             return StopReason.MAXIMUM_RECORDING_TIME_REACHED;
 
         }
 
-        // Check Sound out of composition
-        int cursorPositionInDP = this.compositionView.getScrollPosition();
-        if((cursorPositionInDP + SOUND_SECOND_WIDTH) > TRACK_WIDTH_IN_MS) {
+        if (soundHasReachedMaxLength(compositionView.getScrollPosition())) {
+
+            finishRecording();
 
             return StopReason.COMPOSITION_END_REACHED;
 
         }
 
-        // check sound overlapping
-        long startPositionInDP, lengthInDP;
-        int trackNumber = compositionView.getActiveTrackIndex();
-        for (Sound sound : tracks.get(trackNumber).getSounds()) {
-            startPositionInDP = DPUtils.getValueInDP(sound.getStartPosition());
-            lengthInDP = DPUtils.getValueInDP(sound.getDuration());
-            long endPositionInDP = startPositionInDP + lengthInDP;
-            int distanceToStartPos = cursorPositionInDP + 20 ;
-            int distanceToEndPos = cursorPositionInDP + 20 ;
-            if (distanceToStartPos > startPositionInDP && distanceToEndPos < endPositionInDP) {
+        // check overlap constraints
+        int cp = compositionView.getScrollPosition();
+        Function<Sound, Integer> sp = Sound::getStartPosition;
+        Function<Sound, Integer> d = Sound::getDuration;
+        Predicate<? super Sound> predicate = s -> overlapConstraintsViolation(cp, sp.apply(s), d.apply(s));
+        boolean overlapConstraintsViolation = track.getSounds().parallelStream()
+                .anyMatch(predicate);
+        if (overlapConstraintsViolation) {
 
-                return StopReason.SOUND_RECORD_OVERLAP;
+            finishRecording();
 
-            }
+            return StopReason.SOUND_RECORD_OVERLAP;
         }
 
         return StopReason.NO_STOP;
@@ -220,12 +222,12 @@ public class Composition {
     }
 
 
-    private void startTrackRecorder() throws RecordTimeOutExceededException {
+    private void startTrackRecorder(int startTime) throws RecordTimeOutExceededException {
 
         int activeTrackIndex = compositionView.getActiveTrackIndex();
         Track track = tracks.get(activeTrackIndex);
-        track.startTrackRecorder();
-        tracks.add(activeTrackIndex, track);
+        track.startTrackRecorder(startTime);
+        tracks.set(activeTrackIndex, track);
 
     }
 
@@ -304,7 +306,7 @@ public class Composition {
 
                 track.addSound(sound, compositionView.getContext());
                 track.prepare(compositionView.getContext());
-                tracks.add(trackNumber, track);
+                tracks.set(trackNumber, track);
 
                 compositionId = compositionResponse.id;
                 title = compositionResponse.title;

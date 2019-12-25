@@ -380,7 +380,7 @@ public class EditorActivity extends AppCompatActivity {
 
         if (!stopReason.equals(StopReason.NO_STOP)) {
 
-            handleStop(stopReason.name());
+            handleStop(stopReason.getReason());
 
         }
 

@@ -88,7 +88,7 @@ public class RecordActivity extends AppCompatActivity
                 {
                     resetPlayBtn();
                     try {
-                        mAudioRecorder.start();
+                        mAudioRecorder.start(0);
                         initRecordTimeTimer();
                         initVisualizeAmplitudesTimer();
                         ((Button)(view)).setText("Finish");
@@ -99,7 +99,7 @@ public class RecordActivity extends AppCompatActivity
                 }
                 else
                 {
-                    mAudioRecorder.stop();
+                    mAudioRecorder.stop(0);
                     recordTimeTimer.cancel();
                     visualizeAmplitudesTimer.cancel();
                     resetValues();
@@ -205,7 +205,7 @@ public class RecordActivity extends AppCompatActivity
 
     private void maxTimeForRecordingReached()
     {
-        mAudioRecorder.stop();
+        mAudioRecorder.stop(0);
         recordTimeTimer.cancel();
         visualizeAmplitudesTimer.cancel();
         recordBtn.setText("Record");

@@ -110,7 +110,7 @@ public class SoundView extends View {
         public SoundView build(TrackViewContainer trackViewContainer) {
 
             int layoutWidth = status.equals(SoundViewStatus.DOWNLOAD) ? DPUtils.getValueInDP(duration) : 0;
-            int layoutHeight = DPUtils.TRACK_HEIGHT;
+            int layoutHeight = DPUtils.TRACK_MAX_HEIGHT;
             int marginLeft = status.equals(SoundViewStatus.DOWNLOAD) ? DPUtils.getValueInDP(startPosition) : startPosition;
             RelativeLayout.LayoutParams soundParams =
                     new RelativeLayout.LayoutParams(layoutWidth, layoutHeight);

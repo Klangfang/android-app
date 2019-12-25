@@ -14,4 +14,10 @@ public enum StopReason {
 
         this.reason = reason;
     }
+
+    public String getReason() {
+
+        return reason;
+
+    }
 }
