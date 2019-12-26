@@ -93,6 +93,15 @@ public class LocalSound extends Sound {
 
     }
 
+
+    @Override
+    public void releasePlayer() {
+
+        player.release();
+
+    }
+
+
     @Override
     public boolean isLocalSound() {
 

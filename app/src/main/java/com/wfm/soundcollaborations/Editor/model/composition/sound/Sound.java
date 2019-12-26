@@ -89,6 +89,9 @@ public abstract class Sound {
     public abstract void preparePlayer(Context context);
 
 
+    public abstract void releasePlayer();
+
+
     public abstract boolean isLocalSound();
 
 

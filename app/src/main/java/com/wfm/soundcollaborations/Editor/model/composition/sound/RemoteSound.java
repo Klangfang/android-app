@@ -101,6 +101,14 @@ public class RemoteSound extends Sound {
 
 
     @Override
+    public void releasePlayer() {
+
+        player.release();
+
+    }
+
+
+    @Override
     public boolean isLocalSound() {
 
         return false;

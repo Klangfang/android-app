@@ -147,17 +147,25 @@ public class Track {
     }
 
 
-    public int getTrackNumber() {
+    int getTrackNumber() {
 
         return trackNumber;
 
     }
 
-    public Stream<LocalSound> getLocalSounds() {
+
+    Stream<LocalSound> getLocalSounds() {
 
         return sounds.stream()
-                .filter(s -> s.isLocalSound())
+                .filter(Sound::isLocalSound)
                 .map(LocalSound.class::cast);
+
+    }
+
+
+    void preDestroy() {
+
+        sounds.forEach(Sound::releasePlayer);
 
     }
 }

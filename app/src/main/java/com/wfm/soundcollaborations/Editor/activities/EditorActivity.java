@@ -179,6 +179,8 @@ public class EditorActivity extends AppCompatActivity {
 
         super.onDestroy();
 
+        composition.preDestroy();
+
     }
 
 

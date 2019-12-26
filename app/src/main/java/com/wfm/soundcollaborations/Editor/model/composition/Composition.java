@@ -242,21 +242,15 @@ public class Composition {
 
         List<String> soundUuids = compositionView.deleteSoundViews();
 
-        List<Track> newTracks = new ArrayList<>();
-
         for (Track track : tracks) {
 
             int soundWidths = track.increaseTime(soundUuids);
             compositionView.updateTrackWatches(track.getTrackNumber(), soundWidths);
 
             track.deleteSounds(soundUuids);
-            //newTracks.add(track);
 
 
         }
-
-
-        // newTracks.forEach(t -> tracks.set(t.getTrackNumber(), t));
 
     }
 
@@ -291,6 +285,12 @@ public class Composition {
     private void stopRecord() {
 
         recordTaskScheduler.stop();
+
+    }
+
+    public void preDestroy() {
+
+        tracks.forEach(Track::preDestroy);
 
     }
 
