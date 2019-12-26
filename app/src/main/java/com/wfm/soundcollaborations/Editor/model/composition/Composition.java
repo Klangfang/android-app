@@ -5,6 +5,9 @@ import android.content.Intent;
 import android.util.Log;
 import android.widget.Toast;
 
+import com.wfm.soundcollaborations.Editor.model.composition.sound.LocalSound;
+import com.wfm.soundcollaborations.Editor.model.composition.sound.RemoteSound;
+import com.wfm.soundcollaborations.Editor.model.composition.sound.Sound;
 import com.wfm.soundcollaborations.Editor.utils.AudioRecorderStatus;
 import com.wfm.soundcollaborations.Editor.views.composition.CompositionView;
 import com.wfm.soundcollaborations.activities.MainActivity;
@@ -13,7 +16,6 @@ import com.wfm.soundcollaborations.webservice.dtos.CompositionResponse;
 import com.wfm.soundcollaborations.webservice.dtos.SoundResponse;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
 import java.util.Objects;
 import java.util.function.Function;
@@ -30,10 +32,13 @@ public class Composition {
 
     private static final String TAG = Composition.class.getSimpleName();
 
+    private static final int POSITION_ZERO = 0;
+
+    private final Context context;
+
     private final CompositionView compositionView;
     private final Long compositionId;
     private final String title;
-    private final Context context;
 
     private int startPositionInDP;
     private int soundLengthInDP;
@@ -44,10 +49,10 @@ public class Composition {
 
     private List<Track> tracks;
 
-    private TracksTimer mTracksTimer;
-
-
     private CompositionServiceClient csClient;
+
+    private RecordTaskScheduler recordTaskScheduler;
+    private PlayTaskScheduler playTaskScheduler;
 
 
     private Composition(Context context,
@@ -64,16 +69,10 @@ public class Composition {
 
         csClient = new CompositionServiceClient();
 
-        createTracksController();
+        playTaskScheduler = new PlayTaskScheduler(context);
+        recordTaskScheduler = new RecordTaskScheduler(context);
+
         subscribeToScrollEvent();
-
-    }
-
-
-    // for playing and pausing sounds
-    private void createTracksController() {
-
-        mTracksTimer = new TracksTimer(context, tracks, compositionView);
 
     }
 
@@ -95,7 +94,9 @@ public class Composition {
 
     private void seek(int positionInMillis) {
 
-        mTracksTimer.seek(positionInMillis);
+        tracks.forEach(t -> t.seek(positionInMillis));
+
+        playTaskScheduler.seek(positionInMillis);
 
     }
 
@@ -169,7 +170,7 @@ public class Composition {
         if (filePath != null) {
 
             String uuid = compositionView.finishRecording();
-            Sound sound = new Sound.Builder()
+            LocalSound sound = new LocalSound.Builder()
                     .uuid(uuid)
                     .trackNumber(trackIndex)
                     .startPosition(getPositionInMs(startPositionInDP))
@@ -177,7 +178,6 @@ public class Composition {
                     .filePath(filePath)
                     .build();
             track.prepareSound(sound, compositionView.getContext());
-            mTracksTimer.updateTrack(trackIndex, track); //TODO noch brauchbar??!
 
         }
 
@@ -238,18 +238,59 @@ public class Composition {
     }
 
 
-    public void deleteSounds() {
+    public void deleteSounds() throws Throwable {
 
-        tracks.forEach(track -> {
-            int soundWidths = track.deleteSounds(compositionView.deleteSoundViews());
-            compositionView.updateTrackWatches(soundWidths);
-        });
+        List<String> soundUuids = compositionView.deleteSoundViews();
+
+        List<Track> newTracks = new ArrayList<>();
+
+        for (Track track : tracks) {
+
+            int soundWidths = track.increaseTime(soundUuids);
+            compositionView.updateTrackWatches(track.getTrackNumber(), soundWidths);
+
+            track.deleteSounds(soundUuids);
+            //newTracks.add(track);
+
+
+        }
+
+
+        // newTracks.forEach(t -> tracks.set(t.getTrackNumber(), t));
 
     }
 
-    public void enable() {
+
+    public void enable(StopReason stopReason) {
+
+        if (stopReason.equals(StopReason.COMPOSITION_END_REACHED)) {
+            compositionView.setScrollPosition(POSITION_ZERO);
+        }
+
+        stopRecord();
 
         compositionView.enable(true);
+
+    }
+
+
+    public void increaseScrollPosition() {
+
+        compositionView.increaseScrollPosition();
+
+    }
+
+
+    public void record() {
+
+        recordTaskScheduler.record();
+
+    }
+
+
+    private void stopRecord() {
+
+        recordTaskScheduler.stop();
 
     }
 
@@ -301,7 +342,7 @@ public class Composition {
                 Integer trackNumber = sndResp.trackNumber;
                 Track track = tracks.get(trackNumber);
 
-                Sound sound = new Sound.Builder()
+                RemoteSound sound = new RemoteSound.Builder()
                         .trackNumber(sndResp.trackNumber)
                         .startPosition(sndResp.startPosition)
                         .duration(sndResp.duration)
@@ -340,18 +381,20 @@ public class Composition {
     }
 
 
-    private Stream<Sound> getRecordedSounds() {
+    private Stream<LocalSound> getRecordedSounds() {
 
         return tracks.stream()
-                .map(Track::getRecordedSounds)
-                .flatMap(Collection::stream);
+                .map(Track::getLocalSounds)
+                .flatMap(Function.identity());
 
     }
 
 
     public void playOrPause(boolean pressPlay) {
 
-        mTracksTimer.playOrPause(pressPlay);
+        compositionView.enable(!pressPlay);
+
+        playTaskScheduler.playOrPause(pressPlay, tracks);
 
     }
 

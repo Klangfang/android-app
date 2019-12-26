@@ -1,19 +1,19 @@
 package com.wfm.soundcollaborations.webservice.dtos;
 
-import com.wfm.soundcollaborations.Editor.model.composition.Sound;
+import com.wfm.soundcollaborations.Editor.model.composition.sound.LocalSound;
 import com.wfm.soundcollaborations.Editor.utils.ByteArrayUtils;
 
 public final class SoundRequest {
 
-    public Integer trackNumber;
+    private Integer trackNumber;
 
-    public Integer startPosition;
+    private Integer startPosition;
 
     public Integer duration;
 
     public String creatorName = "TALAL";
 
-    public byte[] soundBytes;
+    private byte[] soundBytes;
 
     private SoundRequest(Integer trackNumber,
                          Integer startPosition,
@@ -27,7 +27,7 @@ public final class SoundRequest {
 
     }
 
-    public static SoundRequest build(Sound s) {
+    public static SoundRequest build(LocalSound s) {
 
         return new SoundRequest(s.trackIndex, s.startPosition, s.duration, ByteArrayUtils.toByteArray(s.filePath));
 

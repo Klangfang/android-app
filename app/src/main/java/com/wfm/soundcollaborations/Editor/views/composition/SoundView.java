@@ -312,6 +312,11 @@ public class SoundView extends View {
     }
 
 
+    /**
+     * Changes the state for the sound view
+     *
+     * @return uuid of the sound view
+     */
     public String finishRecording() {
 
         if (hasRecordState()) {

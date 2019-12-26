@@ -2,9 +2,6 @@ package com.wfm.soundcollaborations.webservice;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.wfm.soundcollaborations.Editor.model.composition.Sound;
-
-import org.json.JSONArray;
 
 import java.io.File;
 import java.io.IOException;

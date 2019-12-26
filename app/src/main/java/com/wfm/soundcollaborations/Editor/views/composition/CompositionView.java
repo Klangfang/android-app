@@ -10,7 +10,7 @@ import android.view.View;
 import android.view.ViewTreeObserver;
 import android.widget.LinearLayout;
 
-import com.wfm.soundcollaborations.Editor.model.composition.Sound;
+import com.wfm.soundcollaborations.Editor.model.composition.sound.RemoteSound;
 import com.wfm.soundcollaborations.R;
 
 import java.util.ArrayList;
@@ -127,7 +127,6 @@ public class CompositionView extends LinearLayout {
 
     private TrackViewContainer getTrackViewContainer(Integer trackIndex) throws Throwable {
 
-
         Predicate<? super TrackViewContainer> activePredicate = c -> c.getIndex() == trackIndex;
 
         return trackViewContainers.stream()
@@ -137,7 +136,7 @@ public class CompositionView extends LinearLayout {
 
     }
 
-    public void addSoundView(Context context, Sound sound) throws Throwable {
+    public void addSoundView(Context context, RemoteSound sound) throws Throwable {
 
         getTrackViewContainer(sound.trackIndex).addSoundView(context, sound);
 
@@ -163,13 +162,19 @@ public class CompositionView extends LinearLayout {
 
     }
 
-    public void updateTrackWatches(int soundWidths) {
 
-        trackViewContainers.forEach(c -> c.updateTrackWatch(soundWidths));
+    public void updateTrackWatches(int trackIndex, int soundWidths) throws Throwable {
 
+        getTrackViewContainer(trackIndex).updateTrackWatches(soundWidths);
 
     }
 
+
+    /**
+     * Finishes recording sound view and enables the composition view
+     *
+     * @return uuid of the sound view
+     */
     public String finishRecording() throws Throwable {
 
         enable(true);
@@ -269,9 +274,10 @@ public class CompositionView extends LinearLayout {
 
     }
 
-    public void setOnScrollChanged(OnScrollChanged scrollChanged)
-    {
+    public void setOnScrollChanged(OnScrollChanged scrollChanged) {
+
         mOnScrollChanged = scrollChanged;
+
     }
 
 
@@ -281,7 +287,6 @@ public class CompositionView extends LinearLayout {
                 .map(TrackViewContainer::deleteSoundViews)
                 .flatMap(Collection::stream)
                 .collect(Collectors.toList());
-
 
     }
 

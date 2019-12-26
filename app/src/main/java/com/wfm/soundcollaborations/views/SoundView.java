@@ -8,16 +8,13 @@ import android.util.AttributeSet;
 import android.util.Log;
 import android.view.View;
 
-import com.wfm.soundcollaborations.Editor.model.composition.Sound;
+import com.wfm.soundcollaborations.Editor.model.composition.sound.Sound;
 
 import java.util.ArrayList;
 
-/**
- * Created by mohammed on 10/9/17.
- */
 
-public class SoundView extends View
-{
+public class SoundView extends View {
+
     private static final String TAG = SoundView.class.getSimpleName();
     private static final int MAX_AMPLITUDE = 32767;
     private Paint linePaint;
@@ -33,10 +30,9 @@ public class SoundView extends View
         init();
     }
 
-    public SoundView(Context context, AttributeSet attrs, Sound sound)
+    public SoundView(Context context, AttributeSet attrs)
     {
         super(context, attrs);
-        this.mSound = sound;
         init();
     }
 

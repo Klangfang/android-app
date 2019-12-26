@@ -51,8 +51,6 @@ public class EditorActivity extends AppCompatActivity {
 
     private Composition composition;
 
-    private RecordTaskScheduler recordTaskScheduler;
-
     @BindView(R.id.btn_delete)
     ImageButton deletedBtn;
 
@@ -231,13 +229,11 @@ public class EditorActivity extends AppCompatActivity {
 
             if (hasStartedRecording) {
 
-                recordTaskScheduler = new RecordTaskScheduler();
-                recordTaskScheduler.scheduleRecord(this);
+                composition.record();
 
             } else {
 
-                recordTaskScheduler.cancel();
-                handleStop(StopReason.FINISH_RECORDING);
+                handleStop(false, StopReason.FINISH_RECORDING);
 
             }
 
@@ -257,6 +253,7 @@ public class EditorActivity extends AppCompatActivity {
         composition.playOrPause(pressPlay);
 
     }
+
 
     private void switchState(boolean togglePlay) {
 
@@ -330,7 +327,7 @@ public class EditorActivity extends AppCompatActivity {
             switch (which) {
                 case DialogInterface.BUTTON_POSITIVE:
                     //Yes button clicked
-                    composition.deleteSounds();
+                    deleteSounds();
                     deletedBtn.setEnabled(false);
                     break;
 
@@ -346,9 +343,25 @@ public class EditorActivity extends AppCompatActivity {
 
     }
 
+
+    private void deleteSounds() {
+
+        try {
+
+            composition.deleteSounds();
+
+        } catch (Throwable t) {
+
+            handleErrorOnRecording(t.getMessage());
+
+        }
+
+    }
+
+
     void handleErrorOnRecording(String message) {
 
-        reset(false);
+        reset(false, StopReason.UNKNOWN);
 
         Toast.makeText(this, message, Toast.LENGTH_LONG)
                 .show();
@@ -359,9 +372,9 @@ public class EditorActivity extends AppCompatActivity {
     }
 
 
-    public void handleStop(StopReason stopReason) {
+    public void handleStop(boolean togglePlay, StopReason stopReason) {
 
-        reset(stopReason.equals(StopReason.COMPOSITION_END_REACHED));
+        reset(togglePlay, stopReason);
 
         String message = stopReason.getReason();
         Toast.makeText(this, message, Toast.LENGTH_LONG)
@@ -372,12 +385,13 @@ public class EditorActivity extends AppCompatActivity {
     }
 
 
-    private void reset(boolean togglePlay) {
+    private void reset(boolean togglePlay, StopReason stopReason) {
+
+        composition.enable(stopReason);
 
         playBtn.setEnabled(true);
         pressPlay = true;
         recordBtn.setEnabled(true);
-        composition.enable();
 
         switchState(togglePlay);
 
@@ -388,7 +402,7 @@ public class EditorActivity extends AppCompatActivity {
      *
      * @return StopReason if the record process is stopped
      */
-    StopReason simulateRecording() {
+    public void simulateRecording() {
 
         StopReason stopReason = StopReason.UNKNOWN;
 
@@ -404,11 +418,16 @@ public class EditorActivity extends AppCompatActivity {
 
         if (!stopReason.equals(StopReason.NO_STOP)) {
 
-            handleStop(stopReason);
+            handleStop(false, stopReason);
 
         }
 
-        return stopReason;
     }
 
+
+    public void increaseScrollPosition() {
+
+        composition.increaseScrollPosition();
+
+    }
 }

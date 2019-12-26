@@ -2,14 +2,15 @@ package com.wfm.soundcollaborations.webservice;
 
 
 import com.android.volley.Response;
-import com.wfm.soundcollaborations.Editor.model.composition.Sound;
+import com.wfm.soundcollaborations.Editor.model.composition.sound.LocalSound;
 import com.wfm.soundcollaborations.webservice.dtos.CompositionOverviewResp;
 import com.wfm.soundcollaborations.webservice.dtos.CompositionRequest;
 import com.wfm.soundcollaborations.webservice.dtos.CompositionResponse;
 import com.wfm.soundcollaborations.webservice.dtos.CompositionUpdateRequest;
 import com.wfm.soundcollaborations.webservice.dtos.OverviewResponse;
 
-import java.util.stream.Collectors;
+import org.jetbrains.annotations.NotNull;
+
 import java.util.stream.Stream;
 
 import retrofit2.Call;
@@ -37,14 +38,14 @@ public class CompositionServiceClient {
 
     public void create(String compositionTitle,
                        String creatorName,
-                       Stream<Sound> recordedSounds,
+                       Stream<LocalSound> recordedSounds,
                        Response.Listener<CompositionOverviewResp> listener) {
 
-        service.create(CompositionRequest.build(compositionTitle, creatorName, recordedSounds.collect(Collectors.toList())))
+        service.create(CompositionRequest.build(compositionTitle, creatorName, recordedSounds))
                 .enqueue(new Callback<CompositionOverviewResp>() {
                     @Override
-                    public void onResponse(Call<CompositionOverviewResp> call,
-                                           retrofit2.Response<CompositionOverviewResp> response) {
+                    public void onResponse(@NotNull Call<CompositionOverviewResp> call,
+                                           @NotNull retrofit2.Response<CompositionOverviewResp> response) {
 
                         CompositionOverviewResp compositionOverviewResp = response.body();
                         listener.onResponse(compositionOverviewResp);
@@ -52,7 +53,7 @@ public class CompositionServiceClient {
                     }
 
                     @Override
-                    public void onFailure(Call<CompositionOverviewResp> call, Throwable t) {
+                    public void onFailure(@NotNull Call<CompositionOverviewResp> call, @NotNull Throwable t) {
                         //Handle failure
                     }
                 });
@@ -83,10 +84,10 @@ public class CompositionServiceClient {
     }
 
     public void join(Long compositionId,
-                     Stream<Sound> recordedSounds,
+                     Stream<LocalSound> recordedSounds,
                      Response.Listener<CompositionResponse> listener) {
 
-        service.join(compositionId, CompositionUpdateRequest.build(recordedSounds.collect(Collectors.toList())))
+        service.join(compositionId, CompositionUpdateRequest.build(recordedSounds))
                 .enqueue(new Callback<CompositionResponse>() {
                     @Override
                     public void onResponse(Call<CompositionResponse> call,
@@ -111,8 +112,8 @@ public class CompositionServiceClient {
         service.cancel(compositionId, CompositionUpdateRequest.build())
                 .enqueue(new Callback<CompositionResponse>() {
                     @Override
-                    public void onResponse(Call<CompositionResponse> call,
-                                           retrofit2.Response<CompositionResponse> response) {
+                    public void onResponse(@NotNull Call<CompositionResponse> call,
+                                           @NotNull retrofit2.Response<CompositionResponse> response) {
 
                         CompositionResponse compositionResponse = response.body();
                         listener.onResponse(compositionResponse);
@@ -120,7 +121,7 @@ public class CompositionServiceClient {
                     }
 
                     @Override
-                    public void onFailure(Call<CompositionResponse> call, Throwable t) {
+                    public void onFailure(@NotNull Call<CompositionResponse> call, @NotNull Throwable t) {
                         //Handle failure
                     }
                 });
@@ -133,8 +134,8 @@ public class CompositionServiceClient {
         service.getOverviews()
                 .enqueue(new Callback<OverviewResponse>() {
                     @Override
-                    public void onResponse(Call<OverviewResponse> call,
-                                           retrofit2.Response<OverviewResponse> response) {
+                    public void onResponse(@NotNull Call<OverviewResponse> call,
+                                           @NotNull retrofit2.Response<OverviewResponse> response) {
 
                         OverviewResponse overviewResponse = response.body();
                         listener.onResponse(overviewResponse);
@@ -142,7 +143,7 @@ public class CompositionServiceClient {
                     }
 
                     @Override
-                    public void onFailure(Call<OverviewResponse> call, Throwable t) {
+                    public void onFailure(@NotNull Call<OverviewResponse> call, @NotNull Throwable t) {
                         //Handle failure
                     }
                 });

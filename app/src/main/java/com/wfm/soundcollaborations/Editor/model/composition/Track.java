@@ -3,13 +3,15 @@ package com.wfm.soundcollaborations.Editor.model.composition;
 import android.content.Context;
 
 import com.wfm.soundcollaborations.Editor.model.audio.AudioRecorder;
+import com.wfm.soundcollaborations.Editor.model.composition.sound.LocalSound;
+import com.wfm.soundcollaborations.Editor.model.composition.sound.Sound;
 import com.wfm.soundcollaborations.Editor.utils.AudioRecorderStatus;
 import com.wfm.soundcollaborations.Editor.utils.DPUtils;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 
 public class Track {
@@ -24,13 +26,6 @@ public class Track {
 
         this.trackNumber = trackNumber;
         recorder = new AudioRecorder();
-
-    }
-
-
-    List<Sound> getRecordedSounds() {
-
-        return sounds.stream().filter(Sound::isRecorded).collect(Collectors.toList());
 
     }
 
@@ -117,29 +112,32 @@ public class Track {
         return sounds;
     }
 
-    public void deleteSound(Sound soundToDelete) {
-        recorder.increaseTime(soundToDelete.getDuration());
-        sounds.remove(soundToDelete);
-    }
-
     public Integer getDuration() {
         return recorder.getDuration();
     }
 
 
-    int deleteSounds(List<String> soundUUIDs) {
+    int increaseTime(List<String> soundUUIDs) {
 
-        //TODO why unterschiedliche uuids ?!!! Problem mit trackwatchview
-        int soundsWidths = sounds.stream()
-                .filter(sound -> soundUUIDs.contains(sound.uuid))
-                .mapToInt(sound -> DPUtils.getValueInDP(sound.duration))
+        int allSoundsDuration = sounds.stream()
+                .filter(s -> s.isLocalSound() && soundUUIDs.contains(s.getUuid()))
+                .mapToInt(s -> s.duration)
                 .sum();
 
-        sounds.removeIf(sound -> soundUUIDs.contains(sound.uuid));
+        recorder.increaseTime(allSoundsDuration);
 
-        return soundsWidths;
+        return DPUtils.getValueInDP(allSoundsDuration);
 
     }
+
+
+    void deleteSounds(List<String> soundUUIDs) {
+
+
+        sounds.removeIf(s -> s.isLocalSound() && soundUUIDs.contains(s.getUuid()));
+
+    }
+
 
     boolean isPlaying() {
 
@@ -148,4 +146,18 @@ public class Track {
 
     }
 
+
+    public int getTrackNumber() {
+
+        return trackNumber;
+
+    }
+
+    public Stream<LocalSound> getLocalSounds() {
+
+        return sounds.stream()
+                .filter(s -> s.isLocalSound())
+                .map(LocalSound.class::cast);
+
+    }
 }

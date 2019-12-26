@@ -1,15 +1,16 @@
 package com.wfm.soundcollaborations.webservice.dtos;
 
-import com.wfm.soundcollaborations.Editor.model.composition.Sound;
+import com.wfm.soundcollaborations.Editor.model.composition.sound.LocalSound;
 
 import java.util.List;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public final class CompositionRequest {
 
     public String title;
 
-    public String creatorName;
+    private String creatorName;
 
     public List<SoundRequest> sounds;
 
@@ -21,10 +22,9 @@ public final class CompositionRequest {
 
     }
 
-    public static CompositionRequest build(String title, String creatorName, List<Sound> recordedSounds) {
+    public static CompositionRequest build(String title, String creatorName, Stream<LocalSound> recordedSounds) {
 
-        List<SoundRequest> soundReqs = recordedSounds.stream()
-                .map(SoundRequest::build)
+        List<SoundRequest> soundReqs = recordedSounds.map(SoundRequest::build)
                 .collect(Collectors.toList());
         return new CompositionRequest(title, creatorName, soundReqs);
 

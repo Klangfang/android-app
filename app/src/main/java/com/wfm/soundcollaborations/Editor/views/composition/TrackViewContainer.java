@@ -5,7 +5,7 @@ import android.util.Log;
 import android.view.ViewGroup;
 import android.widget.LinearLayout;
 
-import com.wfm.soundcollaborations.Editor.model.composition.Sound;
+import com.wfm.soundcollaborations.Editor.model.composition.sound.RemoteSound;
 import com.wfm.soundcollaborations.Editor.utils.DPUtils;
 import com.wfm.soundcollaborations.Editor.views.composition.listeners.TrackViewOnClickListener;
 import com.wfm.soundcollaborations.Editor.views.composition.listeners.TrackWatchViewOnClickListener;
@@ -92,7 +92,7 @@ class TrackViewContainer {
     }
 
 
-    void addSoundView(Context context, Sound sound) {
+    void addSoundView(Context context, RemoteSound sound) {
 
         SoundView soundView = new SoundView.Builder(context)
                 .status(SoundViewStatus.DOWNLOAD)
@@ -148,7 +148,7 @@ class TrackViewContainer {
 
         List<String> uuids = soundViews.stream()
                 .filter(deletePredicate)
-                .map(this::deleteFromTrackAndMap)
+                .map(this::deleteFromTrack)
                 .collect(Collectors.toList());
 
         soundViews.removeIf(deletePredicate);
@@ -158,7 +158,7 @@ class TrackViewContainer {
     }
 
 
-    private String deleteFromTrackAndMap(SoundView soundView) {
+    private String deleteFromTrack(SoundView soundView) {
 
         trackView.deleteSoundViews(soundView);
 
@@ -174,7 +174,7 @@ class TrackViewContainer {
     }
 
 
-    void updateTrackWatch(int soundWidths) {
+    void updateTrackWatches(int soundWidths) {
 
         //TODO wait until sdk 6 Integer.divideUnsigned(soundWidths / 3)
         decreaseTrackWatchPercentage((float) (soundWidths / SCROLL_STEP) * WATCH_VIEW_PERCENTAGE);
@@ -182,6 +182,11 @@ class TrackViewContainer {
     }
 
 
+    /**
+     * Finishes recording sound view
+     *
+     * @return uuid of the sound view
+     */
     String finishRecording() throws Throwable {
 
         return getRecordedSound().finishRecording();
