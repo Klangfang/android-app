@@ -92,10 +92,10 @@ class TrackViewContainer {
     }
 
 
-    void addSoundView(Context context, RemoteSound sound) {
+    void addRemoteSoundView(Context context, RemoteSound sound) {
 
         SoundView soundView = new SoundView.Builder(context)
-                .status(SoundViewStatus.DOWNLOAD)
+                .status(SoundViewStatus.REMOTE)
                 .trackIndex(index)
                 .startPosition(sound.startPosition)
                 .duration(sound.duration)
@@ -103,18 +103,17 @@ class TrackViewContainer {
                 .build(this);
 
         trackView.addSoundView(soundView);
+        soundViews.add(soundView);
 
-        float percentage = (DPUtils.getValueInDP(sound.duration) / SCROLL_STEP) * WATCH_VIEW_PERCENTAGE;
-
-        increaseWatchViewPercentage(percentage);
+        increaseWatchViewPercentage(sound.duration);
 
     }
 
 
-    void addSoundView(Context context, Integer scrollPosition) {
+    void addLocalSoundView(Context context, Integer scrollPosition) {
 
         SoundView soundView = new SoundView.Builder(context)
-                .status(SoundViewStatus.RECORD)
+                .status(SoundViewStatus.LOCAL_RECORDING)
                 .trackIndex(index)
                 .startPosition(scrollPosition)
                 .build(this);
@@ -127,7 +126,7 @@ class TrackViewContainer {
 
     void updateSoundView(int amplitude) throws Throwable {
 
-        SoundView soundView = getRecordedSound();
+        SoundView soundView = getLocalRecordingSoundView();
 
         soundView.addWave(amplitude);
         soundView.invalidate();
@@ -137,7 +136,7 @@ class TrackViewContainer {
         layoutParams.width += SCROLL_STEP;
         soundView.setLayoutParams(layoutParams);
 
-        increaseWatchViewPercentage(WATCH_VIEW_PERCENTAGE);
+        increaseWatchViewPercentage();
 
     }
 
@@ -176,44 +175,52 @@ class TrackViewContainer {
 
     void updateTrackWatches(int soundWidths) {
 
-        //TODO wait until sdk 6 Integer.divideUnsigned(soundWidths / 3)
-        decreaseTrackWatchPercentage((float) (soundWidths / SCROLL_STEP) * WATCH_VIEW_PERCENTAGE);
+        decreaseTrackWatchPercentage(soundWidths);
 
     }
 
 
     /**
-     * Finishes recording sound view
+     * Completes recording sound view
      *
      * @return uuid of the sound view
      */
-    String finishRecording() throws Throwable {
+    String completeSoundView() throws Throwable {
 
-        return getRecordedSound().finishRecording();
+        return getLocalRecordingSoundView().completeLocalSoundView();
 
     }
 
 
-    private SoundView getRecordedSound() throws Throwable {
+    private SoundView getLocalRecordingSoundView() throws Throwable {
 
-        Predicate<? super SoundView> recordPredicate = SoundView::hasRecordState;
+        Predicate<? super SoundView> recordPredicate = SoundView::hasLocalRecordingState;
         return soundViews.stream()
                 .filter(recordPredicate)
                 .findAny()
-                .orElseThrow(() -> new RuntimeException("Could not finish recording."));
+                .orElseThrow(() -> new RuntimeException("Could not complete local recording sound view."));
 
     }
 
 
-    private void increaseWatchViewPercentage(float percentage) {
+    private void increaseWatchViewPercentage() {
 
+        trackWatchView.increasePercentage(WATCH_VIEW_PERCENTAGE);
+
+    }
+
+
+    private void increaseWatchViewPercentage(int duration) {
+
+        float percentage = (DPUtils.getValueInDP(duration) / SCROLL_STEP) * WATCH_VIEW_PERCENTAGE;
         trackWatchView.increasePercentage(percentage);
 
     }
 
 
-    private void decreaseTrackWatchPercentage(float percentage) {
+    private void decreaseTrackWatchPercentage(int widths) {
 
+        float percentage = (float) (widths / SCROLL_STEP) * WATCH_VIEW_PERCENTAGE;
         trackWatchView.decreasePercentage(percentage);
 
     }

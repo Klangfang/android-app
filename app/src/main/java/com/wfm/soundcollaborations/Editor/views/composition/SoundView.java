@@ -109,18 +109,28 @@ public class SoundView extends View {
 
         public SoundView build(TrackViewContainer trackViewContainer) {
 
-            int layoutWidth = status.equals(SoundViewStatus.DOWNLOAD) ? DPUtils.getValueInDP(duration) : 0;
+            SoundView soundView = new SoundView(context, status, trackViewContainer);
+            int layoutWidth = 0;
             int layoutHeight = DPUtils.TRACK_MAX_HEIGHT;
-            int marginLeft = status.equals(SoundViewStatus.DOWNLOAD) ? DPUtils.getValueInDP(startPosition) : startPosition;
+            int marginLeft = startPosition;
+            if (status.equals(SoundViewStatus.REMOTE)) {
+
+                layoutWidth = DPUtils.getValueInDP(duration);
+                marginLeft = DPUtils.getValueInDP(startPosition);
+            } else {
+
+                soundView.setOnLongClickListener(soundView::update);
+
+            }
+
             RelativeLayout.LayoutParams soundParams =
                     new RelativeLayout.LayoutParams(layoutWidth, layoutHeight);
             soundParams.setMargins(marginLeft, 0, 0, 0);
-            SoundView soundView = new SoundView(context, status, trackViewContainer);
+
             soundView.setLayoutParams(soundParams);
             soundView.setTrackIndex(trackIndex);
-            soundView.setOnLongClickListener(soundView::update);
 
-            if (soundView.getSoundViewStatus().equals(SoundViewStatus.DOWNLOAD)) {
+            if (soundView.getSoundViewStatus().equals(SoundViewStatus.REMOTE)) {
                 VisualizeSoundTask soundTask = new VisualizeSoundTask(soundView, url);
                 soundTask.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
             }
@@ -137,6 +147,7 @@ public class SoundView extends View {
 
         super(context);
         this.soundViewStatus = soundViewStatus;
+        //TODO alternative über runnable ectc.....
         EditorActivity editorActivity = (EditorActivity) context;
         deleteBtn = editorActivity.findViewById(R.id.btn_delete);
         this.trackViewContainer = trackViewContainer;
@@ -148,7 +159,6 @@ public class SoundView extends View {
     public SoundView(Context context, AttributeSet attrs) {
 
         super(context, attrs);
-        this.soundViewStatus = SoundViewStatus.RECORD;
         init();
 
     }
@@ -233,9 +243,9 @@ public class SoundView extends View {
     // Set and change fill color of recorded sound when longclicked
     private void refresh() {
 
-        soundViewStatus = hasFinishRecordState() ? SELECT_FOR_DELETE : SoundViewStatus.RECORD_FINISH;
+        soundViewStatus = hasLocalCompletedState() ? SELECT_FOR_DELETE : SoundViewStatus.LOCAL_RECORDING;
         deleteBtn.setEnabled(trackViewContainer.hasDeleteSoundViews() || hasDeleteState());
-        int color = hasFinishRecordState() ? RECORD_COLOR : SELECT_FOR_DELETE_COLOR;
+        int color = hasLocalCompletedState() ? RECORD_COLOR : SELECT_FOR_DELETE_COLOR;
         rectPaint.setColor(getResources().getColor(color));
         invalidate();
 
@@ -244,21 +254,21 @@ public class SoundView extends View {
 
     private void initColor() {
 
-        rectPaint.setColor(getResources().getColor(soundViewStatus.equals(SoundViewStatus.DOWNLOAD) ? DOWNLOAD_COLOR : RECORD_COLOR));
+        rectPaint.setColor(getResources().getColor(soundViewStatus.equals(SoundViewStatus.REMOTE) ? DOWNLOAD_COLOR : RECORD_COLOR));
 
     }
 
 
-    public boolean hasRecordState() {
+    public boolean hasLocalRecordingState() {
 
-        return soundViewStatus.equals(SoundViewStatus.RECORD);
+        return soundViewStatus.equals(SoundViewStatus.LOCAL_RECORDING);
 
     }
 
 
-    public boolean hasFinishRecordState() {
+    public boolean hasLocalCompletedState() {
 
-        return soundViewStatus.equals(SoundViewStatus.RECORD_FINISH);
+        return soundViewStatus.equals(SoundViewStatus.LOCAL_COMPLETED);
 
     }
 
@@ -313,14 +323,14 @@ public class SoundView extends View {
 
 
     /**
-     * Changes the state for the sound view
+     * Changes the state for the sound view to local completed
      *
      * @return uuid of the sound view
      */
-    public String finishRecording() {
+    public String completeLocalSoundView() {
 
-        if (hasRecordState()) {
-            soundViewStatus = SoundViewStatus.RECORD_FINISH;
+        if (hasLocalRecordingState()) {
+            soundViewStatus = SoundViewStatus.LOCAL_COMPLETED;
         }
 
         return uuid;

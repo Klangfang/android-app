@@ -19,12 +19,12 @@ import com.google.android.exoplayer2.ui.PlayerControlView;
 import com.wfm.soundcollaborations.Editor.activities.EditorActivity;
 import com.wfm.soundcollaborations.Editor.model.audio.ExoPlayerFactory;
 import com.wfm.soundcollaborations.R;
-import com.wfm.soundcollaborations.webservice.CompositionServiceClient;
+import com.wfm.soundcollaborations.webservice.CompositionWebserviceClient;
 import com.wfm.soundcollaborations.webservice.JsonUtil;
 import com.wfm.soundcollaborations.webservice.dtos.CompositionOverviewResp;
 import com.wfm.soundcollaborations.webservice.dtos.CompositionResponse;
 
-import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
 import static android.content.Intent.FLAG_ACTIVITY_NEW_TASK;
@@ -37,8 +37,8 @@ import static android.content.Intent.FLAG_ACTIVITY_NEW_TASK;
 public class CompositionOverviewAdapter extends RecyclerView.Adapter<CompositionOverviewAdapter.ViewHolder> {
 
     private List<CompositionOverviewResp> compositionOverviews;
-    public static final String PICK_RESPONSE = "PICK";
-    private CompositionServiceClient client;
+    private static final String PICK_RESPONSE = "PICK";
+    private CompositionWebserviceClient client;
     private ExoPlayerFactory exoPlayerFactory;
     private Context context;
 
@@ -46,7 +46,7 @@ public class CompositionOverviewAdapter extends RecyclerView.Adapter<Composition
     public CompositionOverviewAdapter(Activity context, List<CompositionOverviewResp> compositionOverviews) {
         this.context = context;
         this.compositionOverviews = compositionOverviews;
-        client = new CompositionServiceClient();
+        client = new CompositionWebserviceClient();
     }
 
     /**
@@ -109,9 +109,8 @@ public class CompositionOverviewAdapter extends RecyclerView.Adapter<Composition
 
     private Player getAudioPlayer(String snippetUrl) {
 
-        exoPlayerFactory = new ExoPlayerFactory();
-        exoPlayerFactory.createExoPlayer(context);
-        exoPlayerFactory.prepare(Arrays.asList(snippetUrl));
+        exoPlayerFactory = ExoPlayerFactory.build(context);
+        exoPlayerFactory.prepare(Collections.singletonList(snippetUrl));
 
         return exoPlayerFactory.getPlayer();
 

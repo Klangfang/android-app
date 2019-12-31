@@ -136,20 +136,18 @@ public class CompositionView extends LinearLayout {
 
     }
 
-    public void addSoundView(Context context, RemoteSound sound) throws Throwable {
+    public void addRemoteSoundView(Context context, RemoteSound sound) throws Throwable {
 
-        getTrackViewContainer(sound.trackIndex).addSoundView(context, sound);
+        getTrackViewContainer(sound.trackIndex).addRemoteSoundView(context, sound);
 
     }
 
 
-    public int addSoundView(Context context) throws Throwable {
+    public void addLocalSoundView(Context context) throws Throwable {
 
         enable(false);
 
-        getActiveTrackViewContainer().addSoundView(context, scrollPosition);
-
-        return scrollPosition;
+        getActiveTrackViewContainer().addLocalSoundView(context, scrollPosition);
 
     }
 
@@ -171,15 +169,15 @@ public class CompositionView extends LinearLayout {
 
 
     /**
-     * Finishes recording sound view and enables the composition view
+     * Completes local sound view and enables the composition view
      *
      * @return uuid of the sound view
      */
-    public String finishRecording() throws Throwable {
+    public String completeLocalSoundView() throws Throwable {
 
         enable(true);
 
-        return getActiveTrackViewContainer().finishRecording();
+        return getActiveTrackViewContainer().completeSoundView();
 
     }
 

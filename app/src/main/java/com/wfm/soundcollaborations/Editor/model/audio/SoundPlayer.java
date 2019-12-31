@@ -5,25 +5,24 @@ import android.content.Context;
 import java.util.List;
 
 
-public class SoundPlayer {
+public final class SoundPlayer {
 
-    private Context context;
     private ExoPlayerFactory exoPlayerFactory;
 
 
-    public SoundPlayer(Context context) {
+    private SoundPlayer(Context context) {
 
-        this.context = context;
-        buildExoPlayer();
+        this.exoPlayerFactory = ExoPlayerFactory.build(context);
+
+    }
+
+
+    public static SoundPlayer build(Context context) {
+
+        return new SoundPlayer(context);
 
     }
 
-    private void buildExoPlayer() {
-
-        exoPlayerFactory = new ExoPlayerFactory();
-        exoPlayerFactory.createExoPlayer(context);
-
-    }
 
     public void addSounds(List<String> uris) {
 
@@ -31,11 +30,13 @@ public class SoundPlayer {
 
     }
 
+
     public void playOrPause(boolean play) {
 
         exoPlayerFactory.playOrPause(play);
 
     }
+
 
     public void seek(long positionsMs) {
 
@@ -43,11 +44,6 @@ public class SoundPlayer {
 
     }
 
-    public void reset() {
-
-        exoPlayerFactory.reset();
-
-    }
 
     public void release() {
 

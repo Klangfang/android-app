@@ -6,37 +6,42 @@ import android.net.Uri;
 import com.google.android.exoplayer2.SimpleExoPlayer;
 import com.google.android.exoplayer2.source.MediaSource;
 import com.google.android.exoplayer2.source.ProgressiveMediaSource;
-import com.google.android.exoplayer2.upstream.DataSource;
 import com.google.android.exoplayer2.upstream.DefaultDataSourceFactory;
 import com.google.android.exoplayer2.util.Util;
 
 import java.util.List;
 
-import static com.google.android.exoplayer2.ExoPlayerFactory.newSimpleInstance;
 
-
-public class ExoPlayerFactory {
+public final class ExoPlayerFactory {
 
     private static final String APP_NAME = "Klangfang";
 
-    private Context context;
-
+    private final DefaultDataSourceFactory dataSourceFactory;
     private SimpleExoPlayer player;
 
-    public void createExoPlayer(Context context) {
 
-        this.context = context;
-        player = newSimpleInstance(context);
+    private ExoPlayerFactory(Context context) {
+
+        player = new SimpleExoPlayer.Builder(context).build();
+
+        // Produces DataSource instances through which media data is loaded.
+        dataSourceFactory = new DefaultDataSourceFactory(context,
+                Util.getUserAgent(context, APP_NAME));
 
     }
+
+
+    public static ExoPlayerFactory build(Context context) {
+
+        return new ExoPlayerFactory(context);
+
+    }
+
 
     public void prepare(List<String> uris) {
 
         for (String uri : uris) {
 
-            // Produces DataSource instances through which media data is loaded.
-            DataSource.Factory dataSourceFactory = new DefaultDataSourceFactory(context,
-                    Util.getUserAgent(context, APP_NAME));
             // This is the MediaSource representing the media to be played.
             MediaSource videoSource = new ProgressiveMediaSource.Factory(dataSourceFactory)
                     .createMediaSource(Uri.parse(uri));
@@ -55,6 +60,7 @@ public class ExoPlayerFactory {
 
     void release() {
 
+        player.setPlayWhenReady(false);
         player.stop();
         player.release();
 

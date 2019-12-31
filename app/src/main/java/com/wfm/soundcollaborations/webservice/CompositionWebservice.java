@@ -15,7 +15,7 @@ import retrofit2.http.PUT;
 import retrofit2.http.Path;
 
 
-public interface CompositionService {
+public interface CompositionWebservice {
 
   @Headers({"Content-Type: application/json"})
   @GET("compositions/compositionsOverview?page=0&size=5")

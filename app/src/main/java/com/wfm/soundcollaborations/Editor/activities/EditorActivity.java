@@ -1,13 +1,17 @@
 package com.wfm.soundcollaborations.Editor.activities;
 
 import android.Manifest;
+import android.content.BroadcastReceiver;
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.IntentFilter;
+import android.content.ServiceConnection;
 import android.content.pm.PackageManager;
 import android.content.res.ColorStateList;
-import android.os.Build;
 import android.os.Bundle;
+import android.os.IBinder;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -15,7 +19,6 @@ import android.view.View;
 import android.widget.ImageButton;
 import android.widget.Toast;
 
-import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
@@ -24,16 +27,16 @@ import androidx.core.content.ContextCompat;
 
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.ohoussein.playpause.PlayPauseView;
-import com.wfm.soundcollaborations.Editor.model.composition.Composition;
+import com.wfm.soundcollaborations.Editor.model.composition.CompositionService;
 import com.wfm.soundcollaborations.Editor.model.composition.StopReason;
+import com.wfm.soundcollaborations.Editor.model.composition.sound.RemoteSound;
 import com.wfm.soundcollaborations.Editor.views.composition.CompositionView;
 import com.wfm.soundcollaborations.R;
 import com.wfm.soundcollaborations.fragments.ComposeFragment;
-import com.wfm.soundcollaborations.webservice.CompositionServiceClient;
-import com.wfm.soundcollaborations.webservice.JsonUtil;
-import com.wfm.soundcollaborations.webservice.dtos.CompositionResponse;
 
 import org.apache.commons.lang3.StringUtils;
+
+import java.util.List;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -46,10 +49,15 @@ public class EditorActivity extends AppCompatActivity {
 
     private static final String TAG = EditorActivity.class.getSimpleName();
 
-    @BindView(R.id.composition)
-    CompositionView compositionView;
+    /**
+     * This constant creates a placeholder for the user's consent of the startOrStopRecording audio permission.
+     * It will be used when handling callback from the runtime permission (onRequestPermissionsResult)
+     */
+    private static final int RECORD_AUDIO_PERMISSIONS_DECISIONS = 1;
 
-    private Composition composition;
+
+    @BindView(R.id.composition)
+    public CompositionView compositionView;
 
     @BindView(R.id.btn_delete)
     ImageButton deletedBtn;
@@ -61,29 +69,70 @@ public class EditorActivity extends AppCompatActivity {
     PlayPauseView playBtn;
     private boolean pressPlay;
 
-
-    /**
-     * This constant creates a placeholder for the user's consent of the record audio permission.
-     * It will be used when handling callback from the runtime permission (onRequestPermissionsResult)
-     */
-    private final int RECORD_AUDIO_PERMISSIONS_DECISIONS = 1;
-
-    private CompositionResponse compositionResponse;
-    private CompositionServiceClient client;
-
     private boolean create;
+    boolean mBounded;
+    CompositionService compositionService;
+
+    BroadcastReceiver editorBroadCastReceiver;
 
 
-    /**
-     * create soundViews to be added to the corresponding sounds
-     * let SoundDownloader update these views using listener
-     * when a view finished downloading it add itself to the track
-     * when all sounds are loaded the CompositionOverviewResp will be ready to playOrPause the sounds
-     * @param savedInstanceState
-     */
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+
         super.onCreate(savedInstanceState);
+
+        init();
+
+        Log.d(TAG, "Activity is created");
+
+    }
+
+
+    @Override
+    protected void onStart() {
+
+        super.onStart();
+
+        createReceiver();
+
+        registerReceiver(editorBroadCastReceiver, new IntentFilter(CompositionService.NOTIFICATION));
+
+        createCompositionService();
+
+        Log.d(TAG, "Activity is started");
+
+    }
+
+    @Override
+    protected void onDestroy() {
+
+        super.onDestroy();
+
+        Log.d(TAG, "Activity is destroyed");
+
+    }
+
+
+    @Override
+    protected void onStop() {
+
+        super.onStop();
+
+        if (editorBroadCastReceiver != null) {
+            unregisterReceiver(editorBroadCastReceiver);
+        }
+
+        if (mServiceConnection != null) {
+            unbindService(mServiceConnection);
+        }
+
+        Log.d(TAG, "Activity is stopped");
+
+    }
+
+
+    private void init() {
+
         setContentView(R.layout.activity_editor);
         ButterKnife.bind(this);
 
@@ -93,93 +142,237 @@ public class EditorActivity extends AppCompatActivity {
         actionBar.setDisplayHomeAsUpEnabled(true);
         actionBar.setTitle(CreateCompositionActivity.compositionTitleInput);
 
-        // create soundViews to be added to the corresponding sounds
-        // let SoundDownloader update these views using listener
-        // when a view finished downloading it add itself to the track
-        // when all sounds are loaded the CompositionOverviewResp will be ready to playOrPause the sounds
-        Intent intent = getIntent();
-        String compositionTitle = intent.getStringExtra(String.valueOf(R.id.composition_title_textfield));
-        String compositionJson = intent.getStringExtra(ComposeFragment.PICK_RESPONSE);
-        //builder = new CompositionBuilder(compositionView, 4, compositionTitle);
-        // create new composition has no json response
-        if (StringUtils.isNotBlank(compositionJson)) {
-
-            create = false;
-            compositionResponse = JsonUtil.fromJson(compositionJson, CompositionResponse.class);
-            if (compositionResponse != null) {
-
-                try {
-                    composition = new Composition.CompositionConfigurer(this)
-                            .compositionView(compositionView)
-                            .title(compositionTitle)
-                            .build(compositionResponse);
-                } catch (Throwable t) {
-                    handleErrorOnRecording(t.getMessage());
-                }
-
-            }
-
-        } else {
-
-            create = true;
-            composition = new Composition.CompositionConfigurer(this)
-                    .compositionView(compositionView)
-                    .title(compositionTitle)
-                    .build();
-
-        }
-
-        // ImageButton has to be set to disabled first because this can't be done in xml
         deletedBtn.setEnabled(false);
         deletedBtn.setOnClickListener(delBtnview -> deleteConfirmation(delBtnview.getContext()));
 
-        client = new CompositionServiceClient();
     }
 
-    // Add Menu to Toolbar
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        getMenuInflater().inflate(R.menu.editor_activity_menu, menu);
-        return true;
-    }
 
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
+    private void createCompositionService() {
 
-        // Check which items are being clicked by checking ID
-        int itemId = item.getItemId();
-        if (itemId == R.id.release_composition) {
+        Intent intent = getIntent();
+        String compositionResponse = intent.getStringExtra(ComposeFragment.PICK_RESPONSE);
+        if (StringUtils.isNotBlank(compositionResponse)) {
 
-            if (create) {
+            create = false;
 
-                composition.create();
-                Toast.makeText(this, "Congratulations! Your composition has been created!", Toast.LENGTH_LONG).show();
+            Intent intent1 = new Intent(this, CompositionService.class);
+            intent1.putExtra("CompositionResponse", compositionResponse);
 
+            startService(intent1);
+            bindService(intent1, mServiceConnection, BIND_AUTO_CREATE);
 
-            } else {
+        } else {
 
-                // Code for releasing the composition comes here
-                composition.join();
-                Toast.makeText(this, "Congratulations! Your composition collaboration has been released!", Toast.LENGTH_LONG).show();
+            String compositionTitle = intent.getStringExtra(String.valueOf(R.id.composition_title_textfield));
 
-            }
+            Intent intent1 = new Intent(this, CompositionService.class);
+            intent1.putExtra(String.valueOf(R.id.composition_title_textfield), compositionTitle);
 
-        } else if (itemId == 16908332) {
+            startService(intent1);
+            bindService(intent1, mServiceConnection, BIND_AUTO_CREATE);
 
-            composition.cancel();
+            create = true;
 
         }
 
-        return super.onOptionsItemSelected(item);
+        compositionView.setOnScrollChanged(position -> {
+
+            int milliseconds = (int) (position * 16.6666);
+            compositionService.seek(milliseconds);
+            Log.d(TAG, String.format("Milliseconds =>  %d position => %d", milliseconds, position));
+
+        });
 
     }
 
-    @Override
-    protected void onDestroy() {
 
-        super.onDestroy();
+    private void startOrStopRecording() {
 
-        composition.preDestroy();
+        if (compositionService.isRecording()) {
+
+            stopRecording();
+
+        } else {
+
+            startRecording();
+
+        }
+
+    }
+
+
+    private void startRecording() {
+
+        int activeTrackIndex = compositionView.getActiveTrackIndex();
+        int scrollPositionInDP = compositionView.getScrollPosition();
+
+        try {
+
+            if (compositionService.canRecord(activeTrackIndex, scrollPositionInDP)) {
+
+                compositionView.addLocalSoundView(this);
+
+                compositionService.startRecording(activeTrackIndex, scrollPositionInDP, this::simulateRecording);
+
+                playBtn.setEnabled(false);
+                setRecordBtnColors(false, true);
+
+            } else {
+
+                Toast.makeText(this, "Can not start recording at this position", Toast.LENGTH_SHORT).show();
+            }
+
+        } catch (Throwable t) {
+
+            handleErrorOnRecording(t);
+
+        }
+
+    }
+
+    private void stopRecording() {
+
+        compositionService.stopRecording();
+
+    }
+
+
+    /**
+     * Work to do when sound recording is completed
+     */
+    void completeLocalSound() {
+
+        try {
+
+            String uuid = compositionView.completeLocalSoundView();
+
+            int activeTrackIndex = compositionView.getActiveTrackIndex();
+            int scrollPositionInDP = compositionView.getScrollPosition();
+
+            compositionService.completeLocalSound(activeTrackIndex, scrollPositionInDP, uuid);
+
+            handleStop(false, StopReason.FINISH_RECORDING);
+
+        } catch (Throwable t) {
+            handleErrorOnRecording(t);
+        }
+
+    }
+
+
+    /**
+     * Simulates recording session
+     */
+    public void simulateRecording() {
+
+        StopReason stopReason = StopReason.UNKNOWN;
+
+        try {
+
+            int activeTrackIndex = compositionView.getActiveTrackIndex();
+            int scrollPosition = compositionView.getScrollPosition();
+
+            stopReason = compositionService.simulateRecording(activeTrackIndex, scrollPosition);
+
+        } catch (Throwable t) {
+
+            handleErrorOnRecording(t);
+
+        }
+
+        if (!stopReason.equals(StopReason.NO_STOP)) {
+
+            handleStop(false, stopReason);
+
+        }
+
+    }
+
+
+    /**
+     * Adds remote sounds of loaded composition
+     */
+    public void addRemoteSoundView(RemoteSound remoteSound) {
+
+        try {
+
+            compositionView.addRemoteSoundView(this, remoteSound);
+
+        } catch (Throwable t) {
+            handleErrorOnRecording(t);
+        }
+
+    }
+
+
+    /**
+     * Puts new sound waves as result of recording process
+     */
+    public void updateSoundView(int maxAmplitude) {
+
+        try {
+
+            compositionView.updateSoundView(maxAmplitude);
+
+        } catch (Throwable t) {
+
+            handleErrorOnRecording(t);
+
+        }
+
+    }
+
+
+    /**
+     * Increases track watches after deleting some sounds
+     */
+    public void updateTrackWatches(int trackNumber, int soundWidths) {
+
+        try {
+
+            compositionView.updateTrackWatches(trackNumber, soundWidths);
+
+        } catch (Throwable t) {
+
+            handleErrorOnRecording(t);
+        }
+
+    }
+
+
+    @OnClick(R.id.btn_play)
+    public void play(View view) {
+
+        switchState(true);
+        compositionService.playOrPause(pressPlay, this::increaseScrollPosition, this::handleStop);
+        compositionView.enable(!pressPlay);
+
+    }
+
+
+    /**
+     * Requests audio and storage permissions.
+     */
+    @OnClick(R.id.btn_record)
+    public void record(View view) {
+
+        boolean permissionNotGranted = ContextCompat.checkSelfPermission(this, Manifest.permission.RECORD_AUDIO) +
+                ContextCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE)
+                != PackageManager.PERMISSION_GRANTED;
+        if (permissionNotGranted) {
+
+            // Show system permission dialog
+            ActivityCompat.requestPermissions(this, new String[]{
+                            Manifest.permission.RECORD_AUDIO,
+                            Manifest.permission.WRITE_EXTERNAL_STORAGE},
+                    RECORD_AUDIO_PERMISSIONS_DECISIONS);
+
+        } else {
+
+            startOrStopRecording();
+
+        }
 
     }
 
@@ -192,71 +385,115 @@ public class EditorActivity extends AppCompatActivity {
     public void onRequestPermissionsResult(int requestCode,
                                            String permissions[],
                                            int[] grantResults) {
-        switch (requestCode) {
-            case RECORD_AUDIO_PERMISSIONS_DECISIONS: {
-                if (grantResults.length > 1
-                        && grantResults[0] == PackageManager.PERMISSION_GRANTED
-                        && grantResults[1] == PackageManager.PERMISSION_GRANTED) {
-                    record(); // All permissions were granted! Start recording
-                } else if (grantResults.length > 1
-                        && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                    // Only recording permission was granted
-                    Toast.makeText(this,
-                            this.getString(R.string.external_storage_permission_denied),
-                            Toast.LENGTH_LONG).show();
-                } else if (grantResults.length > 1
-                        && grantResults[1] == PackageManager.PERMISSION_GRANTED) {
-                    // Only Storage permission was granted
-                    Toast.makeText(this,
-                            this.getString(R.string.record_audio_permission_denied),
-                            Toast.LENGTH_LONG).show();
-                } else {
-                    // All permissions were denied.
-                    Toast.makeText(this,
-                            this.getString(R.string.all_audio_permissions_denied),
-                            Toast.LENGTH_LONG).show();
-                }
+
+        if (requestCode == RECORD_AUDIO_PERMISSIONS_DECISIONS) {
+
+            boolean allPermissionsGranted = grantResults.length > 1
+                    && grantResults[0] == PackageManager.PERMISSION_GRANTED
+                    && grantResults[1] == PackageManager.PERMISSION_GRANTED;
+            boolean recordingPermissionGranted = grantResults.length > 1
+                    && grantResults[0] == PackageManager.PERMISSION_GRANTED;
+            boolean storagePermissionGranted = grantResults.length > 1
+                    && grantResults[1] == PackageManager.PERMISSION_GRANTED;
+
+            if (allPermissionsGranted) {
+
+                startOrStopRecording();
+
+            } else if (recordingPermissionGranted) {
+
+                Toast.makeText(this,
+                        this.getString(R.string.external_storage_permission_denied),
+                        Toast.LENGTH_LONG).show();
+
+            } else if (storagePermissionGranted) {
+
+                Toast.makeText(this,
+                        this.getString(R.string.record_audio_permission_denied),
+                        Toast.LENGTH_LONG).show();
+            } else {
+
+                Toast.makeText(this,
+                        this.getString(R.string.all_audio_permissions_denied),
+                        Toast.LENGTH_LONG).show();
             }
+
         }
+
     }
 
 
-    private void record() {
+    /**
+     * do nothing when back button is pressed
+     */
+    @Override
+    public void onBackPressed() {
+
+        //do not leave activity
+
+        //TODO find a way to hide activity in the background
+
+        Log.d(TAG, "Activity is fixed when back is pressed");
+
+    }
+
+
+    /**
+     * Adds menu to toolbar
+     * This is a custom implementation of
+     * {@link android.view.Window.Callback#onCreatePanelMenu}
+     */
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+
+        getMenuInflater().inflate(R.menu.editor_activity_menu, menu);
+        return true;
+
+    }
+
+
+    /**
+     * Event listener for menu item
+     */
+    @Override
+    public boolean onOptionsItemSelected(MenuItem menuItem) {
 
         try {
 
-            boolean hasStartedRecording = composition.startRecording(this);
+            int itemId = menuItem.getItemId();
+            if (itemId == R.id.release_composition) {
 
-            playBtn.setEnabled(!hasStartedRecording);
+                if (create) {
 
-            if (hasStartedRecording) {
+                    compositionService.create();
 
-                composition.record();
 
-            } else {
+                } else {
 
-                handleStop(false, StopReason.FINISH_RECORDING);
+                    compositionService.join();
+
+                }
+
+            } else if (itemId == 16908332) {
+
+                compositionService.cancel();
 
             }
 
         } catch (Throwable t) {
 
-            handleErrorOnRecording(t.getMessage());
+            handleErrorOnRecording(t);
 
         }
 
-    }
-
-    @RequiresApi(api = Build.VERSION_CODES.JELLY_BEAN_MR1)
-    @OnClick(R.id.btn_play)
-    public void play(View view) {
-
-        switchState(true);
-        composition.playOrPause(pressPlay);
+        return super.onOptionsItemSelected(menuItem);
 
     }
 
 
+    /**
+     * Switches all button states and sets record button default colors.
+     */
     private void switchState(boolean togglePlay) {
 
         recordBtn.setEnabled(pressPlay);
@@ -267,34 +504,43 @@ public class EditorActivity extends AppCompatActivity {
             playBtn.toggle();
         }
 
-        setRecordBtnColors(pressPlay);
+        setRecordBtnColors(pressPlay, false);
 
     }
 
 
-    private void setRecordBtnColors(boolean pressPlay) {
-
+    private void setRecordBtnColors(boolean pressPlay, boolean recording) {
 
         //TODO define in CommonUtil as map maybe
         ColorStateList RECORD_ENABLED_BACKGROUND = valueOf(getResources().getColor(R.color.color_primary));
+        ColorStateList RECORD_ENABLED_BACKGROUND_2 = valueOf(getResources().getColor(R.color.color_accent));
         ColorStateList RECORD_DISABLED_BACKGROUND = valueOf(getResources().getColor(R.color.grey_dark));
         ColorStateList RECORD_ENABLED_IMAGE = valueOf(getResources().getColor(R.color.white));
+        ColorStateList RECORD_ENABLED_IMAGE_2 = valueOf(getResources().getColor(R.color.color_error));
         ColorStateList RECORD_DISABLED_IMAGE = valueOf(getResources().getColor(R.color.grey_middle));
 
         ColorStateList backgroundColor;
         ColorStateList imageColor;
 
-        if (pressPlay) {
+        if (recording) {
 
-            backgroundColor = RECORD_DISABLED_BACKGROUND;
-            imageColor = RECORD_DISABLED_IMAGE;
+            backgroundColor = RECORD_ENABLED_BACKGROUND_2;
+            imageColor = RECORD_ENABLED_IMAGE_2;
 
         } else {
+            if (pressPlay) {
 
-            backgroundColor = RECORD_ENABLED_BACKGROUND;
-            imageColor = RECORD_ENABLED_IMAGE;
+                backgroundColor = RECORD_DISABLED_BACKGROUND;
+                imageColor = RECORD_DISABLED_IMAGE;
 
+            } else {
+
+                backgroundColor = RECORD_ENABLED_BACKGROUND;
+                imageColor = RECORD_ENABLED_IMAGE;
+
+            }
         }
+
 
         recordBtn.setBackgroundTintList(backgroundColor);
         recordBtn.setImageTintList(imageColor);
@@ -303,26 +549,10 @@ public class EditorActivity extends AppCompatActivity {
 
 
     /**
-     * This method is called, when the record-button is clicked.
-     * It requests audio and storage permissions.
+     * Asks user for delete confirmation. When the user accepts, all selected local sounds will be delete
+     * {@link EditorActivity#deleteSounds()}
+     * @param context
      */
-    public void requestRecordingPermissions(View view) {
-        // First: check if the permission is not granted
-        if (ContextCompat.checkSelfPermission(this, Manifest.permission.RECORD_AUDIO) +
-                ContextCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE)
-                != PackageManager.PERMISSION_GRANTED) {
-            //Permission is not granted. Show system permission dialog
-            ActivityCompat.requestPermissions(this, new String[]{
-                    Manifest.permission.RECORD_AUDIO,
-                    Manifest.permission.WRITE_EXTERNAL_STORAGE},
-                    RECORD_AUDIO_PERMISSIONS_DECISIONS);
-        } else {
-            //Permission is granted. Start recording
-            record();
-        }
-    }
-
-
     private void deleteConfirmation(Context context) {
 
         DialogInterface.OnClickListener dialogClickListener = (dialog, which) -> {
@@ -346,34 +576,48 @@ public class EditorActivity extends AppCompatActivity {
     }
 
 
+    /**
+     * Deletes all selected local sounds
+     */
     private void deleteSounds() {
 
         try {
 
-            composition.deleteSounds();
+            List<String> soundUUIDs = compositionView.deleteSoundViews();
+
+            compositionService.deleteSounds(soundUUIDs);
 
         } catch (Throwable t) {
 
-            handleErrorOnRecording(t.getMessage());
+            handleErrorOnRecording(t);
 
         }
 
     }
 
 
-    void handleErrorOnRecording(String message) {
+    /**
+     * Resets all values to default and loges error reason
+     */
+    void handleErrorOnRecording(Throwable t) {
 
         reset(false, StopReason.UNKNOWN);
 
-        Toast.makeText(this, message, Toast.LENGTH_LONG)
+        Toast.makeText(this, t.getMessage(), Toast.LENGTH_LONG)
                 .show();
 
-        Log.e(TAG, message);
+        Log.e(TAG, t.getMessage(), t);
 
 
     }
 
 
+    /**
+     * Same as {@link EditorActivity#deleteSounds()}. This is called when sound recording is stopped
+     *
+     * @param togglePlay
+     * @param stopReason
+     */
     public void handleStop(boolean togglePlay, StopReason stopReason) {
 
         reset(togglePlay, stopReason);
@@ -387,9 +631,28 @@ public class EditorActivity extends AppCompatActivity {
     }
 
 
+    /**
+     * Handles stop when end of composition is reached
+     */
+    public void handleStop() {
+
+        handleStop(true, StopReason.COMPOSITION_END_REACHED);
+
+    }
+
+
+    /**
+     * Resets activity default values
+     */
     private void reset(boolean togglePlay, StopReason stopReason) {
 
-        composition.enable(stopReason);
+        if (stopReason.equals(StopReason.COMPOSITION_END_REACHED)) {
+
+            compositionView.setScrollPosition(0);
+
+        }
+
+        compositionView.enable(true);
 
         playBtn.setEnabled(true);
         pressPlay = true;
@@ -399,37 +662,55 @@ public class EditorActivity extends AppCompatActivity {
 
     }
 
-    /**
-     * Simulates recording session
-     *
-     * @return StopReason if the record process is stopped
-     */
-    public void simulateRecording() {
-
-        StopReason stopReason = StopReason.UNKNOWN;
-
-        try {
-
-            stopReason = composition.simulateRecording();
-
-        } catch (Throwable t) {
-
-            handleErrorOnRecording(t.getMessage());
-
-        }
-
-        if (!stopReason.equals(StopReason.NO_STOP)) {
-
-            handleStop(false, stopReason);
-
-        }
-
-    }
-
 
     public void increaseScrollPosition() {
 
-        composition.increaseScrollPosition();
+        compositionView.increaseScrollPosition();
 
     }
+
+
+    /**
+     * Creates a new activity broadcast message receiver
+     */
+    private void createReceiver() {
+
+        if (editorBroadCastReceiver == null) {
+
+            editorBroadCastReceiver = new EditorBroadcastReceiver();
+
+        }
+
+    }
+
+
+    /**
+     * Handles composition service connections
+     */
+    ServiceConnection mServiceConnection = new ServiceConnection() {
+
+        @Override
+        public void onServiceDisconnected(ComponentName name) {
+
+            Toast.makeText(getBaseContext(), "Service is disconnected", Toast.LENGTH_SHORT)
+                    .show();
+            mBounded = false;
+            compositionService = null;
+
+        }
+
+
+        @Override
+        public void onServiceConnected(ComponentName name, IBinder service) {
+
+            Toast.makeText(getBaseContext(), "Service is connected", Toast.LENGTH_SHORT)
+                    .show();
+            mBounded = true;
+            CompositionService.CompositionServiceBinder mLocalBinder = (CompositionService.CompositionServiceBinder) service;
+            compositionService = mLocalBinder.getService();
+
+        }
+
+    };
+
 }

@@ -18,20 +18,19 @@ import retrofit2.Callback;
 import retrofit2.Retrofit;
 import retrofit2.converter.gson.GsonConverterFactory;
 
-public class CompositionServiceClient {
+public class CompositionWebserviceClient {
 
-    private CompositionService service;
+    private CompositionWebservice service;
 
 
-    public CompositionServiceClient() {
+    public CompositionWebserviceClient() {
 
         // Instantiate Composition
         service = new Retrofit.Builder()
                 .baseUrl("https://klangfang-service.herokuapp.com")
                 .addConverterFactory(GsonConverterFactory.create())
                 .build()
-                .create(CompositionService.class);
-
+                .create(CompositionWebservice.class);
 
     }
 
@@ -67,8 +66,8 @@ public class CompositionServiceClient {
         service.open(compositionId, CompositionUpdateRequest.build())
                 .enqueue(new Callback<CompositionResponse>() {
                     @Override
-                    public void onResponse(Call<CompositionResponse> call,
-                                           retrofit2.Response<CompositionResponse> response) {
+                    public void onResponse(@NotNull Call<CompositionResponse> call,
+                                           @NotNull retrofit2.Response<CompositionResponse> response) {
 
                         CompositionResponse compositionResponse = response.body();
                         listener.onResponse(compositionResponse);
@@ -76,7 +75,7 @@ public class CompositionServiceClient {
                     }
 
                     @Override
-                    public void onFailure(Call<CompositionResponse> call, Throwable t) {
+                    public void onFailure(@NotNull Call<CompositionResponse> call, @NotNull Throwable t) {
                         //Handle failure
                     }
                 });
@@ -90,8 +89,8 @@ public class CompositionServiceClient {
         service.join(compositionId, CompositionUpdateRequest.build(recordedSounds))
                 .enqueue(new Callback<CompositionResponse>() {
                     @Override
-                    public void onResponse(Call<CompositionResponse> call,
-                                           retrofit2.Response<CompositionResponse> response) {
+                    public void onResponse(@NotNull Call<CompositionResponse> call,
+                                           @NotNull retrofit2.Response<CompositionResponse> response) {
 
                         CompositionResponse compositionResponse = response.body();
                         listener.onResponse(compositionResponse);
@@ -99,7 +98,7 @@ public class CompositionServiceClient {
                     }
 
                     @Override
-                    public void onFailure(Call<CompositionResponse> call, Throwable t) {
+                    public void onFailure(@NotNull Call<CompositionResponse> call, @NotNull Throwable t) {
                         //Handle failure
                     }
                 });
@@ -122,7 +121,7 @@ public class CompositionServiceClient {
 
                     @Override
                     public void onFailure(@NotNull Call<CompositionResponse> call, @NotNull Throwable t) {
-                        //Handle failure
+                        listener.onResponse(null);
                     }
                 });
 

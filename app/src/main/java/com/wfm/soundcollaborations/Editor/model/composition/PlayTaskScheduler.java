@@ -1,9 +1,6 @@
 package com.wfm.soundcollaborations.Editor.model.composition;
 
-import android.content.Context;
 import android.os.Handler;
-
-import com.wfm.soundcollaborations.Editor.activities.EditorActivity;
 
 import java.util.List;
 import java.util.Timer;
@@ -16,32 +13,26 @@ class PlayTaskScheduler {
     private static final long NO_DELAY = 0;
     private static final int POSITION_ZERO = 0;
 
-    private final Context context;
-
     private Timer timer;
 
     private int positionInMillis = POSITION_ZERO;
     private int circlesReached = POSITION_ZERO;
 
-    private boolean pause = false;
+    private boolean playing;
 
 
-    PlayTaskScheduler(Context context) {
+    PlayTaskScheduler() {
 
         super();
-
-        this.context = context;
 
     }
 
 
-    void playOrPause(boolean pressPlay, List<Track> tracks) {
-
-        EditorActivity editorActivity = (EditorActivity) context;
+    void playOrPause(boolean pressPlay, List<Track> tracks, Runnable fallback1, Runnable fallback2) {
 
         Handler handler = new Handler();
 
-        pause = !pressPlay;
+        playing = pressPlay;
 
         if (pressPlay) {
 
@@ -51,7 +42,7 @@ class PlayTaskScheduler {
                 public void run() {
                     handler.post(() -> {
 
-                        if (pause) {
+                        if (!playing) {
 
                             cancel();
                             return;
@@ -61,7 +52,8 @@ class PlayTaskScheduler {
                         if (positionInMillis >= COMPOSITION_MAX_DURATION_IN_MS) {
 
                             cancel();
-                            reset(context);
+                            positionInMillis = POSITION_ZERO;
+                            fallback2.run();
                             return;
 
                         }
@@ -72,7 +64,7 @@ class PlayTaskScheduler {
                         circlesReached += PLAYING_PERIOD_IN_MS;
                         positionInMillis += PLAYING_PERIOD_IN_MS;
                         if (circlesReached >= 50) {
-                            editorActivity.increaseScrollPosition();
+                            fallback1.run();
                             circlesReached = 0;
                         }
                     });
@@ -96,12 +88,21 @@ class PlayTaskScheduler {
     }
 
 
-    private void reset(Context context) {
+    void stop() {
 
-        positionInMillis = POSITION_ZERO;
+        if (playing) {
 
-        EditorActivity editorActivity = (EditorActivity) context;
-        editorActivity.handleStop(true, StopReason.COMPOSITION_END_REACHED);
+            playing = false;
+            timer.cancel();
+
+        }
+
+    }
+
+
+    boolean isPlaying() {
+
+        return playing;
 
     }
 

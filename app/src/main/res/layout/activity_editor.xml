@@ -41,7 +41,6 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginBottom="32dp"
-            android:onClick="requestRecordingPermissions"
             android:src="@drawable/ic_mic_black_24dp"
             android:text="@string/record_button"
             android:tint="@color/white"

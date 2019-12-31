@@ -1,13 +1,12 @@
 package com.wfm.soundcollaborations.activities;
 
 import android.os.Bundle;
-import androidx.annotation.NonNull;
-import com.google.android.material.bottomnavigation.BottomNavigationView;
-import androidx.fragment.app.FragmentTransaction;
+
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
-import android.view.MenuItem;
+import androidx.fragment.app.FragmentTransaction;
 
+import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.wfm.soundcollaborations.R;
 import com.wfm.soundcollaborations.fragments.ComposeFragment;
 import com.wfm.soundcollaborations.fragments.ExploreFragment;
@@ -16,90 +15,103 @@ import com.wfm.soundcollaborations.fragments.ProfileFragment;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 
-/**
- * Created by Markus Eberts on 15.10.16.
- */
-public class MainActivity extends AppCompatActivity
-{
+
+public class MainActivity extends AppCompatActivity {
+
     private final static String TAG = MainActivity.class.getSimpleName();
 
     @BindView(R.id.base_toolbar)
     Toolbar base_toolbar;
+
     @BindView(R.id.bnv_bottom_navigation)
     BottomNavigationView bottomNavigationView;
 
+
     @Override
-    public void onCreate(Bundle savedInstanceState)
-    {
+    public void onCreate(Bundle savedInstanceState) {
+
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         ButterKnife.bind(this);
 
         initToolbar();
         initBottomNavigationView();
-        showDefaultFragment();
+        startComposeFragment();
+
     }
 
-    private void initToolbar()
-    {
+
+    @Override
+    public void onBackPressed() {
+
+        //do not navigate
+
+        //TODO find a way to hide activity in the background
+    }
+
+
+    private void initToolbar() {
+
         setSupportActionBar(base_toolbar);
+
     }
 
-    private void initBottomNavigationView()
-    {
+
+    private void initBottomNavigationView() {
+
         bottomNavigationView.setOnNavigationItemSelectedListener(
-                new BottomNavigationView.OnNavigationItemSelectedListener() {
-                    @Override
-                    public boolean onNavigationItemSelected(@NonNull MenuItem item)
-                    {
-                        switch (item.getItemId())
-                        {
-                            case R.id.bnm_explore:
-                                startExploreFragment();
-                                break;
-                            case R.id.bnm_compose:
-                                startComposeFragment();
-                                break;
-                            case R.id.bnm_record:
-                                startProfileFragment();
-                                break;
-                        }
-                        return true;
+                item -> {
+                    switch (item.getItemId()) {
+                        case R.id.bnm_explore:
+                            startExploreFragment();
+                            break;
+                        case R.id.bnm_compose:
+                            startComposeFragment();
+                            break;
+                        case R.id.bnm_record:
+                            startProfileFragment();
+                            break;
                     }
+                    return true;
                 });
+
     }
+
 
     private void startExploreFragment(){
-        ExploreFragment exploreFragment = new ExploreFragment();
 
+        ExploreFragment exploreFragment = new ExploreFragment();
         FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
         transaction.replace(R.id.fl_content, exploreFragment);
         transaction.commit();
+
     }
 
-    private void startComposeFragment(){
-        ComposeFragment composeFragment = new ComposeFragment();
 
+    private void startComposeFragment(){
+
+        ComposeFragment composeFragment = new ComposeFragment();
         FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
         transaction.replace(R.id.fl_content, composeFragment);
         transaction.commit();
+
     }
 
-    private void startProfileFragment(){
-        ProfileFragment profileFragment = new ProfileFragment();
 
+    private void startProfileFragment(){
+
+        ProfileFragment profileFragment = new ProfileFragment();
         FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
         transaction.replace(R.id.fl_content, profileFragment);
         transaction.commit();
+
     }
 
-    private void showDefaultFragment()
-    {
-        startComposeFragment();
-    }
 
-    public Toolbar getToolbar()
-    {
+    public Toolbar getToolbar() {
+
         return base_toolbar;
+
     }
+
 }

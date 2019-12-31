@@ -21,7 +21,7 @@ import com.wfm.soundcollaborations.Editor.activities.CreateCompositionActivity;
 import com.wfm.soundcollaborations.R;
 import com.wfm.soundcollaborations.activities.MainActivity;
 import com.wfm.soundcollaborations.adapter.CompositionOverviewAdapter;
-import com.wfm.soundcollaborations.webservice.CompositionServiceClient;
+import com.wfm.soundcollaborations.webservice.CompositionWebserviceClient;
 import com.wfm.soundcollaborations.webservice.dtos.CompositionOverviewResp;
 import com.wfm.soundcollaborations.webservice.dtos.OverviewResponse;
 
@@ -39,7 +39,7 @@ public class ComposeFragment extends Fragment {
     private View root; // Needed when adding a Fragment, is returned below
 
 
-    private CompositionServiceClient client;
+    private CompositionWebserviceClient client;
     public static final String PICK_RESPONSE = "PICK";
 
 
@@ -59,10 +59,10 @@ public class ComposeFragment extends Fragment {
         initToolbar();
 
         FloatingActionButton createCompositionButton = root.findViewById(R.id.new_composition_button);
-        createCompositionButton.setOnClickListener(view -> startCreateCompositionActivity(view));
+        createCompositionButton.setOnClickListener(this::startCreateCompositionActivity);
 
-        client = new CompositionServiceClient();
-        Response.Listener<OverviewResponse> listener = overviewResponse -> fillActivity(overviewResponse);
+        client = new CompositionWebserviceClient();
+        Response.Listener<OverviewResponse> listener = this::fillActivity;
         client.getOverviews(listener);
 
         return root; // Needed when adding a Fragment (See top of Fragment)

@@ -88,7 +88,7 @@ public class LocalSound extends Sound {
     @Override
     public void preparePlayer(Context context) {
 
-        player = new SoundPlayer(context);
+        player = SoundPlayer.build(context);
         player.addSounds(Collections.singletonList(filePath));
 
     }

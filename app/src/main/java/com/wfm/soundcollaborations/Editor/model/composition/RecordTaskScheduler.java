@@ -1,9 +1,6 @@
 package com.wfm.soundcollaborations.Editor.model.composition;
 
-import android.content.Context;
 import android.os.Handler;
-
-import com.wfm.soundcollaborations.Editor.activities.EditorActivity;
 
 import java.util.Timer;
 import java.util.TimerTask;
@@ -13,42 +10,55 @@ class RecordTaskScheduler {
     private static final int DELAY = 0;
     private static final int PERIOD = 50;
 
-    private final Context context;
-
     private Timer timer;
+    private boolean recording;
 
 
-    RecordTaskScheduler(Context context) {
+    RecordTaskScheduler() {
 
         super();
-
-        this.context = context;
 
     }
 
 
-    void record() {
+    void record(Runnable fallback) {
 
-        EditorActivity editorActivity = (EditorActivity) context;
+        if (!recording) {
 
-        Handler handler = new Handler();
+            recording = true;
 
-        timer = new Timer();
-        timer.scheduleAtFixedRate(new TimerTask() {
-            @Override
-            public void run() {
+            Handler handler = new Handler();
 
-                handler.post(editorActivity::simulateRecording);
+            timer = new Timer();
+            timer.scheduleAtFixedRate(new TimerTask() {
+                @Override
+                public void run() {
 
-            }
-        }, DELAY, PERIOD);
+                    handler.post(fallback);
+
+                }
+            }, DELAY, PERIOD);
+
+        }
 
     }
 
 
     void stop() {
 
-        timer.cancel();
+        if (recording) {
+
+            recording = false;
+            timer.cancel();
+
+        }
+
+    }
+
+
+    boolean isRecording() {
+
+        return recording;
 
     }
 

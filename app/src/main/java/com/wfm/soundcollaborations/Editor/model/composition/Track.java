@@ -4,6 +4,7 @@ import android.content.Context;
 
 import com.wfm.soundcollaborations.Editor.model.audio.AudioRecorder;
 import com.wfm.soundcollaborations.Editor.model.composition.sound.LocalSound;
+import com.wfm.soundcollaborations.Editor.model.composition.sound.RemoteSound;
 import com.wfm.soundcollaborations.Editor.model.composition.sound.Sound;
 import com.wfm.soundcollaborations.Editor.utils.AudioRecorderStatus;
 import com.wfm.soundcollaborations.Editor.utils.DPUtils;
@@ -11,6 +12,7 @@ import com.wfm.soundcollaborations.Editor.utils.DPUtils;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.function.Predicate;
 import java.util.stream.Stream;
 
 
@@ -30,30 +32,25 @@ public class Track {
     }
 
 
-    private void addRecordedSound(Sound sound) {
+    void addLocalSound(Context context, LocalSound sound) {
 
         recorderTime = recorderTime + sound.getDuration();
+        sound.preparePlayer(context);
         sounds.add(sound);
+
+        //Sorting sounds:
+        Collections.sort(sounds, (Sound s1, Sound s2) -> Long.valueOf(s1.getStartPosition()).compareTo(Long.valueOf(s2.getStartPosition())));
 
     }
 
 
-    void addSound(Sound sound, Context context) {
+    void addRemoteSound(Context context, RemoteSound sound) {
 
         sound.preparePlayer(context);
         sounds.add(sound);
 
-
-    }
-
-    public void addSounds(List<Sound> sounds) {
-        this.sounds.addAll(sounds);
-    }
-
-
-    void prepare(Context context) throws NullPointerException {
-
-        sounds.forEach(s -> s.preparePlayer(context));
+        //Sorting sounds:
+        Collections.sort(sounds, (Sound s1, Sound s2) -> Long.valueOf(s1.getStartPosition()).compareTo(Long.valueOf(s2.getStartPosition())));
 
     }
 
@@ -69,17 +66,6 @@ public class Track {
 
         sounds.forEach(s -> s.seek(positionInMillis));
 
-    }
-
-    // after adding a new sound to the list of sounds, we sort our list of sounds again and create a new player with this.
-    void prepareSound(Sound sound, Context context)
-    {
-        addRecordedSound(sound);
-
-        sound.preparePlayer(context);
-
-        //Sorting sounds:
-        Collections.sort(sounds, (Sound s1, Sound s2) -> Long.valueOf(s1.getStartPosition()).compareTo(Long.valueOf(s2.getStartPosition())));
     }
 
 
@@ -133,8 +119,12 @@ public class Track {
 
     void deleteSounds(List<String> soundUUIDs) {
 
-
-        sounds.removeIf(s -> s.isLocalSound() && soundUUIDs.contains(s.getUuid()));
+        //TODO everything in one loop?
+        Predicate<? super Sound> soundToDelete = s -> s.isLocalSound() && soundUUIDs.contains(s.getUuid());
+        sounds.stream()
+                .filter(soundToDelete)
+                .forEach(Sound::releasePlayer);
+        sounds.removeIf(soundToDelete);
 
     }
 
