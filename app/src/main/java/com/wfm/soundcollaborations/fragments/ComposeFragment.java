@@ -15,7 +15,6 @@ import androidx.recyclerview.widget.PagerSnapHelper;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.recyclerview.widget.SnapHelper;
 
-import com.android.volley.Response;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.wfm.soundcollaborations.Editor.activities.CreateCompositionActivity;
 import com.wfm.soundcollaborations.R;
@@ -62,8 +61,7 @@ public class ComposeFragment extends Fragment {
         createCompositionButton.setOnClickListener(this::startCreateCompositionActivity);
 
         client = new CompositionWebserviceClient();
-        Response.Listener<OverviewResponse> listener = this::fillActivity;
-        client.getOverviews(listener);
+        client.getOverviews(this::fillActivity);
 
         return root; // Needed when adding a Fragment (See top of Fragment)
     }

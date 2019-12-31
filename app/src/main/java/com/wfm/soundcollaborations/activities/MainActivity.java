@@ -10,7 +10,6 @@ import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.wfm.soundcollaborations.R;
 import com.wfm.soundcollaborations.fragments.ComposeFragment;
 import com.wfm.soundcollaborations.fragments.ExploreFragment;
-import com.wfm.soundcollaborations.fragments.ProfileFragment;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -69,7 +68,6 @@ public class MainActivity extends AppCompatActivity {
                             startComposeFragment();
                             break;
                         case R.id.bnm_record:
-                            startProfileFragment();
                             break;
                     }
                     return true;
@@ -93,16 +91,6 @@ public class MainActivity extends AppCompatActivity {
         ComposeFragment composeFragment = new ComposeFragment();
         FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
         transaction.replace(R.id.fl_content, composeFragment);
-        transaction.commit();
-
-    }
-
-
-    private void startProfileFragment(){
-
-        ProfileFragment profileFragment = new ProfileFragment();
-        FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
-        transaction.replace(R.id.fl_content, profileFragment);
         transaction.commit();
 
     }

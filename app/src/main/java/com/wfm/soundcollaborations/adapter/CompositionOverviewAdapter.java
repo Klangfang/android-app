@@ -13,7 +13,6 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.android.volley.Response;
 import com.google.android.exoplayer2.Player;
 import com.google.android.exoplayer2.ui.PlayerControlView;
 import com.wfm.soundcollaborations.Editor.activities.EditorActivity;
@@ -26,6 +25,7 @@ import com.wfm.soundcollaborations.webservice.dtos.CompositionResponse;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.Locale;
 
 import static android.content.Intent.FLAG_ACTIVITY_NEW_TASK;
 
@@ -72,7 +72,9 @@ public class CompositionOverviewAdapter extends RecyclerView.Adapter<Composition
 
         // Assign string values of {@link CompositionOverview} to the text views of layout
         holder.mCompositionTitleTextView.setText(currentOverview.title);
-        holder.mMembersTextView.setText(currentOverview.numberOfMembers + "/4 Members"); //TODO replace string with resource
+        //TODO replace string with resource
+        String membersText = String.format(Locale.getDefault(), "%d/4 Members", currentOverview.numberOfMembers);
+        holder.mMembersTextView.setText(membersText);
         holder.mPlayerControlView.setPlayer(getAudioPlayer(currentOverview.snippetUrl));
         holder.mJoinButton.setOnClickListener(view -> open(currentOverview.id, view));
 
@@ -118,8 +120,7 @@ public class CompositionOverviewAdapter extends RecyclerView.Adapter<Composition
 
     private void open(Long id, View view) {
 
-        Response.Listener<CompositionResponse> listener = response -> startEditorActivity(view, response);
-        client.open(id, listener);
+        client.open(id, compositionResponse -> startEditorActivity(view, compositionResponse));
 
     }
 

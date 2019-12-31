@@ -191,7 +191,7 @@ public class CompositionService extends Service {
         csClient.create(composition.getTitle(),
                 "KLANGFANG",
                 composition.getLocalSounds(),
-                listener -> showInfo(this, CompositionRequestType.CREATE));
+                compositionOverviewResp -> showInfo(this, CompositionRequestType.CREATE));
 
 
     }
@@ -205,7 +205,7 @@ public class CompositionService extends Service {
 
         csClient.join(composition.getCompositionId(),
                 composition.getLocalSounds(),
-                listener -> showInfo(this, CompositionRequestType.JOIN));
+                compositionResponse -> showInfo(this, CompositionRequestType.JOIN));
 
     }
 
@@ -217,7 +217,7 @@ public class CompositionService extends Service {
         stopPlaying();
 
         csClient.cancel(composition.getCompositionId(),
-                listener -> showInfo(this, CompositionRequestType.CANCEL));
+                compositionResponse -> showInfo(this, CompositionRequestType.CANCEL));
         //boolean successful = csClient.cancel(composition.getCompositionId());
         //showInfo(this, successful ? CompositionRequestType.CANCEL : CompositionRequestType.FAILED);
 
