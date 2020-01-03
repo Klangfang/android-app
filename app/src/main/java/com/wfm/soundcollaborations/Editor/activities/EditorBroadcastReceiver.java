@@ -7,7 +7,6 @@ import android.os.Bundle;
 
 import com.wfm.soundcollaborations.Editor.model.composition.CompositionService;
 import com.wfm.soundcollaborations.Editor.model.composition.sound.RemoteSound;
-import com.wfm.soundcollaborations.activities.MainActivity;
 
 /**
  * Broadcast message receiver handles receiving messages sent from composition service
@@ -56,12 +55,7 @@ public class EditorBroadcastReceiver extends BroadcastReceiver {
     private void receiveStartMainActivity(Context context, Bundle bundle) {
 
         EditorActivity editorActivity = (EditorActivity) context;
-        editorActivity.finish();
-
-        Intent intent = new Intent(context, MainActivity.class);
-        intent.putExtras(bundle);
-
-        context.startActivity(intent);
+        editorActivity.finish(bundle);
 
     }
 

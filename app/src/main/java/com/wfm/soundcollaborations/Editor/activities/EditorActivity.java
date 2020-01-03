@@ -33,6 +33,7 @@ import com.wfm.soundcollaborations.Editor.model.composition.sound.RemoteSound;
 import com.wfm.soundcollaborations.Editor.views.composition.CompositionView;
 import com.wfm.soundcollaborations.R;
 import com.wfm.soundcollaborations.activities.KlangfangSnackbar;
+import com.wfm.soundcollaborations.activities.MainActivity;
 import com.wfm.soundcollaborations.fragments.ComposeFragment;
 
 import org.apache.commons.lang3.StringUtils;
@@ -137,9 +138,22 @@ public class EditorActivity extends AppCompatActivity {
     }
 
 
+    @Override
     public void onBackPressed() {
 
         // do nothing here
+
+    }
+
+
+    public void finish(Bundle bundle) {
+
+        super.finish();
+
+        Intent intent = new Intent(getBaseContext(), MainActivity.class);
+        intent.putExtras(bundle);
+
+        startActivity(intent);
 
     }
 
@@ -470,6 +484,13 @@ public class EditorActivity extends AppCompatActivity {
                 doNothing = true;
 
             } else {
+
+                compositionView.enable(false);
+                playBtn.setEnabled(false);
+                recordBtn.setEnabled(false);
+                findViewById(R.id.release_composition).setEnabled(false);
+                findViewById(R.id.base_toolbar).setEnabled(false); // TODO funktioniert nicht
+
                 int itemId = menuItem.getItemId();
                 if (itemId == R.id.release_composition) {
 

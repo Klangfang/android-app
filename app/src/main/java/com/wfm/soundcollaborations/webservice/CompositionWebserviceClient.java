@@ -8,9 +8,11 @@ import com.wfm.soundcollaborations.webservice.dtos.CompositionResponse;
 import com.wfm.soundcollaborations.webservice.dtos.CompositionUpdateRequest;
 import com.wfm.soundcollaborations.webservice.dtos.OverviewResponse;
 
+import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
 import java.util.stream.Stream;
 
+import okhttp3.OkHttpClient;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
@@ -19,13 +21,18 @@ import retrofit2.converter.gson.GsonConverterFactory;
 
 public class CompositionWebserviceClient {
 
+    private final static long HTTP_TIMEOUT = 10_000;
     private CompositionWebservice service;
 
 
     public CompositionWebserviceClient() {
 
-        // Instantiate Composition
+        OkHttpClient httpClient = new OkHttpClient.Builder()
+                .callTimeout(HTTP_TIMEOUT, TimeUnit.MILLISECONDS)
+                .build();
+
         service = new Retrofit.Builder()
+                .client(httpClient)
                 .baseUrl("https://klangfang-service.herokuapp.com")
                 .addConverterFactory(GsonConverterFactory.create())
                 .build()
