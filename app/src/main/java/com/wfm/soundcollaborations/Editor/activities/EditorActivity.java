@@ -18,6 +18,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.ImageButton;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
@@ -42,8 +43,6 @@ import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
 
-import static android.content.res.ColorStateList.valueOf;
-
 
 public class EditorActivity extends AppCompatActivity {
 
@@ -55,6 +54,7 @@ public class EditorActivity extends AppCompatActivity {
      */
     private static final int RECORD_AUDIO_PERMISSIONS_DECISIONS = 1;
 
+    private static final int CANCEL_BTN_ID = 16908332;
 
     @BindView(R.id.composition)
     public CompositionView compositionView;
@@ -133,6 +133,13 @@ public class EditorActivity extends AppCompatActivity {
         unbindService(mServiceConnection);
 
         unregisterReceiver(editorBroadCastReceiver);
+
+    }
+
+
+    public void onBackPressed() {
+
+        // do nothing here
 
     }
 
@@ -393,8 +400,8 @@ public class EditorActivity extends AppCompatActivity {
      */
     @Override
     public void onRequestPermissionsResult(int requestCode,
-                                           String permissions[],
-                                           int[] grantResults) {
+                                           @NonNull String[] permissions,
+                                           @NonNull int[] grantResults) {
 
         if (requestCode == RECORD_AUDIO_PERMISSIONS_DECISIONS) {
 
@@ -450,37 +457,47 @@ public class EditorActivity extends AppCompatActivity {
      * Event listener for menu item
      */
     @Override
-    public boolean onOptionsItemSelected(MenuItem menuItem) {
+    public boolean onOptionsItemSelected(@NonNull MenuItem menuItem) {
+
+        boolean doNothing = super.onOptionsItemSelected(menuItem);
 
         try {
 
-            int itemId = menuItem.getItemId();
-            if (itemId == R.id.release_composition) {
+            if (compositionService.isRecording()) {
 
-                if (create) {
+                KlangfangSnackbar.shortShow(compositionView, "Please cancel recording before continuing.");
 
-                    compositionService.requestCreate();
+                doNothing = true;
 
+            } else {
+                int itemId = menuItem.getItemId();
+                if (itemId == R.id.release_composition) {
 
-                } else {
+                    if (create) {
 
-                    compositionService.requestJoin();
+                        compositionService.requestCreate();
+
+                    } else {
+
+                        compositionService.requestJoin();
+
+                    }
+
+                } else if (itemId == CANCEL_BTN_ID) {
+
+                    cancelConfirmation(compositionView.getContext());
+
+                    doNothing = true;
 
                 }
-
-            } else if (itemId == 16908332) {
-
-                compositionService.requestCancel();
-
             }
-
         } catch (Throwable t) {
 
             handleErrorOnRecording(t);
 
         }
 
-        return super.onOptionsItemSelected(menuItem);
+        return doNothing;
 
     }
 
@@ -506,12 +523,12 @@ public class EditorActivity extends AppCompatActivity {
     private void setRecordBtnColors(boolean pressPlay, boolean recording) {
 
         //TODO define in CommonUtil as map maybe
-        ColorStateList RECORD_ENABLED_BACKGROUND = valueOf(getResources().getColor(R.color.color_primary));
-        ColorStateList RECORD_ENABLED_BACKGROUND_2 = valueOf(getResources().getColor(R.color.color_accent));
-        ColorStateList RECORD_DISABLED_BACKGROUND = valueOf(getResources().getColor(R.color.grey_dark));
-        ColorStateList RECORD_ENABLED_IMAGE = valueOf(getResources().getColor(R.color.white));
-        ColorStateList RECORD_ENABLED_IMAGE_2 = valueOf(getResources().getColor(R.color.color_error));
-        ColorStateList RECORD_DISABLED_IMAGE = valueOf(getResources().getColor(R.color.grey_middle));
+        ColorStateList RECORD_ENABLED_BACKGROUND = getColorStateList(R.color.color_primary);
+        ColorStateList RECORD_ENABLED_BACKGROUND_2 = getColorStateList(R.color.color_accent);
+        ColorStateList RECORD_DISABLED_BACKGROUND = getColorStateList(R.color.grey_dark);
+        ColorStateList RECORD_ENABLED_IMAGE = getColorStateList(R.color.white);
+        ColorStateList RECORD_ENABLED_IMAGE_2 = getColorStateList(R.color.color_error);
+        ColorStateList RECORD_DISABLED_IMAGE = getColorStateList(R.color.grey_middle);
 
         ColorStateList backgroundColor;
         ColorStateList imageColor;
@@ -545,7 +562,6 @@ public class EditorActivity extends AppCompatActivity {
     /**
      * Asks user for delete confirmation. When the user accepts, all selected local sounds will be delete
      * {@link EditorActivity#deleteSounds()}
-     * @param context
      */
     private void deleteConfirmation(Context context) {
 
@@ -567,6 +583,29 @@ public class EditorActivity extends AppCompatActivity {
         builder.setMessage("Möchten Sie diesen Sound löschen?").setPositiveButton("Ja", dialogClickListener)
                 .setNegativeButton("Nein", dialogClickListener).show();
 
+    }
+
+
+    private void cancelConfirmation(Context context) {
+
+        DialogInterface.OnClickListener dialogClickListener = (dialog, which) -> {
+            switch (which) {
+                case DialogInterface.BUTTON_POSITIVE:
+                    //Yes button clicked
+                    finish();
+                    break;
+
+                case DialogInterface.BUTTON_NEGATIVE:
+                    //No button clicked
+                    break;
+            }
+        };
+
+        AlertDialog.Builder builder = new AlertDialog.Builder(context);
+        builder.setMessage("Ihre Änderungen werden verworfen. Möchten Sie wirklich fortfahren?")
+                .setPositiveButton("Ja", dialogClickListener)
+                .setNegativeButton("Nein", dialogClickListener)
+                .show();
     }
 
 
@@ -607,9 +646,6 @@ public class EditorActivity extends AppCompatActivity {
 
     /**
      * Same as {@link EditorActivity#deleteSounds()}. This is called when sound recording is stopped
-     *
-     * @param togglePlay
-     * @param stopReason
      */
     public void handleStop(boolean togglePlay, StopReason stopReason) {
 
