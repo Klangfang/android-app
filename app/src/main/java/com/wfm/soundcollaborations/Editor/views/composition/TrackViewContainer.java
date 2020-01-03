@@ -198,7 +198,7 @@ class TrackViewContainer {
         return soundViews.stream()
                 .filter(recordPredicate)
                 .findAny()
-                .orElseThrow(() -> new RuntimeException("Could not complete local recording sound view."));
+                .orElseThrow(() -> new Throwable("Could not complete local recording sound view."));
 
     }
 

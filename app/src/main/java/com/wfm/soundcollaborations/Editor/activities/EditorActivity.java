@@ -17,7 +17,6 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.ImageButton;
-import android.widget.Toast;
 
 import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AlertDialog;
@@ -32,6 +31,7 @@ import com.wfm.soundcollaborations.Editor.model.composition.StopReason;
 import com.wfm.soundcollaborations.Editor.model.composition.sound.RemoteSound;
 import com.wfm.soundcollaborations.Editor.views.composition.CompositionView;
 import com.wfm.soundcollaborations.R;
+import com.wfm.soundcollaborations.activities.KlangfangSnackbar;
 import com.wfm.soundcollaborations.fragments.ComposeFragment;
 
 import org.apache.commons.lang3.StringUtils;
@@ -83,6 +83,12 @@ public class EditorActivity extends AppCompatActivity {
 
         init();
 
+        createReceiver();
+
+        registerReceiver(editorBroadCastReceiver, new IntentFilter(CompositionService.NOTIFICATION));
+
+        createCompositionService();
+
         Log.d(TAG, "Activity is created");
 
     }
@@ -93,20 +99,17 @@ public class EditorActivity extends AppCompatActivity {
 
         super.onStart();
 
-        createReceiver();
-
-        registerReceiver(editorBroadCastReceiver, new IntentFilter(CompositionService.NOTIFICATION));
-
-        createCompositionService();
-
         Log.d(TAG, "Activity is started");
 
     }
+
 
     @Override
     protected void onDestroy() {
 
         super.onDestroy();
+
+        preDestroy();
 
         Log.d(TAG, "Activity is destroyed");
 
@@ -118,15 +121,18 @@ public class EditorActivity extends AppCompatActivity {
 
         super.onStop();
 
-        if (editorBroadCastReceiver != null) {
-            unregisterReceiver(editorBroadCastReceiver);
-        }
-
-        if (mServiceConnection != null) {
-            unbindService(mServiceConnection);
-        }
-
         Log.d(TAG, "Activity is stopped");
+
+    }
+
+
+    public void preDestroy() {
+
+        compositionService.requestCancel();
+
+        unbindService(mServiceConnection);
+
+        unregisterReceiver(editorBroadCastReceiver);
 
     }
 
@@ -220,7 +226,11 @@ public class EditorActivity extends AppCompatActivity {
 
             } else {
 
-                Toast.makeText(this, "Can not start recording at this position", Toast.LENGTH_SHORT).show();
+                String text = "Could not start recording at this position.\n" +
+                        "The composition may has been exhausted.";
+
+                KlangfangSnackbar.longShow(compositionView, text);
+
             }
 
         } catch (Throwable t) {
@@ -402,38 +412,22 @@ public class EditorActivity extends AppCompatActivity {
 
             } else if (recordingPermissionGranted) {
 
-                Toast.makeText(this,
-                        this.getString(R.string.external_storage_permission_denied),
-                        Toast.LENGTH_LONG).show();
+                KlangfangSnackbar.longShow(compositionView,
+                        this.getString(R.string.external_storage_permission_denied));
 
             } else if (storagePermissionGranted) {
 
-                Toast.makeText(this,
-                        this.getString(R.string.record_audio_permission_denied),
-                        Toast.LENGTH_LONG).show();
+                KlangfangSnackbar.longShow(compositionView,
+                        this.getString(R.string.record_audio_permission_denied));
+
             } else {
 
-                Toast.makeText(this,
-                        this.getString(R.string.all_audio_permissions_denied),
-                        Toast.LENGTH_LONG).show();
+                KlangfangSnackbar.longShow(compositionView,
+                        this.getString(R.string.all_audio_permissions_denied));
+
             }
 
         }
-
-    }
-
-
-    /**
-     * do nothing when back button is pressed
-     */
-    @Override
-    public void onBackPressed() {
-
-        //do not leave activity
-
-        //TODO find a way to hide activity in the background
-
-        Log.d(TAG, "Activity is fixed when back is pressed");
 
     }
 
@@ -465,18 +459,18 @@ public class EditorActivity extends AppCompatActivity {
 
                 if (create) {
 
-                    compositionService.create();
+                    compositionService.requestCreate();
 
 
                 } else {
 
-                    compositionService.join();
+                    compositionService.requestJoin();
 
                 }
 
             } else if (itemId == 16908332) {
 
-                compositionService.cancel();
+                compositionService.requestCancel();
 
             }
 
@@ -603,8 +597,7 @@ public class EditorActivity extends AppCompatActivity {
 
         reset(false, StopReason.UNKNOWN);
 
-        Toast.makeText(this, t.getMessage(), Toast.LENGTH_LONG)
-                .show();
+        KlangfangSnackbar.longShow(compositionView, t.getMessage());
 
         Log.e(TAG, t.getMessage(), t);
 
@@ -623,8 +616,7 @@ public class EditorActivity extends AppCompatActivity {
         reset(togglePlay, stopReason);
 
         String message = stopReason.getReason();
-        Toast.makeText(this, message, Toast.LENGTH_LONG)
-                .show();
+        KlangfangSnackbar.longShow(compositionView, message);
 
         Log.d(TAG, message);
 
@@ -692,8 +684,7 @@ public class EditorActivity extends AppCompatActivity {
         @Override
         public void onServiceDisconnected(ComponentName name) {
 
-            Toast.makeText(getBaseContext(), "Service is disconnected", Toast.LENGTH_SHORT)
-                    .show();
+            KlangfangSnackbar.shortShow(compositionView, "Service is disconnected");
             mBounded = false;
             compositionService = null;
 
@@ -703,8 +694,7 @@ public class EditorActivity extends AppCompatActivity {
         @Override
         public void onServiceConnected(ComponentName name, IBinder service) {
 
-            Toast.makeText(getBaseContext(), "Service is connected", Toast.LENGTH_SHORT)
-                    .show();
+            KlangfangSnackbar.shortShow(compositionView, "Service is connected");
             mBounded = true;
             CompositionService.CompositionServiceBinder mLocalBinder = (CompositionService.CompositionServiceBinder) service;
             compositionService = mLocalBinder.getService();

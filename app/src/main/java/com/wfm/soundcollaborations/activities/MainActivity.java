@@ -7,9 +7,14 @@ import androidx.appcompat.widget.Toolbar;
 import androidx.fragment.app.FragmentTransaction;
 
 import com.google.android.material.bottomnavigation.BottomNavigationView;
+import com.wfm.soundcollaborations.Editor.model.composition.CompositionService;
 import com.wfm.soundcollaborations.R;
 import com.wfm.soundcollaborations.fragments.ComposeFragment;
 import com.wfm.soundcollaborations.fragments.ExploreFragment;
+
+import org.apache.commons.lang3.StringUtils;
+
+import java.util.Objects;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -37,16 +42,27 @@ public class MainActivity extends AppCompatActivity {
         initBottomNavigationView();
         startComposeFragment();
 
+        Bundle bundle = getIntent().getExtras();
+        if (Objects.nonNull(bundle)) {
+            String messageText = bundle.getString(CompositionService.MESSAGE_TEXT);
+            if (StringUtils.isNoneBlank(messageText)) {
+                KlangfangSnackbar.longShow(base_toolbar, messageText);
+            }
+
+            getIntent().removeExtra(CompositionService.MESSAGE_TEXT);
+
+        }
+
     }
 
 
-    @Override
     public void onBackPressed() {
 
-        //do not navigate
+        // no history here
+        finish();
 
-        //TODO find a way to hide activity in the background
     }
+
 
 
     private void initToolbar() {

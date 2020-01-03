@@ -9,8 +9,6 @@ import com.wfm.soundcollaborations.Editor.model.composition.CompositionService;
 import com.wfm.soundcollaborations.Editor.model.composition.sound.RemoteSound;
 import com.wfm.soundcollaborations.activities.MainActivity;
 
-import static android.content.Intent.FLAG_ACTIVITY_NEW_TASK;
-
 /**
  * Broadcast message receiver handles receiving messages sent from composition service
  */
@@ -26,7 +24,7 @@ public class EditorBroadcastReceiver extends BroadcastReceiver {
             switch (messageType) {
                 case CompositionService.START_MAIN_ACTIVITY:
 
-                    receiveStartMainActivity(context);
+                    receiveStartMainActivity(context, bundle);
 
                     break;
                 case CompositionService.ADD_REMOTE_SOUND_VIEW:
@@ -34,7 +32,7 @@ public class EditorBroadcastReceiver extends BroadcastReceiver {
                     receiveAddRemoveSoundView(context, bundle);
 
                     break;
-                case CompositionService.FINISH_RECORDING_SOUND_VIEW:
+                case CompositionService.COMPLETE_LOCAL_SOUND:
 
                     receiveCompleteLocalSound(context);
 
@@ -55,10 +53,14 @@ public class EditorBroadcastReceiver extends BroadcastReceiver {
     }
 
 
-    private void receiveStartMainActivity(Context context) {
+    private void receiveStartMainActivity(Context context, Bundle bundle) {
+
+        EditorActivity editorActivity = (EditorActivity) context;
+        editorActivity.finish();
 
         Intent intent = new Intent(context, MainActivity.class);
-        intent.setFlags(FLAG_ACTIVITY_NEW_TASK);
+        intent.putExtras(bundle);
+
         context.startActivity(intent);
 
     }

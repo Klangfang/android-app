@@ -13,13 +13,16 @@ class Composition {
 
     private final Long compositionId;
     private String title;
-    private CompositionStatus status = CompositionStatus.READY;
+    private boolean collaboration;
+    private CompositionStatus status = CompositionStatus.OPENED;
     private List<Track> tracks;
+
 
     public static class CompositionConfigurer {
 
         private Long compositionId;
         private String title;
+        private boolean collaboration;
         private List<Track> tracks = new ArrayList<>();
 
 
@@ -31,6 +34,14 @@ class Composition {
                 tracks.add(track);
 
             }
+
+        }
+
+
+        CompositionConfigurer collaboration() {
+
+            this.collaboration = true;
+            return this;
 
         }
 
@@ -53,7 +64,7 @@ class Composition {
 
         public Composition build() {
 
-            return new Composition(compositionId, title, tracks);
+            return new Composition(compositionId, title, collaboration, tracks);
 
         }
 
@@ -62,10 +73,12 @@ class Composition {
 
     private Composition(Long compositionId,
                         String title,
+                        boolean collaboration,
                         List<Track> tracks) {
 
         this.compositionId = compositionId;
         this.title = title;
+        this.collaboration = collaboration;
         this.tracks = tracks;
 
     }
@@ -116,9 +129,9 @@ class Composition {
     }
 
 
-    boolean isReady() {
+    boolean isOpened() {
 
-        return status.equals(CompositionStatus.READY);
+        return status.equals(CompositionStatus.OPENED);
 
     }
 
@@ -141,6 +154,33 @@ class Composition {
 
         return title;
 
+    }
+
+
+    boolean isCollaboration() {
+
+        return collaboration;
+
+    }
+
+
+    boolean isNotCanceled() {
+
+        return !status.equals(CompositionStatus.CANCELED);
+
+    }
+
+
+    public void cancel() {
+
+        status = CompositionStatus.CANCELED;
+
+    }
+
+
+    boolean isNotExhausted() {
+
+        return !status.equals(CompositionStatus.EXHAUSTED);
     }
 
 }

@@ -1,12 +1,10 @@
 package com.wfm.soundcollaborations.Editor.model.composition;
 
 import android.app.Service;
-import android.content.Context;
 import android.content.Intent;
 import android.os.Binder;
 import android.os.IBinder;
 import android.util.Log;
-import android.widget.Toast;
 
 import androidx.annotation.Nullable;
 
@@ -35,12 +33,14 @@ public class CompositionService extends Service {
     private static final String TAG = CompositionService.class.getSimpleName();
 
     public static final String MESSAGE_TYPE = "MESSAGE_TYPE";
+    public static final String SHOW_MESSAGE = "SHOW_MESSAGE";
+    public static final String MESSAGE_TEXT = "MESSAGE_TEXT";
     public static final String START_MAIN_ACTIVITY = "START_MAIN_ACTIVITY";
     public static final String UPDATE_TRACK_WATCHES = "UPDATE_TRACK_WATCHES";
     public static final String TRACK_NUMBER = "TRACK_NUMBER";
     public static final String SOUND_WIDTHS = "SOUND_WIDTHS";
     public static final String MAX_AMPLITUDE = "MAX_AMPLITUDE";
-    public static final String FINISH_RECORDING_SOUND_VIEW = "FINISH_RECORDING_SOUND_VIEW";
+    public static final String COMPLETE_LOCAL_SOUND = "COMPLETE_LOCAL_SOUND";
     public static final String ADD_REMOTE_SOUND_VIEW = "ADD_REMOTE_SOUND_VIEW";
     public static final String START_POSITION = "START_POSITION";
     public static final String DURATION = "DURATION";
@@ -99,6 +99,7 @@ public class CompositionService extends Service {
                     composition = new Composition.CompositionConfigurer()
                             .compositionId(compositionResponse.id)
                             .title(compositionResponse.title)
+                            .collaboration()
                             .build();
 
                     for (SoundResponse sndResp : compositionResponse.sounds) {
@@ -163,7 +164,7 @@ public class CompositionService extends Service {
         super.onTaskRemoved(rootIntent);
         try {
 
-            cancel();
+            requestCancel();
 
         } catch (Throwable t) {
             Log.e(TAG, t.getMessage());
@@ -173,68 +174,75 @@ public class CompositionService extends Service {
     }
 
 
+    public void preDestroy() {
+
+        stopRecording();
+
+        stopPlaying();
+
+    }
+
+
     private void completeLocalSoundBroadcast() {
 
         Intent intent = new Intent(NOTIFICATION);
-        intent.putExtra(MESSAGE_TYPE, FINISH_RECORDING_SOUND_VIEW);
+        intent.putExtra(MESSAGE_TYPE, COMPLETE_LOCAL_SOUND);
         sendBroadcast(intent);
 
     }
 
 
-    public void create() {
+    public void requestCreate() {
 
-        stopRecording();
-
-        stopPlaying();
+        preDestroy();
 
         csClient.create(composition.getTitle(),
                 "KLANGFANG",
                 composition.getLocalSounds(),
-                compositionOverviewResp -> showInfo(this, CompositionRequestType.CREATE));
+                compositionOverviewResp -> startMainActivity(CompositionRequestType.CREATE));
 
+        composition.cancel();
 
     }
 
 
-    public void join() {
+    public void requestJoin() {
 
-        stopRecording();
-
-        stopPlaying();
+        preDestroy();
 
         csClient.join(composition.getCompositionId(),
                 composition.getLocalSounds(),
-                compositionResponse -> showInfo(this, CompositionRequestType.JOIN));
+                compositionResponse -> startMainActivity(CompositionRequestType.JOIN));
+
+        composition.cancel();
 
     }
 
 
-    public void cancel() {
+    public void requestCancel() {
 
-        stopRecording();
+        if (composition.isNotCanceled()) {
 
-        stopPlaying();
+            preDestroy();
 
-        csClient.cancel(composition.getCompositionId(),
-                compositionResponse -> showInfo(this, CompositionRequestType.CANCEL));
-        //boolean successful = csClient.cancel(composition.getCompositionId());
-        //showInfo(this, successful ? CompositionRequestType.CANCEL : CompositionRequestType.FAILED);
+            if (composition.isCollaboration()) {
+                csClient.cancel(composition.getCompositionId(),
+                        compositionResponse -> startMainActivity(CompositionRequestType.CANCEL));
+            }
 
-    }
-
-
-    private void showInfo(Context context, CompositionRequestType compositionRequestType) {
-
-        Toast.makeText(context, compositionRequestType.getText(), Toast.LENGTH_LONG).show();
-
-        if (!compositionRequestType.equals(CompositionRequestType.CANCEL)) {
-
-            Intent intent = new Intent(NOTIFICATION);
-            intent.putExtra(MESSAGE_TYPE, START_MAIN_ACTIVITY);
-            sendBroadcast(intent);
+            composition.cancel();
 
         }
+
+    }
+
+
+    private void startMainActivity(CompositionRequestType compositionRequestType) {
+
+        Intent intent = new Intent(NOTIFICATION);
+        intent.putExtra(MESSAGE_TYPE, START_MAIN_ACTIVITY);
+        intent.putExtra(MESSAGE_TEXT, compositionRequestType.getText());
+        sendBroadcast(intent);
 
     }
 
@@ -268,7 +276,7 @@ public class CompositionService extends Service {
     public void startRecording(int activeTrackIndex, int startPositionInDP, Runnable fallback) {
 
 
-        if (composition.isReady()) {
+        if (composition.isOpened()) {
 
             this.startPositionInDP = startPositionInDP;
 
@@ -311,7 +319,7 @@ public class CompositionService extends Service {
 
     public boolean canRecord(int activeTrackIndex, int scrollPositionInDP) {
 
-        return checkStop(activeTrackIndex, scrollPositionInDP).equals(StopReason.NO_STOP);
+        return composition.isNotExhausted() && checkStop(activeTrackIndex, scrollPositionInDP).equals(StopReason.NO_STOP);
 
     }
 

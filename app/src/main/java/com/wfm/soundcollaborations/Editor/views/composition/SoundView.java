@@ -45,7 +45,7 @@ public class SoundView extends View {
 
 
     private static final int DOWNLOAD_COLOR = R.color.color_primary;
-    private static final int RECORD_COLOR = R.color.color_my_sound;
+    private static final int LOCAL_COLOR = R.color.color_my_sound;
     private static final int SELECT_FOR_DELETE_COLOR = R.color.color_error;
 
 
@@ -243,9 +243,9 @@ public class SoundView extends View {
     // Set and change fill color of recorded sound when longclicked
     private void refresh() {
 
-        soundViewStatus = hasLocalCompletedState() ? SELECT_FOR_DELETE : SoundViewStatus.LOCAL_RECORDING;
+        soundViewStatus = hasLocalCompletedState() ? SELECT_FOR_DELETE : SoundViewStatus.LOCAL_COMPLETED;
         deleteBtn.setEnabled(trackViewContainer.hasDeleteSoundViews() || hasDeleteState());
-        int color = hasLocalCompletedState() ? RECORD_COLOR : SELECT_FOR_DELETE_COLOR;
+        int color = hasLocalCompletedState() ? LOCAL_COLOR : SELECT_FOR_DELETE_COLOR;
         rectPaint.setColor(getResources().getColor(color));
         invalidate();
 
@@ -254,7 +254,7 @@ public class SoundView extends View {
 
     private void initColor() {
 
-        rectPaint.setColor(getResources().getColor(soundViewStatus.equals(SoundViewStatus.REMOTE) ? DOWNLOAD_COLOR : RECORD_COLOR));
+        rectPaint.setColor(getResources().getColor(soundViewStatus.equals(SoundViewStatus.REMOTE) ? DOWNLOAD_COLOR : LOCAL_COLOR));
 
     }
 
