@@ -3,7 +3,6 @@ package com.wfm.soundcollaborations.Editor.activities;
 import android.Manifest;
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
-import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
@@ -170,7 +169,7 @@ public class EditorActivity extends AppCompatActivity {
         actionBar.setTitle(CreateCompositionActivity.compositionTitleInput);
 
         deletedBtn.setEnabled(false);
-        deletedBtn.setOnClickListener(delBtnview -> deleteConfirmation(delBtnview.getContext()));
+        deletedBtn.setOnClickListener(this::deleteConfirmation);
 
     }
 
@@ -485,11 +484,8 @@ public class EditorActivity extends AppCompatActivity {
 
             } else {
 
-                compositionView.enable(false);
-                playBtn.setEnabled(false);
-                recordBtn.setEnabled(false);
-                findViewById(R.id.release_composition).setEnabled(false);
-                findViewById(R.id.base_toolbar).setEnabled(false); // TODO funktioniert nicht
+
+                enableAll(false);
 
                 int itemId = menuItem.getItemId();
                 if (itemId == R.id.release_composition) {
@@ -506,7 +502,7 @@ public class EditorActivity extends AppCompatActivity {
 
                 } else if (itemId == CANCEL_BTN_ID) {
 
-                    cancelConfirmation(compositionView.getContext());
+                    cancelConfirmation();
 
                     doNothing = true;
 
@@ -519,6 +515,17 @@ public class EditorActivity extends AppCompatActivity {
         }
 
         return doNothing;
+
+    }
+
+
+    private void enableAll(boolean enable) {
+
+        compositionView.enable(enable);
+        playBtn.setEnabled(enable);
+        recordBtn.setEnabled(enable);
+        findViewById(R.id.release_composition).setEnabled(enable);
+        findViewById(R.id.base_toolbar).setEnabled(enable); // TODO funktioniert nicht
 
     }
 
@@ -584,7 +591,7 @@ public class EditorActivity extends AppCompatActivity {
      * Asks user for delete confirmation. When the user accepts, all selected local sounds will be delete
      * {@link EditorActivity#deleteSounds()}
      */
-    private void deleteConfirmation(Context context) {
+    private void deleteConfirmation(View deleteBtnView) {
 
         DialogInterface.OnClickListener dialogClickListener = (dialog, which) -> {
             switch (which) {
@@ -600,30 +607,36 @@ public class EditorActivity extends AppCompatActivity {
             }
         };
 
-        AlertDialog.Builder builder = new AlertDialog.Builder(context);
-        builder.setMessage("Möchten Sie diesen Sound löschen?").setPositiveButton("Ja", dialogClickListener)
-                .setNegativeButton("Nein", dialogClickListener).show();
+        new AlertDialog.Builder(deleteBtnView.getContext())
+                .setCancelable(false)
+                .setMessage("Möchten Sie diesen Sound löschen?")
+                .setPositiveButton("Ja", dialogClickListener)
+                .setNegativeButton("Nein", dialogClickListener)
+                .show();
 
     }
 
 
-    private void cancelConfirmation(Context context) {
+    /**
+     * Asks user for cancel confirmation before canceling the composition
+     */
+    private void cancelConfirmation() {
 
         DialogInterface.OnClickListener dialogClickListener = (dialog, which) -> {
             switch (which) {
                 case DialogInterface.BUTTON_POSITIVE:
-                    //Yes button clicked
                     finish();
                     break;
 
                 case DialogInterface.BUTTON_NEGATIVE:
-                    //No button clicked
+                    enableAll(true);
                     break;
             }
         };
 
-        AlertDialog.Builder builder = new AlertDialog.Builder(context);
-        builder.setMessage("Ihre Änderungen werden verworfen. Möchten Sie wirklich fortfahren?")
+        new AlertDialog.Builder(compositionView.getContext())
+                .setCancelable(false)
+                .setMessage("Ihre Änderungen werden verworfen. Möchten Sie wirklich fortfahren?")
                 .setPositiveButton("Ja", dialogClickListener)
                 .setNegativeButton("Nein", dialogClickListener)
                 .show();

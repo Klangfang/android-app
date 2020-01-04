@@ -119,7 +119,7 @@ public class SoundView extends View {
                 marginLeft = DPUtils.getValueInDP(startPosition);
             } else {
 
-                soundView.setOnLongClickListener(soundView::update);
+                soundView.setOnLongClickListener(soundView::selectForDelete);
 
             }
 
@@ -240,13 +240,13 @@ public class SoundView extends View {
     }
 
 
-    // Set and change fill color of recorded sound when longclicked
-    private void refresh() {
+    // Sets and change fill color of local sound when longclicked
+    private void refreshAfterSelection() {
 
         soundViewStatus = hasLocalCompletedState() ? SELECT_FOR_DELETE : SoundViewStatus.LOCAL_COMPLETED;
         deleteBtn.setEnabled(trackViewContainer.hasDeleteSoundViews() || hasDeleteState());
         int color = hasLocalCompletedState() ? LOCAL_COLOR : SELECT_FOR_DELETE_COLOR;
-        rectPaint.setColor(getResources().getColor(color));
+        rectPaint.setColor(getResources().getColor(color, null));
         invalidate();
 
     }
@@ -254,7 +254,15 @@ public class SoundView extends View {
 
     private void initColor() {
 
-        rectPaint.setColor(getResources().getColor(soundViewStatus.equals(SoundViewStatus.REMOTE) ? DOWNLOAD_COLOR : LOCAL_COLOR));
+        int newColor = hasRemoteState() ? DOWNLOAD_COLOR : LOCAL_COLOR;
+        rectPaint.setColor(getResources().getColor(newColor, null));
+
+    }
+
+
+    public boolean hasRemoteState() {
+
+        return soundViewStatus.equals(SoundViewStatus.REMOTE);
 
     }
 
@@ -280,19 +288,24 @@ public class SoundView extends View {
     }
 
 
-    //TODO no param neaded?!!!!
-    public boolean update(View clickView) {
+    public boolean selectForDelete(View view) {
 
-        float xPosition = clickView.getX();
+        float xPosition = view.getX();
         Log.v("long clicked", "pos: " + xPosition);
 
-        if (clickView instanceof SoundView) {
+        if (view instanceof SoundView) {
 
-            SoundView soundView = (SoundView) clickView;
+            SoundView soundView = (SoundView) view;
 
-            soundView.refresh();
+            if (soundView.hasLocalCompletedState() || soundView.isSelectedForDelete()) {
 
-            return true;
+                refreshAfterSelection();
+
+                return true;
+
+            }
+
+            return false;
 
         }
 
