@@ -8,7 +8,7 @@ import android.util.AttributeSet;
 import android.util.Log;
 import android.view.View;
 
-import com.wfm.soundcollaborations.Editor.model.composition.sound.Sound;
+import com.wfm.soundcollaborations.editor.model.composition.sound.Sound;
 
 import java.util.ArrayList;
 

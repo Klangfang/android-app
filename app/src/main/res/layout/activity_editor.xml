@@ -5,17 +5,17 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    tools:context="com.wfm.soundcollaborations.Editor.activities.EditorActivity">
+    tools:context="com.wfm.soundcollaborations.editor.activities.EditorActivity">
 
     <include layout="@layout/toolbar_base" />
 
-    <com.wfm.soundcollaborations.Editor.views.composition.CompositionView
+    <com.wfm.soundcollaborations.editor.views.composition.CompositionView
         android:id="@+id/composition"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:paddingTop="20dp">
 
-    </com.wfm.soundcollaborations.Editor.views.composition.CompositionView>
+    </com.wfm.soundcollaborations.editor.views.composition.CompositionView>
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"

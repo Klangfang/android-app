@@ -15,17 +15,20 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.google.android.exoplayer2.Player;
 import com.google.android.exoplayer2.ui.PlayerControlView;
-import com.wfm.soundcollaborations.Editor.activities.EditorActivity;
-import com.wfm.soundcollaborations.Editor.model.audio.ExoPlayerFactory;
 import com.wfm.soundcollaborations.R;
-import com.wfm.soundcollaborations.webservice.CompositionWebserviceClient;
+import com.wfm.soundcollaborations.compose.model.ComposeViewModel;
+import com.wfm.soundcollaborations.editor.activities.EditorActivity;
+import com.wfm.soundcollaborations.editor.model.audio.ExoPlayerFactory;
 import com.wfm.soundcollaborations.webservice.JsonUtil;
 import com.wfm.soundcollaborations.webservice.dtos.CompositionOverviewResp;
 import com.wfm.soundcollaborations.webservice.dtos.CompositionResponse;
+import com.wfm.soundcollaborations.webservice.dtos.OverviewResponse;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
+import java.util.Objects;
 
 import static android.content.Intent.FLAG_ACTIVITY_NEW_TASK;
 
@@ -36,17 +39,37 @@ import static android.content.Intent.FLAG_ACTIVITY_NEW_TASK;
  **/
 public class CompositionOverviewAdapter extends RecyclerView.Adapter<CompositionOverviewAdapter.ViewHolder> {
 
-    private List<CompositionOverviewResp> compositionOverviews;
     private static final String PICK_RESPONSE = "PICK";
-    private CompositionWebserviceClient client;
+
+    private final ComposeViewModel composeViewModel;
+
+    private List<CompositionOverviewResp> compositionOverviews = new ArrayList<>();
+
     private ExoPlayerFactory exoPlayerFactory;
     private Context context;
 
 
-    public CompositionOverviewAdapter(Activity context, List<CompositionOverviewResp> compositionOverviews) {
+    public CompositionOverviewAdapter(Activity context, ComposeViewModel composeViewModel) {
+
         this.context = context;
-        this.compositionOverviews = compositionOverviews;
-        client = new CompositionWebserviceClient();
+
+        this.composeViewModel = composeViewModel;
+
+        this.composeViewModel.loadOverviews(this::setCompositionOverviews);
+
+    }
+
+
+    private void setCompositionOverviews(OverviewResponse overviewResponse) {
+
+        if (Objects.nonNull(overviewResponse)) {
+
+            compositionOverviews = overviewResponse.overviews;
+
+            notifyDataSetChanged(); // TODO rethink of design and best practice - activity/fragment
+
+        }
+
     }
 
     /**
@@ -118,9 +141,10 @@ public class CompositionOverviewAdapter extends RecyclerView.Adapter<Composition
 
     }
 
+
     private void open(Long id, View view) {
 
-        client.open(id, compositionResponse -> startEditorActivity(view, compositionResponse));
+        composeViewModel.open(id, compositionResponse -> startEditorActivity(view, compositionResponse));
 
     }
 

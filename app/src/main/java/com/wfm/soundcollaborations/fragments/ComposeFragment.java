@@ -16,16 +16,17 @@ import androidx.recyclerview.widget.RecyclerView;
 import androidx.recyclerview.widget.SnapHelper;
 
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
-import com.wfm.soundcollaborations.Editor.activities.CreateCompositionActivity;
+import com.wfm.soundcollaborations.KlangfangApp;
+import com.wfm.soundcollaborations.MainActivity;
 import com.wfm.soundcollaborations.R;
-import com.wfm.soundcollaborations.activities.MainActivity;
 import com.wfm.soundcollaborations.adapter.CompositionOverviewAdapter;
-import com.wfm.soundcollaborations.webservice.CompositionWebserviceClient;
-import com.wfm.soundcollaborations.webservice.dtos.CompositionOverviewResp;
-import com.wfm.soundcollaborations.webservice.dtos.OverviewResponse;
+import com.wfm.soundcollaborations.compose.ComposeComponent;
+import com.wfm.soundcollaborations.compose.model.ComposeViewModel;
+import com.wfm.soundcollaborations.editor.activities.CreateCompositionActivity;
 
-import java.util.List;
 import java.util.Objects;
+
+import javax.inject.Inject;
 
 /**
  * The {@link ComposeFragment} ...
@@ -37,9 +38,12 @@ public class ComposeFragment extends Fragment {
 
     private View root; // Needed when adding a Fragment, is returned below
 
-
-    private CompositionWebserviceClient client;
     public static final String PICK_RESPONSE = "PICK";
+
+    ComposeComponent composeComponent;
+
+    @Inject
+    ComposeViewModel composeViewModel;
 
 
     @Override
@@ -60,24 +64,25 @@ public class ComposeFragment extends Fragment {
         FloatingActionButton createCompositionButton = root.findViewById(R.id.new_composition_button);
         createCompositionButton.setOnClickListener(this::startCreateCompositionActivity);
 
-        client = new CompositionWebserviceClient();
-        client.getOverviews(this::fillActivity);
+        composeComponent = ((KlangfangApp) getActivity().getApplicationContext())
+                .appComponent
+                .composeComponent()
+                .create();
+        composeComponent.inject(this);
+
+        fillActivity();
 
         return root; // Needed when adding a Fragment (See top of Fragment)
+
     }
 
 
-    private void fillActivity(OverviewResponse overviewResponse) {
-
-        if (Objects.nonNull(overviewResponse)) {
-
-            List<CompositionOverviewResp> compositions = overviewResponse.overviews;
+    private void fillActivity() {
 
             if (isAdded()) {
 
                 FragmentActivity fragmentActivity = Objects.requireNonNull(getActivity());
-                CompositionOverviewAdapter adapter = new CompositionOverviewAdapter(fragmentActivity,
-                        compositions);
+                CompositionOverviewAdapter adapter = new CompositionOverviewAdapter(fragmentActivity, composeViewModel);
 
                 RecyclerView recyclerView = root.findViewById(R.id.public_compositions_list);
                 recyclerView.setAdapter(adapter);
@@ -90,7 +95,6 @@ public class ComposeFragment extends Fragment {
                 snapHelper.attachToRecyclerView(recyclerView);
 
             }
-        }
     }
 
     private void startCreateCompositionActivity(View view) {

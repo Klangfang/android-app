@@ -1,7 +1,7 @@
 package com.wfm.soundcollaborations.webservice.dtos;
 
-import com.wfm.soundcollaborations.Editor.model.composition.sound.LocalSound;
-import com.wfm.soundcollaborations.Editor.utils.ByteArrayUtils;
+import com.wfm.soundcollaborations.editor.model.composition.sound.LocalSound;
+import com.wfm.soundcollaborations.editor.utils.ByteArrayUtils;
 
 public final class SoundRequest {
 

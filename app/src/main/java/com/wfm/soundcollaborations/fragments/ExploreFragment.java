@@ -1,17 +1,17 @@
 package com.wfm.soundcollaborations.fragments;
 
 import android.os.Bundle;
-import androidx.fragment.app.Fragment;
-import androidx.appcompat.widget.Toolbar;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
+import androidx.appcompat.widget.Toolbar;
+import androidx.fragment.app.Fragment;
 
+import com.wfm.soundcollaborations.MainActivity;
 import com.wfm.soundcollaborations.R;
-import com.wfm.soundcollaborations.activities.MainActivity;
 
 /**
  * Created by Markus Eberts on 09.11.16.
