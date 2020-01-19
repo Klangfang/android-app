@@ -33,6 +33,7 @@ public class EditorViewModel extends ViewModel {
 
     private static final String TAG = EditorViewModel.class.getSimpleName();
 
+    private static final String CREATOR_NAME_HAS_TO_BE_DEFINED = "KLANGFANG";
 
     private Composition composition;
 
@@ -68,56 +69,11 @@ public class EditorViewModel extends ViewModel {
     }
 
 
-    private void preDestroy() {
+    public void createNewComposition(String compositionTitle) {
 
-
-        stopRecording();
-        stopPlaying();
-
-    }
-
-
-    public void requestCancel() {
-
-        preDestroy();
-
-        composition.cancel();
-
-        if (composition.isCollaboration()) {
-
-            compositionRepository.cancel(composition.getCompositionId(), callback);
-
-        }
-
-    }
-
-
-    public void requestCreate() {
-
-        preDestroy();
-
-        composition.cancel();
-
-        compositionRepository.create(composition.getTitle(), "KLANGFANG", composition.getLocalSounds(), callback);
-
-
-    }
-
-
-    public void requestJoin() {
-
-        preDestroy();
-
-        composition.cancel();
-
-        compositionRepository.join(composition.getCompositionId(), composition.getLocalSounds(), callback);
-
-    }
-
-
-    public boolean isCompositionNotCanceled() {
-
-        return composition.isNotCanceled();
+        composition = new Composition.CompositionConfigurer()
+                .title(compositionTitle)
+                .build();
 
     }
 
@@ -164,11 +120,54 @@ public class EditorViewModel extends ViewModel {
     }
 
 
-    public void createNewComposition(String compositionTitle) {
+    private void preDestroy() {
 
-        composition = new Composition.CompositionConfigurer()
-                .title(compositionTitle)
-                .build();
+        stopRecording();
+        stopPlaying();
+
+    }
+
+
+    public void requestCancel() {
+
+        preDestroy();
+
+        composition.cancel();
+
+        if (composition.isCollaboration()) {
+
+            compositionRepository.cancel(composition.getCompositionId(), callback);
+
+        }
+
+    }
+
+
+    public void requestCreate() {
+
+        preDestroy();
+
+        composition.cancel();
+
+        compositionRepository.create(composition.getTitle(), CREATOR_NAME_HAS_TO_BE_DEFINED, composition.getLocalSounds(), callback);
+
+    }
+
+
+    public void requestJoin() {
+
+        preDestroy();
+
+        composition.cancel();
+
+        compositionRepository.join(composition.getCompositionId(), composition.getLocalSounds(), callback);
+
+    }
+
+
+    public boolean isCompositionNotCanceled() {
+
+        return composition.isNotCanceled();
 
     }
 
@@ -360,6 +359,20 @@ public class EditorViewModel extends ViewModel {
     public void setCallBack(Consumer<String> callback) {
 
         this.callback = callback;
+
+    }
+
+
+    public String getCompositionTitle() {
+
+        return composition.getTitle();
+
+    }
+
+
+    public Long getCompositionId() {
+
+        return composition.getCompositionId();
 
     }
 

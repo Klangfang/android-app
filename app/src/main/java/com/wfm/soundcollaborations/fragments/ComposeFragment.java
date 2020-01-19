@@ -1,6 +1,5 @@
 package com.wfm.soundcollaborations.fragments;
 
-import android.content.Intent;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -22,9 +21,10 @@ import com.wfm.soundcollaborations.R;
 import com.wfm.soundcollaborations.adapter.CompositionOverviewAdapter;
 import com.wfm.soundcollaborations.compose.ComposeComponent;
 import com.wfm.soundcollaborations.compose.model.ComposeViewModel;
-import com.wfm.soundcollaborations.editor.activities.CreateCompositionActivity;
+import com.wfm.soundcollaborations.webservice.dtos.CompositionResponse;
 
 import java.util.Objects;
+import java.util.function.Consumer;
 
 import javax.inject.Inject;
 
@@ -38,12 +38,26 @@ public class ComposeFragment extends Fragment {
 
     private View root; // Needed when adding a Fragment, is returned below
 
+    private final Consumer<CompositionResponse> startEditorCallback;
+    private final Consumer<View> startCreateCompositionCallback;
+
     public static final String PICK_RESPONSE = "PICK";
 
-    ComposeComponent composeComponent;
+    private CompositionOverviewAdapter adapter;
+
+    private ComposeComponent composeComponent;
 
     @Inject
     ComposeViewModel composeViewModel;
+
+
+    public ComposeFragment(Consumer<CompositionResponse> startEditorCallback,
+                           Consumer<View> startCreateCompositionCallback) {
+
+        this.startEditorCallback = startEditorCallback;
+        this.startCreateCompositionCallback = startCreateCompositionCallback;
+
+    }
 
 
     @Override
@@ -62,7 +76,7 @@ public class ComposeFragment extends Fragment {
         initToolbar();
 
         FloatingActionButton createCompositionButton = root.findViewById(R.id.new_composition_button);
-        createCompositionButton.setOnClickListener(this::startCreateCompositionActivity);
+        createCompositionButton.setOnClickListener(startCreateCompositionCallback::accept);
 
         composeComponent = ((KlangfangApp) getActivity().getApplicationContext())
                 .appComponent
@@ -70,19 +84,21 @@ public class ComposeFragment extends Fragment {
                 .create();
         composeComponent.inject(this);
 
-        fillActivity();
+        initFragmentActivity();
 
         return root; // Needed when adding a Fragment (See top of Fragment)
 
     }
 
 
-    private void fillActivity() {
+    private void initFragmentActivity() {
 
             if (isAdded()) {
 
                 FragmentActivity fragmentActivity = Objects.requireNonNull(getActivity());
-                CompositionOverviewAdapter adapter = new CompositionOverviewAdapter(fragmentActivity, composeViewModel);
+                adapter = new CompositionOverviewAdapter(fragmentActivity,
+                        composeViewModel,
+                        startEditorCallback);
 
                 RecyclerView recyclerView = root.findViewById(R.id.public_compositions_list);
                 recyclerView.setAdapter(adapter);
@@ -97,10 +113,6 @@ public class ComposeFragment extends Fragment {
             }
     }
 
-    private void startCreateCompositionActivity(View view) {
-        Intent intent = new Intent(view.getContext(), CreateCompositionActivity.class);
-        view.getContext().startActivity(intent);
-    }
 
     /**
      * Initialize {@link Toolbar} and set custom title and background color.
@@ -114,4 +126,5 @@ public class ComposeFragment extends Fragment {
         toolbar.setBackgroundColor(getResources().getColor(R.color.bars));
         toolbar.setTitleTextColor(getResources().getColor(R.color.toolbar_title));
     }
+
 }

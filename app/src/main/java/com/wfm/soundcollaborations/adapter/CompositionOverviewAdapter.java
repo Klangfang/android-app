@@ -2,7 +2,6 @@ package com.wfm.soundcollaborations.adapter;
 
 import android.app.Activity;
 import android.content.Context;
-import android.content.Intent;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -17,9 +16,7 @@ import com.google.android.exoplayer2.Player;
 import com.google.android.exoplayer2.ui.PlayerControlView;
 import com.wfm.soundcollaborations.R;
 import com.wfm.soundcollaborations.compose.model.ComposeViewModel;
-import com.wfm.soundcollaborations.editor.activities.EditorActivity;
 import com.wfm.soundcollaborations.editor.model.audio.ExoPlayerFactory;
-import com.wfm.soundcollaborations.webservice.JsonUtil;
 import com.wfm.soundcollaborations.webservice.dtos.CompositionOverviewResp;
 import com.wfm.soundcollaborations.webservice.dtos.CompositionResponse;
 import com.wfm.soundcollaborations.webservice.dtos.OverviewResponse;
@@ -29,8 +26,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
 import java.util.Objects;
-
-import static android.content.Intent.FLAG_ACTIVITY_NEW_TASK;
+import java.util.function.Consumer;
 
 /**
  * The CompositionOverviewAdapter helps to render out a list of data.
@@ -47,11 +43,13 @@ public class CompositionOverviewAdapter extends RecyclerView.Adapter<Composition
 
     private ExoPlayerFactory exoPlayerFactory;
     private Context context;
+    private Consumer<CompositionResponse> consumerResponse;
 
 
-    public CompositionOverviewAdapter(Activity context, ComposeViewModel composeViewModel) {
+    public CompositionOverviewAdapter(Activity context, ComposeViewModel composeViewModel, Consumer<CompositionResponse> consumerResponse) {
 
         this.context = context;
+        this.consumerResponse = consumerResponse;
 
         this.composeViewModel = composeViewModel;
 
@@ -71,6 +69,7 @@ public class CompositionOverviewAdapter extends RecyclerView.Adapter<Composition
         }
 
     }
+
 
     /**
      * This method is called when a view is created in the first place to make sure there are views to bind
@@ -144,17 +143,7 @@ public class CompositionOverviewAdapter extends RecyclerView.Adapter<Composition
 
     private void open(Long id, View view) {
 
-        composeViewModel.open(id, compositionResponse -> startEditorActivity(view, compositionResponse));
-
-    }
-
-
-    private void startEditorActivity(View view, CompositionResponse response) {
-
-        Intent intent = new Intent(view.getContext(), EditorActivity.class);
-        intent.setFlags(FLAG_ACTIVITY_NEW_TASK);
-        intent.putExtra(PICK_RESPONSE, JsonUtil.toJson(response));
-        view.getContext().startActivity(intent);
+        composeViewModel.open(id, consumerResponse);
 
     }
 

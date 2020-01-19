@@ -2,23 +2,22 @@ package com.wfm.soundcollaborations.editor.activities;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.text.Editable;
 import android.view.View;
 import android.widget.Button;
-import android.widget.Toast;
 
 import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.util.Preconditions;
 
 import com.google.android.material.textfield.TextInputEditText;
+import com.wfm.soundcollaborations.KlangfangSnackbar;
 import com.wfm.soundcollaborations.R;
 
 import org.apache.commons.lang3.StringUtils;
 
 public class CreateCompositionActivity extends AppCompatActivity {
 
-    public static String compositionTitleInput;
-    // private Object CreateCompositionActivity;
-    // View view = view.ge;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -50,20 +49,28 @@ public class CreateCompositionActivity extends AppCompatActivity {
         */
         String compositionTitle = getCompositionTitleInput();
         if (StringUtils.isBlank(compositionTitle)) {
-            Toast.makeText(this, getString(R.string.min_text_input), Toast.LENGTH_LONG).show();
+
+            KlangfangSnackbar.longShow(view, getString(R.string.min_text_input));
+
         } else {
+
             Intent intent = new Intent(view.getContext(), EditorActivity.class);
             intent.putExtra(String.valueOf(R.id.composition_title_textfield), compositionTitle);
             startActivity(intent);
+
         }
-}
+
+    }
 
     public String getCompositionTitleInput() {
+
         // Get specific User Input data by looking inside the TextInputEditText Object
         TextInputEditText compositionTitleTextField = findViewById(R.id.composition_title_textfield);
-        // Cast "editable" to normal String Type
-        compositionTitleInput = compositionTitleTextField.getText().toString();
-        return compositionTitleInput;
+        Editable titleEditable = compositionTitleTextField.getText();
+        Preconditions.checkNotNull(titleEditable);
+
+        return titleEditable.toString();
+
     }
 
 

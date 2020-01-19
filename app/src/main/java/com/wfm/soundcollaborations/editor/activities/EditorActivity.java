@@ -1,11 +1,14 @@
 package com.wfm.soundcollaborations.editor.activities;
 
 import android.Manifest;
+import android.content.ComponentName;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.ServiceConnection;
 import android.content.pm.PackageManager;
 import android.content.res.ColorStateList;
 import android.os.Bundle;
+import android.os.IBinder;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -18,6 +21,7 @@ import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
+import androidx.core.util.Preconditions;
 
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.ohoussein.playpause.PlayPauseView;
@@ -29,6 +33,7 @@ import com.wfm.soundcollaborations.editor.EditorComponent;
 import com.wfm.soundcollaborations.editor.model.composition.EditorViewModel;
 import com.wfm.soundcollaborations.editor.model.composition.StopReason;
 import com.wfm.soundcollaborations.editor.model.composition.sound.RemoteSound;
+import com.wfm.soundcollaborations.editor.service.CompositionRecoverService;
 import com.wfm.soundcollaborations.editor.views.composition.CompositionView;
 import com.wfm.soundcollaborations.fragments.ComposeFragment;
 
@@ -36,6 +41,7 @@ import org.apache.commons.lang3.StringUtils;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 import javax.inject.Inject;
 
@@ -82,13 +88,18 @@ public class EditorActivity extends AppCompatActivity {
     @Inject
     EditorViewModel editorViewModel;
 
+    boolean mBounded;
+    CompositionRecoverService compositionRecoverService;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
 
         super.onCreate(savedInstanceState);
 
-        init();
+
+        setContentView(R.layout.activity_editor);
+        ButterKnife.bind(this);
 
         editorComponent = ((KlangfangApp) getApplicationContext())
                 .appComponent
@@ -98,6 +109,17 @@ public class EditorActivity extends AppCompatActivity {
         editorComponent.inject(this);
 
         prepareEditorViewModel();
+
+        setSupportActionBar(findViewById(R.id.base_toolbar));
+        ActionBar actionBar = getSupportActionBar();
+        Preconditions.checkNotNull(actionBar);
+        actionBar.setDisplayHomeAsUpEnabled(true);
+        actionBar.setTitle(editorViewModel.getCompositionTitle());
+
+        deletedBtn.setEnabled(false);
+        deletedBtn.setOnClickListener(this::deleteConfirmation);
+
+        prepareCompositionRecoverService();
 
         Log.d(TAG, "Activity is created");
 
@@ -120,6 +142,10 @@ public class EditorActivity extends AppCompatActivity {
         super.onDestroy();
 
         preDestroy();
+
+        if (mBounded) {
+            unbindService(mServiceConnection);
+        }
 
         Log.d(TAG, "Activity is destroyed");
 
@@ -151,23 +177,6 @@ public class EditorActivity extends AppCompatActivity {
     public void onBackPressed() {
 
         // do nothing here
-
-    }
-
-
-    private void init() {
-
-        setContentView(R.layout.activity_editor);
-        ButterKnife.bind(this);
-
-        setSupportActionBar(findViewById(R.id.base_toolbar));
-        ActionBar actionBar = getSupportActionBar();
-        assert actionBar != null;
-        actionBar.setDisplayHomeAsUpEnabled(true);
-        actionBar.setTitle(CreateCompositionActivity.compositionTitleInput);
-
-        deletedBtn.setEnabled(false);
-        deletedBtn.setOnClickListener(this::deleteConfirmation);
 
     }
 
@@ -742,14 +751,62 @@ public class EditorActivity extends AppCompatActivity {
 
     private void startMainActivity(String text) {
 
-        super.finish();
 
         Intent intent = new Intent(getApplicationContext(), MainActivity.class);
-        intent.setFlags(Intent.FLAG_ACTIVITY_NO_HISTORY);
         intent.putExtra(MESSAGE_TEXT, text);
 
-        startActivity(intent);
+        setResult(RESULT_OK, intent);
+        finish();
+
+        if (editorViewModel.getCompositionId() == null) {
+            startActivity(intent);
+        }
 
     }
+
+
+    public void prepareCompositionRecoverService() {
+
+        Long compositionId = editorViewModel.getCompositionId();
+
+        if (Objects.nonNull(compositionId)) {
+
+            Intent intent = new Intent(this, CompositionRecoverService.class);
+            intent.putExtra("COMPOSITION_ID", compositionId);
+
+            startService(intent);
+            bindService(intent, mServiceConnection, BIND_AUTO_CREATE);
+
+        }
+
+    }
+
+
+    /**
+     * Handles composition service connections
+     */
+    ServiceConnection mServiceConnection = new ServiceConnection() {
+
+        @Override
+        public void onServiceDisconnected(ComponentName name) {
+
+            KlangfangSnackbar.shortShow(compositionView, "Service is disconnected");
+            mBounded = false;
+            compositionRecoverService = null;
+
+        }
+
+
+        @Override
+        public void onServiceConnected(ComponentName name, IBinder service) {
+
+            KlangfangSnackbar.shortShow(compositionView, "Service is connected");
+            mBounded = true;
+            CompositionRecoverService.CompositionRecoverServiceBinder mLocalBinder = (CompositionRecoverService.CompositionRecoverServiceBinder) service;
+            compositionRecoverService = mLocalBinder.getService();
+
+        }
+
+    };
 
 }
