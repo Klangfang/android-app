@@ -34,7 +34,7 @@
             card_view:cardElevation="0dp"
             card_view:cardMaxElevation="0dp">
 
-            <com.wfm.soundcollaborations.views.SoundVisualizationView
+            <com.wfm.soundcollaborations.interaction.views.SoundVisualizationView
                 android:id="@+id/visualization"
                 android:layout_width="match_parent"
                 android:layout_height="35dp"

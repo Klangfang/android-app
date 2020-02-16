@@ -5,7 +5,7 @@
     android:layout_marginLeft="30dp"
     android:layout_marginRight="30dp">
 
-    <com.wfm.soundcollaborations.views.PlayerLargeView
+    <com.wfm.soundcollaborations.interaction.views.PlayerLargeView
         android:id="@+id/sound_player"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"

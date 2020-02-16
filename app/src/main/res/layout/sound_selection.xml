@@ -13,7 +13,7 @@
         android:layout_gravity="center"
         android:gravity="center">
 
-        <com.wfm.soundcollaborations.views.SoundSelectorView
+        <com.wfm.soundcollaborations.interaction.views.SoundSelectorView
             android:layout_width="130dp"
             android:layout_height="wrap_content"
             android:background="#9c9c9c"
@@ -24,7 +24,7 @@
             android:layout_height="0dp"
             />
 
-        <com.wfm.soundcollaborations.views.SoundSelectorView
+        <com.wfm.soundcollaborations.interaction.views.SoundSelectorView
             android:layout_width="130dp"
             android:layout_height="wrap_content"
             android:layout_gravity="right"
@@ -43,7 +43,7 @@
         android:layout_gravity="center"
         android:gravity="center">
 
-        <com.wfm.soundcollaborations.views.SoundSelectorView
+        <com.wfm.soundcollaborations.interaction.views.SoundSelectorView
             android:layout_width="130dp"
             android:layout_height="wrap_content"
             android:background="#9c9c9c"
@@ -54,7 +54,7 @@
             android:layout_height="0dp"
             />
 
-        <com.wfm.soundcollaborations.views.SoundSelectorView
+        <com.wfm.soundcollaborations.interaction.views.SoundSelectorView
             android:layout_width="130dp"
             android:layout_height="wrap_content"
             android:layout_gravity="right"

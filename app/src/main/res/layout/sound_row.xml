@@ -11,7 +11,7 @@
         android:layout_width="10dp"
         android:layout_height="1dp"/>
 
-    <com.wfm.soundcollaborations.views.PlayerSmallView
+    <com.wfm.soundcollaborations.interaction.views.PlayerSmallView
         android:id="@+id/sound_player"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"

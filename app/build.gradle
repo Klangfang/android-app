@@ -61,6 +61,7 @@ dependencies {
     implementation "com.fasterxml.jackson.core:jackson-databind:$jackson"
     implementation "org.apache.commons:commons-lang3:$commonslang3"
     implementation "com.google.dagger:dagger:$dagger"
+    implementation "com.google.dagger:dagger-android-support:$dagger"
     annotationProcessor "com.google.dagger:dagger-compiler:$dagger"
 
 }

@@ -1,6 +1,6 @@
 package com.wfm.soundcollaborations.webservice.dtos;
 
-import com.wfm.soundcollaborations.editor.model.composition.sound.LocalSound;
+import com.wfm.soundcollaborations.interaction.editor.model.composition.sound.LocalSound;
 
 import java.util.List;
 import java.util.stream.Collectors;

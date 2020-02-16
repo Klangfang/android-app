@@ -16,7 +16,7 @@
         android:theme="@style/ThemeOverlay.AppCompat.ActionBar"
         app:popupTheme="@style/ThemeOverlay.AppCompat.Light"/>
 
-    <com.wfm.soundcollaborations.views.SoundView
+    <com.wfm.soundcollaborations.interaction.views.SoundView
         android:id="@+id/sv_visualizer"
         android:layout_width="match_parent"
         android:layout_height="0dp"

@@ -1,8 +1,8 @@
 package com.wfm.soundcollaborations;
 
 
-import com.wfm.soundcollaborations.editor.model.composition.CompositionRequestType;
-import com.wfm.soundcollaborations.editor.model.composition.sound.LocalSound;
+import com.wfm.soundcollaborations.interaction.editor.model.composition.CompositionRequestType;
+import com.wfm.soundcollaborations.interaction.editor.model.composition.sound.LocalSound;
 import com.wfm.soundcollaborations.webservice.CompositionRetrofitService;
 import com.wfm.soundcollaborations.webservice.dtos.CompositionOverviewResp;
 import com.wfm.soundcollaborations.webservice.dtos.CompositionRequest;
