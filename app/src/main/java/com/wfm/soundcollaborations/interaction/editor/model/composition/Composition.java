@@ -128,18 +128,16 @@ class Composition {
 
     }
 
+    void exhaustTrack(int trackNumber) {
 
-    boolean isOpened() {
-
-        return status.equals(CompositionStatus.OPENED);
+        getTrack(trackNumber).exhaust();
 
     }
 
 
-    void exhausted() {
+    boolean isTrackNotExhausted(int trackNumber) {
 
-        this.status = CompositionStatus.EXHAUSTED;
-
+        return !tracks.get(trackNumber).isExhausted();
     }
 
 
@@ -175,12 +173,6 @@ class Composition {
 
         status = CompositionStatus.CANCELED;
 
-    }
-
-
-    boolean isNotExhausted() {
-
-        return !status.equals(CompositionStatus.EXHAUSTED);
     }
 
 }

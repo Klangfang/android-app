@@ -22,6 +22,7 @@ public class Track {
     private List<Sound> sounds = new ArrayList<>();
     private AudioRecorder recorder;
     private int recorderTime;
+    private boolean exhausted;
 
 
     Track(int trackNumber) {
@@ -158,4 +159,18 @@ public class Track {
         sounds.forEach(Sound::releasePlayer);
 
     }
+
+
+    void exhaust() {
+
+        exhausted = true;
+
+    }
+
+    boolean isExhausted() {
+
+        return exhausted;
+
+    }
+
 }

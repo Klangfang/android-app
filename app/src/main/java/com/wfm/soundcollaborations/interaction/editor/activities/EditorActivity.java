@@ -249,7 +249,7 @@ public class EditorActivity extends AppCompatActivity {
             } else {
 
                 String text = "Could not start recording at this position.\n" +
-                        "The composition may has been exhausted.";
+                        "The selected track may has been exhausted.";
 
                 KlangfangSnackbar.longShow(compositionView, text);
 

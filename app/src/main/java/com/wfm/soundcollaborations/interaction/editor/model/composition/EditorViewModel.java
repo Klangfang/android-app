@@ -246,7 +246,7 @@ public class EditorViewModel extends ViewModel {
 
     public boolean canRecord(int activeTrackIndex, int scrollPositionInDP) {
 
-        return composition.isOpened() && checkStop(activeTrackIndex, scrollPositionInDP).equals(StopReason.NO_STOP);
+        return composition.isTrackNotExhausted(activeTrackIndex) && checkStop(activeTrackIndex, scrollPositionInDP).equals(StopReason.NO_STOP);
 
     }
 
@@ -272,7 +272,7 @@ public class EditorViewModel extends ViewModel {
 
                 stopRecording();
 
-                composition.exhausted();
+                composition.exhaustTrack(track.getTrackNumber());
 
                 return StopReason.MAXIMUM_RECORDING_TIME_REACHED;
 
@@ -345,13 +345,6 @@ public class EditorViewModel extends ViewModel {
     public int getMaxAmplitude(int activeTrackIndex) {
 
         return composition.getMaxAmplitude(activeTrackIndex);
-
-    }
-
-
-    public boolean isCompositionOpened() {
-
-        return composition.isOpened();
 
     }
 
