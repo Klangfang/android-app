@@ -12,7 +12,6 @@ import com.wfm.soundcollaborations.KlangfangApp;
 import com.wfm.soundcollaborations.KlangfangSnackbar;
 import com.wfm.soundcollaborations.R;
 import com.wfm.soundcollaborations.databinding.ActivityMainBinding;
-import com.wfm.soundcollaborations.databinding.ToolbarBaseBinding;
 import com.wfm.soundcollaborations.interaction.editor.activities.CreateCompositionActivity;
 import com.wfm.soundcollaborations.interaction.editor.activities.EditorActivity;
 import com.wfm.soundcollaborations.interaction.main.fragments.ComposeFragment;
@@ -32,7 +31,7 @@ public class MainActivity extends AppCompatActivity {
 
     private ActivityMainBinding activityMainBinding;
 
-    private ToolbarBaseBinding toolbarBaseBinding;
+    private Toolbar base_toolbar;
 
     public static final int UPDATE_CODE = 0;
 
@@ -50,7 +49,7 @@ public class MainActivity extends AppCompatActivity {
         activityMainBinding = ActivityMainBinding.inflate(getLayoutInflater());
         setContentView(activityMainBinding.getRoot());
 
-        toolbarBaseBinding = ToolbarBaseBinding.inflate(getLayoutInflater());
+        base_toolbar = findViewById(R.id.base_toolbar);
 
         initToolbar();
         initBottomNavigationView();
@@ -96,7 +95,7 @@ public class MainActivity extends AppCompatActivity {
 
     private void initToolbar() {
 
-        setSupportActionBar(toolbarBaseBinding.baseToolbar);
+        setSupportActionBar(base_toolbar);
 
     }
 
@@ -164,14 +163,14 @@ public class MainActivity extends AppCompatActivity {
 
         String messageText = data.getStringExtra(EditorActivity.MESSAGE_TEXT);
         if (StringUtils.isNoneBlank(messageText)) {
-            KlangfangSnackbar.longShow(toolbarBaseBinding.baseToolbar, messageText);
+            KlangfangSnackbar.longShow(base_toolbar, messageText);
         }
 
     }
 
     public Toolbar getToolbar() {
 
-        return toolbarBaseBinding.baseToolbar;
+        return base_toolbar;
 
     }
 
