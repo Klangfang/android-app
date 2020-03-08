@@ -6,7 +6,6 @@ import android.view.ViewGroup;
 import android.widget.LinearLayout;
 
 import com.wfm.soundcollaborations.interaction.editor.model.composition.sound.RemoteSound;
-import com.wfm.soundcollaborations.interaction.editor.utils.DPUtils;
 import com.wfm.soundcollaborations.interaction.editor.views.composition.listeners.TrackViewOnClickListener;
 import com.wfm.soundcollaborations.interaction.editor.views.composition.listeners.TrackWatchViewOnClickListener;
 
@@ -104,8 +103,6 @@ class TrackViewContainer {
 
         trackView.addSoundView(soundView);
         soundViews.add(soundView);
-
-        increaseWatchViewPercentage(sound.duration);
 
     }
 
@@ -206,14 +203,6 @@ class TrackViewContainer {
     private void increaseWatchViewPercentage() {
 
         trackWatchView.increasePercentage(WATCH_VIEW_PERCENTAGE);
-
-    }
-
-
-    private void increaseWatchViewPercentage(int duration) {
-
-        float percentage = (DPUtils.getValueInDP(duration) / SCROLL_STEP) * WATCH_VIEW_PERCENTAGE;
-        trackWatchView.increasePercentage(percentage);
 
     }
 
