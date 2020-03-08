@@ -2,7 +2,7 @@ package com.wfm.soundcollaborations.interaction.editor.utils;
 
 public final class DPUtils {
 
-    public static final int TRACK_MAX_LENGTH_IN_MS = 7200;
+    public static final int TRACK_MAX_LENGTH_IN_DP = 7200;
     private static final int SOUND_MAX_LENGTH_IN_S = 60;
     public static final int TRACK_MAX_HEIGHT = 75;
 
@@ -19,7 +19,7 @@ public final class DPUtils {
 
     public static boolean soundHasReachedMaxLength(int cursorPositionInDP) {
 
-        return (cursorPositionInDP + SOUND_MAX_LENGTH_IN_S) > TRACK_MAX_LENGTH_IN_MS;
+        return cursorPositionInDP >= TRACK_MAX_LENGTH_IN_DP;
 
     }
 

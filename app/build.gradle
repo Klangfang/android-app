@@ -33,11 +33,11 @@ ext {
     material = '1.0.0'
     exoplayer = '2.11.1'
     playpauseview = '1.0.2'
-    retrofit2 = '2.7.0'
-    jackson = '2.10.1'
+    retrofit2 = '2.7.1'
+    jackson = '2.10.2'
     commonslang3 = '3.9'
     commonsio = '2.6'
-    dagger = '2.25.4'
+    dagger = '2.26'
 }
 
 dependencies {

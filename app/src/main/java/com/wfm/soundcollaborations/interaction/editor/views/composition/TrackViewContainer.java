@@ -15,7 +15,7 @@ import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 import static com.wfm.soundcollaborations.interaction.editor.utils.DPUtils.TRACK_MAX_HEIGHT;
-import static com.wfm.soundcollaborations.interaction.editor.utils.DPUtils.TRACK_MAX_LENGTH_IN_MS;
+import static com.wfm.soundcollaborations.interaction.editor.utils.DPUtils.TRACK_MAX_LENGTH_IN_DP;
 import static com.wfm.soundcollaborations.interaction.editor.views.composition.CompositionView.SCROLL_STEP;
 
 class TrackViewContainer {
@@ -60,7 +60,7 @@ class TrackViewContainer {
 
             TrackView trackView = new TrackView(context);
             trackView.setOnClickListener(new TrackViewOnClickListener(compositionView, index));
-            LinearLayout.LayoutParams trackParams = new LinearLayout.LayoutParams(TRACK_MAX_LENGTH_IN_MS, TRACK_MAX_HEIGHT);
+            LinearLayout.LayoutParams trackParams = new LinearLayout.LayoutParams(TRACK_MAX_LENGTH_IN_DP, TRACK_MAX_HEIGHT);
             trackParams.setMargins(0, 10, 0, 10);
             trackView.setLayoutParams(trackParams);
 
