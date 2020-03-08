@@ -6,11 +6,12 @@ import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.Path;
 import android.util.AttributeSet;
+import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewTreeObserver;
 import android.widget.LinearLayout;
 
-import com.wfm.soundcollaborations.R;
+import com.wfm.soundcollaborations.databinding.TracksAndTrackwatchViewgroupBinding;
 import com.wfm.soundcollaborations.interaction.editor.model.composition.sound.RemoteSound;
 
 import java.util.ArrayList;
@@ -19,9 +20,6 @@ import java.util.List;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
-import butterknife.BindView;
-import butterknife.ButterKnife;
-
 
 public class CompositionView extends LinearLayout {
 
@@ -29,14 +27,7 @@ public class CompositionView extends LinearLayout {
 
     public static final int SCROLL_STEP = 3;
 
-    @BindView(R.id.hsv_holder)
-    CompositionScrollView holderScrollView;
-    @BindView(R.id.tvs)
-    LinearLayout tracksViewsHolder;
-    @BindView(R.id.twvs)
-    LinearLayout trackWatchesViewsHolder;
-    @BindView(R.id.ll_space)
-    LinearLayout spaceLayout;
+    private TracksAndTrackwatchViewgroupBinding binding;
 
     List<TrackViewContainer> trackViewContainers = new ArrayList<>();
 
@@ -56,20 +47,22 @@ public class CompositionView extends LinearLayout {
     }
 
     //TODO i think this is not used
-    public CompositionView(Context context)
-    {
+    public CompositionView(Context context) {
         super(context);
-        View.inflate(getContext(), R.layout.tracks_and_trackwatch_viewgroup, this);
-        ButterKnife.bind(this);
+
+        binding = TracksAndTrackwatchViewgroupBinding.inflate(LayoutInflater.from(context), this, true);
+
         initVariables();
+
     }
 
 
     public CompositionView(Context context, AttributeSet attrs) {
 
         super(context, attrs);
-        View.inflate(getContext(), R.layout.tracks_and_trackwatch_viewgroup, this);
-        ButterKnife.bind(this);
+
+        binding = TracksAndTrackwatchViewgroupBinding.inflate(LayoutInflater.from(context), this, true);
+
         initVariables();
 
         // default first Track is activated
@@ -83,8 +76,8 @@ public class CompositionView extends LinearLayout {
                     .index(i)
                     .build(this);
 
-            tracksViewsHolder.addView(trackViewContainer.getTrackView());
-            trackWatchesViewsHolder.addView(trackViewContainer.getTrackWatchView());
+            binding.tvs.addView(trackViewContainer.getTrackView());
+            binding.twvs.addView(trackViewContainer.getTrackWatchView());
 
             trackViewContainers.add(trackViewContainer);
 
@@ -107,14 +100,14 @@ public class CompositionView extends LinearLayout {
 
         ViewTreeObserver viewTreeObserver = getViewTreeObserver();
         viewTreeObserver.addOnGlobalLayoutListener(() ->
-                spaceLayout.setPadding(getWidth() / 2, 0, getWidth() / 2, 0));
+                binding.llSpace.setPadding(getWidth() / 2, 0, getWidth() / 2, 0));
 
-        holderScrollView.getViewTreeObserver().addOnScrollChangedListener(() -> {
-            scrollPosition = holderScrollView.getScrollX();
-            mOnScrollChanged.onNewScrollPosition(holderScrollView.getScrollX());
+        binding.hsvHolder.getViewTreeObserver().addOnScrollChangedListener(() -> {
+            scrollPosition = binding.hsvHolder.getScrollX();
+            mOnScrollChanged.onNewScrollPosition(binding.hsvHolder.getScrollX());
         });
 
-        holderScrollView.setOverScrollMode(View.OVER_SCROLL_NEVER);
+        binding.hsvHolder.setOverScrollMode(View.OVER_SCROLL_NEVER);
     }
 
 
@@ -252,14 +245,14 @@ public class CompositionView extends LinearLayout {
     public void increaseScrollPosition() {
 
         this.scrollPosition += SCROLL_STEP;
-        holderScrollView.scrollTo(this.scrollPosition, 0);
+        binding.hsvHolder.scrollTo(this.scrollPosition, 0);
 
     }
 
     public void setScrollPosition(int value) {
 
         this.scrollPosition = value;
-        holderScrollView.scrollTo(value, 0);
+        binding.hsvHolder.scrollTo(value, 0);
 
     }
 
@@ -268,7 +261,7 @@ public class CompositionView extends LinearLayout {
     public void setEnabled(boolean enabled) {
 
         super.setEnabled(enabled);
-        holderScrollView.setEnabled(enabled);
+        binding.hsvHolder.setEnabled(enabled);
 
     }
 

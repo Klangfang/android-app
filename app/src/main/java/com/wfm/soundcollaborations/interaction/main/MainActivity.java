@@ -8,10 +8,11 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 import androidx.fragment.app.FragmentTransaction;
 
-import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.wfm.soundcollaborations.KlangfangApp;
 import com.wfm.soundcollaborations.KlangfangSnackbar;
 import com.wfm.soundcollaborations.R;
+import com.wfm.soundcollaborations.databinding.ActivityMainBinding;
+import com.wfm.soundcollaborations.databinding.ToolbarBaseBinding;
 import com.wfm.soundcollaborations.interaction.editor.activities.CreateCompositionActivity;
 import com.wfm.soundcollaborations.interaction.editor.activities.EditorActivity;
 import com.wfm.soundcollaborations.interaction.main.fragments.ComposeFragment;
@@ -23,21 +24,15 @@ import org.apache.commons.lang3.StringUtils;
 
 import javax.inject.Inject;
 
-import butterknife.BindView;
-import butterknife.ButterKnife;
-
 
 public class MainActivity extends AppCompatActivity {
 
     private final static String TAG = MainActivity.class.getSimpleName();
     public static final String PICK_RESPONSE = "PICK";
 
+    private ActivityMainBinding activityMainBinding;
 
-    @BindView(R.id.base_toolbar)
-    Toolbar base_toolbar;
-
-    @BindView(R.id.bnv_bottom_navigation)
-    BottomNavigationView bottomNavigationView;
+    private ToolbarBaseBinding toolbarBaseBinding;
 
     public static final int UPDATE_CODE = 0;
 
@@ -51,8 +46,11 @@ public class MainActivity extends AppCompatActivity {
     public void onCreate(Bundle savedInstanceState) {
 
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main);
-        ButterKnife.bind(this);
+
+        activityMainBinding = ActivityMainBinding.inflate(getLayoutInflater());
+        setContentView(activityMainBinding.getRoot());
+
+        toolbarBaseBinding = ToolbarBaseBinding.inflate(getLayoutInflater());
 
         initToolbar();
         initBottomNavigationView();
@@ -98,14 +96,14 @@ public class MainActivity extends AppCompatActivity {
 
     private void initToolbar() {
 
-        setSupportActionBar(base_toolbar);
+        setSupportActionBar(toolbarBaseBinding.baseToolbar);
 
     }
 
 
     private void initBottomNavigationView() {
 
-        bottomNavigationView.setOnNavigationItemSelectedListener(
+        activityMainBinding.bnvBottomNavigation.setOnNavigationItemSelectedListener(
                 item -> {
                     switch (item.getItemId()) {
                         case R.id.bnm_explore:
@@ -166,14 +164,14 @@ public class MainActivity extends AppCompatActivity {
 
         String messageText = data.getStringExtra(EditorActivity.MESSAGE_TEXT);
         if (StringUtils.isNoneBlank(messageText)) {
-            KlangfangSnackbar.longShow(base_toolbar, messageText);
+            KlangfangSnackbar.longShow(toolbarBaseBinding.baseToolbar, messageText);
         }
 
     }
 
     public Toolbar getToolbar() {
 
-        return base_toolbar;
+        return toolbarBaseBinding.baseToolbar;
 
     }
 

@@ -13,7 +13,6 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.widget.ImageButton;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.ActionBar;
@@ -23,17 +22,15 @@ import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 import androidx.core.util.Preconditions;
 
-import com.google.android.material.floatingactionbutton.FloatingActionButton;
-import com.ohoussein.playpause.PlayPauseView;
 import com.wfm.soundcollaborations.KlangfangApp;
 import com.wfm.soundcollaborations.KlangfangSnackbar;
 import com.wfm.soundcollaborations.R;
+import com.wfm.soundcollaborations.databinding.ActivityEditorBinding;
 import com.wfm.soundcollaborations.interaction.editor.EditorComponent;
 import com.wfm.soundcollaborations.interaction.editor.model.composition.EditorViewModel;
 import com.wfm.soundcollaborations.interaction.editor.model.composition.StopReason;
 import com.wfm.soundcollaborations.interaction.editor.model.composition.sound.RemoteSound;
 import com.wfm.soundcollaborations.interaction.editor.service.CompositionRecoverService;
-import com.wfm.soundcollaborations.interaction.editor.views.composition.CompositionView;
 import com.wfm.soundcollaborations.interaction.main.MainActivity;
 import com.wfm.soundcollaborations.interaction.main.fragments.ComposeFragment;
 
@@ -45,11 +42,6 @@ import java.util.Objects;
 
 import javax.inject.Inject;
 
-import butterknife.BindView;
-import butterknife.ButterKnife;
-import butterknife.OnClick;
-
-
 public class EditorActivity extends AppCompatActivity {
 
     private static final String TAG = EditorActivity.class.getSimpleName();
@@ -59,6 +51,7 @@ public class EditorActivity extends AppCompatActivity {
     public static final String MESSAGE_TEXT = "MESSAGE_TEXT";
     public static final String START_MAIN_ACTIVITY = "START_MAIN_ACTIVITY";
 
+    private ActivityEditorBinding binding;
 
     /**
      * This constant creates a placeholder for the user's consent of the startOrStopRecording audio permission.
@@ -68,17 +61,6 @@ public class EditorActivity extends AppCompatActivity {
 
     private static final int CANCEL_BTN_ID = 16908332;
 
-    @BindView(R.id.composition)
-    public CompositionView compositionView;
-
-    @BindView(R.id.btn_delete)
-    ImageButton deletedBtn;
-
-    @BindView(R.id.btn_record)
-    FloatingActionButton recordBtn;
-
-    @BindView(R.id.btn_play)
-    PlayPauseView playBtn;
     private boolean pressPlay;
 
     private boolean create;
@@ -97,8 +79,11 @@ public class EditorActivity extends AppCompatActivity {
 
         super.onCreate(savedInstanceState);
 
-        setContentView(R.layout.activity_editor);
-        ButterKnife.bind(this);
+        binding = ActivityEditorBinding.inflate(getLayoutInflater());
+        setContentView(binding.getRoot());
+
+        binding.btnPlay.setOnClickListener(view -> play(view));
+        binding.btnRecord.setOnClickListener(view -> record(view));
 
         editorComponent = ((KlangfangApp) getApplicationContext())
                 .appComponent
@@ -115,8 +100,8 @@ public class EditorActivity extends AppCompatActivity {
         actionBar.setDisplayHomeAsUpEnabled(true);
         actionBar.setTitle(editorViewModel.getCompositionTitle());
 
-        deletedBtn.setEnabled(false);
-        deletedBtn.setOnClickListener(this::deleteConfirmation);
+        binding.btnDelete.setEnabled(false);
+        binding.btnDelete.setOnClickListener(this::deleteConfirmation);
 
         prepareCompositionRecoverService();
 
@@ -145,6 +130,8 @@ public class EditorActivity extends AppCompatActivity {
         if (mBounded) {
             unbindService(mServiceConnection);
         }
+
+        binding = null;
 
         Log.d(TAG, "Activity is destroyed");
 
@@ -203,7 +190,7 @@ public class EditorActivity extends AppCompatActivity {
 
         }
 
-        compositionView.setOnScrollChanged(position -> {
+        binding.composition.setOnScrollChanged(position -> {
 
             int milliseconds = (int) (position * 16.6666);
             editorViewModel.seek(milliseconds);
@@ -231,18 +218,18 @@ public class EditorActivity extends AppCompatActivity {
 
     private void startRecording() {
 
-        int activeTrackIndex = compositionView.getActiveTrackIndex();
-        int scrollPositionInDP = compositionView.getScrollPosition();
+        int activeTrackIndex = binding.composition.getActiveTrackIndex();
+        int scrollPositionInDP = binding.composition.getScrollPosition();
 
         try {
 
             if (editorViewModel.canRecord(activeTrackIndex, scrollPositionInDP)) {
 
-                compositionView.addLocalSoundView(this);
+                binding.composition.addLocalSoundView(this);
 
                 editorViewModel.startRecording(activeTrackIndex, scrollPositionInDP, this::simulateRecording);
 
-                playBtn.setEnabled(false);
+                binding.btnPlay.setEnabled(false);
                 setRecordBtnColors(false, true);
 
 
@@ -251,7 +238,7 @@ public class EditorActivity extends AppCompatActivity {
                 String text = "Could not start recording at this position.\n" +
                         "The selected track may has been exhausted.";
 
-                KlangfangSnackbar.longShow(compositionView, text);
+                KlangfangSnackbar.longShow(binding.composition, text);
 
             }
 
@@ -279,10 +266,10 @@ public class EditorActivity extends AppCompatActivity {
 
         try {
 
-            String uuid = compositionView.completeLocalSoundView();
+            String uuid = binding.composition.completeLocalSoundView();
 
-            int activeTrackIndex = compositionView.getActiveTrackIndex();
-            int scrollPositionInDP = compositionView.getScrollPosition();
+            int activeTrackIndex = binding.composition.getActiveTrackIndex();
+            int scrollPositionInDP = binding.composition.getScrollPosition();
 
             editorViewModel.completeLocalSound(getApplicationContext(), activeTrackIndex, scrollPositionInDP, uuid);
 
@@ -302,8 +289,8 @@ public class EditorActivity extends AppCompatActivity {
 
         try {
 
-            int activeTrackIndex = compositionView.getActiveTrackIndex();
-            int scrollPosition = compositionView.getScrollPosition();
+            int activeTrackIndex = binding.composition.getActiveTrackIndex();
+            int scrollPosition = binding.composition.getScrollPosition();
 
             if (editorViewModel.checkStop(activeTrackIndex, scrollPosition).equals(StopReason.NO_STOP)) {
 
@@ -334,7 +321,7 @@ public class EditorActivity extends AppCompatActivity {
 
             for (RemoteSound remoteSound : remoteSounds) {
 
-                compositionView.addRemoteSoundView(this, remoteSound);
+                binding.composition.addRemoteSoundView(this, remoteSound);
 
             }
 
@@ -352,7 +339,7 @@ public class EditorActivity extends AppCompatActivity {
 
         try {
 
-            compositionView.updateSoundView(maxAmplitude);
+            binding.composition.updateSoundView(maxAmplitude);
 
         } catch (Throwable t) {
 
@@ -373,7 +360,7 @@ public class EditorActivity extends AppCompatActivity {
 
             for (Map.Entry<Integer, Integer> entry : values.entrySet()) {
 
-                compositionView.updateTrackWatches(entry.getKey(), entry.getValue());
+                binding.composition.updateTrackWatches(entry.getKey(), entry.getValue());
 
             }
 
@@ -386,12 +373,11 @@ public class EditorActivity extends AppCompatActivity {
     }
 
 
-    @OnClick(R.id.btn_play)
     public void play(View view) {
 
         switchState(true);
         editorViewModel.playOrPause(pressPlay, this::increaseScrollPosition, this::handleStop);
-        compositionView.enable(!pressPlay);
+        binding.composition.enable(!pressPlay);
 
     }
 
@@ -399,7 +385,6 @@ public class EditorActivity extends AppCompatActivity {
     /**
      * Requests audio and storage permissions.
      */
-    @OnClick(R.id.btn_record)
     public void record(View view) {
 
         boolean permissionNotGranted = ContextCompat.checkSelfPermission(this, Manifest.permission.RECORD_AUDIO) +
@@ -447,17 +432,17 @@ public class EditorActivity extends AppCompatActivity {
 
             } else if (recordingPermissionGranted) {
 
-                KlangfangSnackbar.longShow(compositionView,
+                KlangfangSnackbar.longShow(binding.composition,
                         this.getString(R.string.external_storage_permission_denied));
 
             } else if (storagePermissionGranted) {
 
-                KlangfangSnackbar.longShow(compositionView,
+                KlangfangSnackbar.longShow(binding.composition,
                         this.getString(R.string.record_audio_permission_denied));
 
             } else {
 
-                KlangfangSnackbar.longShow(compositionView,
+                KlangfangSnackbar.longShow(binding.composition,
                         this.getString(R.string.all_audio_permissions_denied));
 
             }
@@ -493,7 +478,7 @@ public class EditorActivity extends AppCompatActivity {
 
             if (editorViewModel.isRecording()) {
 
-                KlangfangSnackbar.shortShow(compositionView, "Please cancel recording before continuing.");
+                KlangfangSnackbar.shortShow(binding.composition, "Please cancel recording before continuing.");
 
                 doNothing = true;
 
@@ -536,9 +521,9 @@ public class EditorActivity extends AppCompatActivity {
 
     private void enableAll(boolean enable) {
 
-        compositionView.enable(enable);
-        playBtn.setEnabled(enable);
-        recordBtn.setEnabled(enable);
+        binding.composition.enable(enable);
+        binding.btnPlay.setEnabled(enable);
+        binding.btnRecord.setEnabled(enable);
         findViewById(R.id.release_composition).setEnabled(enable);
         findViewById(R.id.base_toolbar).setEnabled(enable); // TODO funktioniert nicht
 
@@ -550,12 +535,12 @@ public class EditorActivity extends AppCompatActivity {
      */
     private void switchState(boolean togglePlay) {
 
-        recordBtn.setEnabled(pressPlay);
+        binding.btnRecord.setEnabled(pressPlay);
 
         pressPlay = !pressPlay;
 
         if (togglePlay) {
-            playBtn.toggle();
+            binding.btnPlay.toggle();
         }
 
         setRecordBtnColors(pressPlay, false);
@@ -596,8 +581,8 @@ public class EditorActivity extends AppCompatActivity {
         }
 
 
-        recordBtn.setBackgroundTintList(backgroundColor);
-        recordBtn.setImageTintList(imageColor);
+        binding.btnRecord.setBackgroundTintList(backgroundColor);
+        binding.btnRecord.setImageTintList(imageColor);
 
     }
 
@@ -613,7 +598,7 @@ public class EditorActivity extends AppCompatActivity {
                 case DialogInterface.BUTTON_POSITIVE:
                     //Yes button clicked
                     deleteSounds();
-                    deletedBtn.setEnabled(false);
+                    binding.btnDelete.setEnabled(false);
                     break;
 
                 case DialogInterface.BUTTON_NEGATIVE:
@@ -649,7 +634,7 @@ public class EditorActivity extends AppCompatActivity {
             }
         };
 
-        new AlertDialog.Builder(compositionView.getContext())
+        new AlertDialog.Builder(binding.composition.getContext())
                 .setCancelable(false)
                 .setMessage("Ihre Änderungen werden verworfen. Möchten Sie wirklich fortfahren?")
                 .setPositiveButton("Ja", dialogClickListener)
@@ -665,7 +650,7 @@ public class EditorActivity extends AppCompatActivity {
 
         try {
 
-            List<String> soundUUIDs = compositionView.deleteSoundViews();
+            List<String> soundUUIDs = binding.composition.deleteSoundViews();
 
             Map<Integer, Integer> valuesToRecover = editorViewModel.deleteSounds(soundUUIDs);
             updateTrackWatches(valuesToRecover);
@@ -686,7 +671,7 @@ public class EditorActivity extends AppCompatActivity {
 
         reset(false, StopReason.UNKNOWN);
 
-        KlangfangSnackbar.longShow(compositionView, t.getMessage());
+        KlangfangSnackbar.longShow(binding.composition, t.getMessage());
 
         Log.e(TAG, t.getMessage(), t);
 
@@ -702,7 +687,7 @@ public class EditorActivity extends AppCompatActivity {
         reset(togglePlay, stopReason);
 
         String message = stopReason.getReason();
-        KlangfangSnackbar.longShow(compositionView, message);
+        KlangfangSnackbar.longShow(binding.composition, message);
 
         Log.d(TAG, message);
 
@@ -726,15 +711,15 @@ public class EditorActivity extends AppCompatActivity {
 
         if (stopReason.equals(StopReason.COMPOSITION_END_REACHED)) {
 
-            compositionView.setScrollPosition(0);
+            binding.composition.setScrollPosition(0);
 
         }
 
-        compositionView.enable(true);
+        binding.composition.enable(true);
 
-        playBtn.setEnabled(true);
+        binding.btnPlay.setEnabled(true);
         pressPlay = true;
-        recordBtn.setEnabled(true);
+        binding.btnRecord.setEnabled(true);
 
         switchState(togglePlay);
 
@@ -743,7 +728,7 @@ public class EditorActivity extends AppCompatActivity {
 
     public void increaseScrollPosition() {
 
-        compositionView.increaseScrollPosition();
+        binding.composition.increaseScrollPosition();
 
     }
 
@@ -789,7 +774,7 @@ public class EditorActivity extends AppCompatActivity {
         @Override
         public void onServiceDisconnected(ComponentName name) {
 
-            KlangfangSnackbar.shortShow(compositionView, "Service is disconnected");
+            KlangfangSnackbar.shortShow(binding.composition, "Service is disconnected");
             mBounded = false;
             compositionRecoverService = null;
 
@@ -799,7 +784,7 @@ public class EditorActivity extends AppCompatActivity {
         @Override
         public void onServiceConnected(ComponentName name, IBinder service) {
 
-            KlangfangSnackbar.shortShow(compositionView, "Service is connected");
+            KlangfangSnackbar.shortShow(binding.composition, "Service is connected");
             mBounded = true;
             CompositionRecoverService.CompositionRecoverServiceBinder mLocalBinder = (CompositionRecoverService.CompositionRecoverServiceBinder) service;
             compositionRecoverService = mLocalBinder.getService();
