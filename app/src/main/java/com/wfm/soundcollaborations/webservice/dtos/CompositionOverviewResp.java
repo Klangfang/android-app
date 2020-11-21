@@ -10,4 +10,11 @@ public class CompositionOverviewResp {
     public Integer numberOfMembers;
     public String snippetUrl;
 
+    public CompositionOverviewResp(Long id, String title, Integer numberOfMembers, String snippetUrl) {
+        this.id = id;
+        this.title = title;
+        this.numberOfMembers = numberOfMembers;
+        this.snippetUrl = snippetUrl;
+    }
+
 }

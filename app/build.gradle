@@ -33,7 +33,6 @@ ext {
     material = '1.0.0'
     exoplayer = '2.11.1'
     playpauseview = '1.0.2'
-    retrofit2 = '2.7.1'
     jackson = '2.10.2'
     commonslang3 = '3.9'
     commonsio = '2.6'
@@ -54,8 +53,6 @@ dependencies {
     implementation "com.google.android.material:material:$material"
     implementation "com.google.android.exoplayer:exoplayer:$exoplayer"
     implementation "com.github.ohoussein.playpauseview:playpauseview:$playpauseview"
-    implementation "com.squareup.retrofit2:retrofit:$retrofit2"
-    implementation "com.squareup.retrofit2:converter-gson:$retrofit2"
     implementation "com.fasterxml.jackson.core:jackson-databind:$jackson"
     implementation "org.apache.commons:commons-lang3:$commonslang3"
     implementation "com.google.dagger:dagger:$dagger"

@@ -14,4 +14,17 @@ public class SoundResponse {
 
     public String creatorName;
 
+    public SoundResponse() {
+
+    }
+
+    public SoundResponse(Long id, Integer trackNumber, String url, Integer startPosition, Integer duration, String creatorName) {
+        this.id = id;
+        this.trackNumber = trackNumber;
+        this.url = url;
+        this.startPosition = startPosition;
+        this.duration = duration;
+        this.creatorName = creatorName;
+    }
+
 }

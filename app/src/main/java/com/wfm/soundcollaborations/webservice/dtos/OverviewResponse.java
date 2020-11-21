@@ -8,4 +8,12 @@ public class OverviewResponse {
 
     public String nextPage;
 
+    public OverviewResponse() {
+
+    }
+
+    public OverviewResponse(List<CompositionOverviewResp> overviews) {
+        this.overviews = overviews;
+    }
+
 }
